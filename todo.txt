@@ -1,0 +1,12 @@
+
+-- TODO:  commands.<command> see http://computercraft.info/wiki/Commands_(API)     http://computercraft.info/wiki/Commands.list
+-- TODO:  commands.async.<command>
+
+-- TODO: Freies loading.gif (ajax gif stammt von https://loading.io/assets/img/ajax.gif, könnte geschützt sein)
+
+
+Hardware-Situationen:
+	-> Turtle mit Extra Modem (Wifi)
+	-> Computer mit extra Monitor und mit Extra Modem
+
+
