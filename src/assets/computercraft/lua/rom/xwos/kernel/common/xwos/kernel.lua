@@ -167,6 +167,7 @@ M.startup = function()
     local start = require("xwos/startup")
     local proc = M.modules.sandbox.createProcessBuilder().buildAndExecute(start, M)
     proc.join()
+    M.print("shutting down...")
 end -- function startup
 
 -------------------------------

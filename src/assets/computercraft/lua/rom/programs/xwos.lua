@@ -37,28 +37,33 @@ end -- if valid
 -- kernel file loader
 kernelpaths[1] = kernels[osn][osv]
 
+-- prepare first sandboxing for kernel
+
+
 local sandbox
 local ex
+local origRequire = require
+local origFs = _G.fs
+local origStringGsub = _G.string.gsub
+local origItems = _G.pairs
 
-ex = function()
+ex = function(kernelpaths)
     -- redirect require for kernel loading
-    local origRequire = _G.require
-    local origFs = _G.fs
-    local origStringGsub = _G.string.gsub
-    local origItems = _G.items
-    
     _G.require = function(path)
+        print("require "..path)
         for k, v in origItems(kernelpaths) do
-            local target = v .. "/" .. origStringGsub(path, "\.", "/")
+            local target = v .. "/" .. origStringGsub(path, "%.", "/")
             local targetFile = target .. ".lua"
+            print("searching for "..targetFile)
             if origFs.exists(targetFile) then
+                print("origRequire "..target)
                 return origRequire(target)
             end -- if file exists
         end -- for kernelpaths
         return nil
     end -- function require
     
-    local kernel = require('xwos.kernel')
+    local kernel = _G.require('xwos.kernel')
     
     kernel.boot(myver, kernelpaths, origRequire, sandbox, tArgs)
     kernel.startup()
@@ -68,9 +73,10 @@ sandbox = function(secure, func, ...)
     -- save globals
     local origGlobal = _G
     local newGlobal = {}
-    for k, v in pairs(origGlobal) do
+    for k, v in origItems(origGlobal) do
         newGlobal[k] = v
     end -- for _G
+    print("creating sandbox") -- TODO remove
     
     if secure then
         local function getStackDepth()
@@ -83,10 +89,14 @@ sandbox = function(secure, func, ...)
             return 50000
         end  -- function getStackDepth
         
+        print("[sb] calling getStackDepth") -- TODO remove
         local stackDepth = getStackDepth()
+        print("[sb] getStackDepth returns "..stackDepth) -- TODO remove
     
         newGlobal.setfenv = function(f, val)
+            print("[sb] called setfenv("..f..",...)") -- TODO remove
             local curDepth = getStackDepth()
+            print("[sb] getStackDepth returns "..curDepth) -- TODO remove
             local limit = curDepth - stackDepth
             
             if f == 0 then
@@ -106,10 +116,12 @@ sandbox = function(secure, func, ...)
         end -- function setfenv
         
         newGlobal.getfenv = function(f)
+            print("[sb] called getfenv("..f..")") -- TODO remove
             if (f == 0) then
                 return newGlobal
             end -- if global
             local curDepth = getStackDepth()
+            print("[sb] getStackDepth returns "..curDepth) -- TODO remove
             local limit = curDepth - stackDepth
             if f < 0 then
                 error("bad argument #1: level must be non-negative")
@@ -127,13 +139,13 @@ sandbox = function(secure, func, ...)
     local status, err = pcall(func, ...)
     
     -- reset globals to saved values
-    setfenv(1, origGlobal)
+    origGlobal.setfenv(1, origGlobal)
     
     if not status then
         error(err)
     end -- if error
 end -- function sandbox
 
-sandbox(true, ex)
+sandbox(true, ex, kernelpaths)
 
 -- remote monitors: http://www.computercraft.info/forums2/index.php?/topic/25973-multiple-monitors-via-wired-network-cables/
