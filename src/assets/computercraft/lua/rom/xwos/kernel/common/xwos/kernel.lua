@@ -12,6 +12,13 @@ local M = {}
 M.modules = {}
 
 -------------------------------
+-- require function for kernel
+-- @function [parent=#xwos.kernel] require
+-- @param #string path
+-- @return #any
+M.require = nil
+
+-------------------------------
 -- sandbox kernel module
 -- @field [parent=#xwos.kernel.modules] xwos.kernel.sandbox#xwos.kernel.sandbox sandbox
 
@@ -249,10 +256,11 @@ local bootSequence = {
 
 -- helper to load kernel modules from given directory
 local loadKernelModules = function(dir)
-    M.debug("loading kernel modules from " .. dir)
-    for i, v in M.origGlob.pairs(M.origGlob.fs.list(dir)) do
-        M.debug("loading kernel module from " .. dir .. "/" .. v)
-        M.modules[v] = M.origGlob.require(dir .. "/" .. v)
+    local path = dir .. "/modules"
+    M.debug("loading kernel modules from " .. path)
+    for i, v in M.origGlob.pairs(M.origGlob.fs.list(path)) do
+        M.debug("loading kernel module from " .. path .. "/" .. v)
+        M.modules[v] = M.origGlob.require(path .. "/" .. v)
     end -- for list
 end --  function loadKernelModules
 
@@ -348,6 +356,7 @@ end  -- function getStackDepth
 -- @param ... command line arguments
 M.boot = function(myVersion, kernelPaths, oldGlob, ...)
     M.origGlob = oldGlob
+    M.require = getfenv(2).require
     
     -- parse arguments
     for i, v in ipairs(arg) do
@@ -364,7 +373,7 @@ M.boot = function(myVersion, kernelPaths, oldGlob, ...)
     end -- for kernelPaths
     
     -- load settings with kernel module boot order
-    local moduleOrder = require("moduleOrder")
+    local moduleOrder = M.require("moduleOrder")
   
     -- booting kernel modules
     for i, v in pairs(moduleOrder) do
@@ -394,16 +403,29 @@ end -- function boot
 -- @function [parent=#xwos.kernel] spawnSandbox
 -- @param #function func to execute
 -- @param #table inject injections for env
+-- @param #table whitelist the whitelist for fenv
 -- @param ... function arguments
-M.spawnSandbox = function(func, inject, ...)
+M.spawnSandbox = function(func, inject, whitelist, ...)
+    M.debug("[sb] spawn new sandbox")
     local orig = M.origGlob.getfenv(1)
+    M.debug("[sb] cloning fenv")
     local newGlobal = origTable.clone(orig)
+    M.debug("[sb] get stack depth")
     local stackDepth = getStackDepth()
+    M.debug("[sb] stack depth == "..stackDepth)
     
-    for k, v in origTable.pairs(inject) do
+    for k, v in M.origGlob.pairs(_G) do
+        if whitelist == nil or origTable.contains(whitelist, k) then
+            M.debug("[sb] copying "..k.." to fenv")
+            newGlobal[k] = v
+        end -- if whitelist
+    end -- for _G
+    for k, v in M.origGlob.pairs(inject) do
+        M.debug("[sb] injecting "..k.." to fenv")
         newGlobal[k] = v
-    end
+    end -- for inject
     
+    M.debug("[sb] installing setfenv")
     newGlobal.setfenv = function(f, val)
         M.debug("[sb] called setfenv("..f..",...)")
         local curDepth = getStackDepth()
@@ -426,6 +448,7 @@ M.spawnSandbox = function(func, inject, ...)
         error("bad argument #1: invalid level")
     end -- function setfenv
     
+    M.debug("[sb] installing getfenv")
     newGlobal.getfenv = function(f)
         M.debug("[sb] called getfenv("..f..")")
         if (f == 0) then
@@ -444,12 +467,20 @@ M.spawnSandbox = function(func, inject, ...)
     end -- function getfenv
     
     -- store env and invoke
+    M.debug("[sb] installing new fenv")
     M.origGlob.setfenv(1, newGlobal)
+    M.debug("[sb] calling func", func)
+    M.debug("[sb] arguments", ...)
     local status, err = M.origGlob.pcall(func, ...)
     
+    if not status then
+        M.debug("[sb] returned with error ", err)
+    end
     -- reset globals to saved values
+    M.debug("[sb] restore fenv")
     M.origGlob.setfenv(1, orig)
     if not status then
+        M.debug("[sb] rethrow error")
         error(err)
     end -- if error
 end
@@ -463,6 +494,7 @@ M.startup = function()
         local nos = table.clone(origTable.os)
         nos.queueEvent = function(event, ...)
             local str = M.origGlob.os.day() .. "-" .. M.origGlob.os.time() " EVENT,"..event..": ".. M.origGlob.textutils.serialize({...})
+            M.debug(str)
             local f = M.origGlob.fs.open("/core/log/event-log.txt", M.origGlob.fs.exists("/core/log/event-log.txt") and "a" or "w")
             f.writeLine(str)
             f.close()
@@ -470,8 +502,9 @@ M.startup = function()
         end -- function queueEvent
     end -- if eventLog
 
-    local start = require("xwos/startup")
-    local proc = M.modules.sandbox.createProcessBuilder().buildAndExecute(start, M)
+    M.print("starting...")
+    local start = M.require("xwos/startup")
+    local proc = M.modules.sandbox.createProcessBuilder().buildAndExecute(function() start.run(M) end)
     proc.join()
     M.print("shutting down...")
 end -- function startup
@@ -492,6 +525,15 @@ end -- function debug
 -- @param ... print message arguments
 M.print = function(...)
     M.origGlob.print(...) -- TODO wrap to kernel display
+    if (M.kernelDebug) then
+        local f = M.origGlob.fs.open("/core/log/debug-log.txt", M.origGlob.fs.exists("/core/log/debug-log.txt") and "a" or "w")
+        local str = ""
+        for k, v in M.origGlob.pairs({...}) do
+            str = str .. tostring(v) .. " "
+        end
+        f.writeLine(str)
+        f.close()
+    end
 end -- function print
 
 -------------------------------
@@ -500,7 +542,7 @@ end -- function print
 -- @param #string path the file to read
 -- @return #string the file content or nil if file does not exist
 M.readSecureData = function(path)
-    local f = "/xwos/" + path
+    local f = "/xwos/" .. path
     if not M.origGlob.fs.exists(f) then
         return nil
     end -- if not exists

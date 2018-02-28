@@ -19,7 +19,7 @@ print("** Copyright © 2018 by xworlds.eu.")
 print("** All rights reserved.")
 
 -- check if already booted
-if _G.xwos then
+if xwos then
   print()
   print("FAILED... We are already running XW-OS...")
   return nil
@@ -38,24 +38,32 @@ end -- if valid
 kernelpaths[1] = kernels[osn][osv]
 
 -- prepare first sandboxing for kernel
-local oldGlob = getfenv(1)
-if oldGlob ~= _G then
+local old2 = getfenv(2)
+local old1 = getfenv(1)
+if old2 ~= _G or old1.require == nil then
     print()
     print("FAILED... please run XW-OS in startup script or on root console...")
     print("Running inside other operating systems may not be supported...")
     return nil
 end -- if not globals
+local oldGlob = {}
+for k, v in old2.pairs(old2) do
+    oldGlob[k] = v
+end -- for _G
+for k, v in old2.pairs(old1) do
+    oldGlob[k] = v
+end -- for _G
 
 -- create an explicit copy of globals
 local newGlob = {}
-for k, v in oldGlob.items(oldGlob) do
+for k, v in oldGlob.pairs(oldGlob) do
     newGlob[k] = v
 end -- for _G
 
 -- redirect require for kernel loading
 -- using functions from oldGlob for security reasons
 newGlob.require = function(path)
-    for k, v in oldGlob.items(kernelpaths) do
+    for k, v in oldGlob.pairs(kernelpaths) do
         local target = v .. "/" .. oldGlob.string.gsub(path, "%.", "/")
         local targetFile = target .. ".lua"
         if oldGlob.fs.exists(targetFile) then
@@ -65,31 +73,31 @@ newGlob.require = function(path)
     return nil
 end -- function require
 
-local function ex()
-    local kernel = require('xwos.kernel')
-    
-    kernel.boot(myver, kernelpaths, oldGlob, tArgs)
-    kernel.startup()
-end -- function ex
-
-local function wrap(name)
-    if newGlob[name] ~= nil then
-        local res = {}
-        for k, v in oldGlob.items(newGlob[name]) do
-            res[k] = v
-        end -- for _G
-        newGlob[name] = res
-    end -- if exists
-end -- function wrap
-
-wrap("table")
-wrap("fs")
+--local function wrap(name)
+--    if newGlob[name] ~= nil then
+--        local res = {}
+--        for k, v in oldGlob.pairs(newGlob[name]) do
+--            res[k] = v
+--        end -- for _G
+--        newGlob[name] = res
+--    end -- if exists
+--end -- function wrap
+--
+--wrap("table")
+--wrap("fs")
 
 setfenv(1, newGlob)
-local state, err = pcall(ex)
-setfenv(1, oldGlob)
+local state, err = pcall(function()
+        local kernel = require('xwos.kernel')
+        
+        kernel.boot(myver, kernelpaths, oldGlob, tArgs)
+        kernel.startup()
+    end -- function ex
+)
+setfenv(1, old1)
 
 if not state then
     error(err)
 end
+
 

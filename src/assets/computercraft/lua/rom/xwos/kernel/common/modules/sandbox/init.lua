@@ -33,20 +33,27 @@ end -- function boot
 -- @param #function func the function to be invoked
 -- @param ... args function arguments
 local function spawn0(proc, func, ...)
+    kernel.debug("[PID"..proc.pid.."] called spawn0")
     -- TODO install global context wrappers; build sandbox
     
+    kernel.debug("[PID"..proc.pid.."] procstate = running")
     proc.procstate = "running"
+    
+    kernel.debug("[PID"..proc.pid.."] calling func", func)
     local state, err = pcall(func, ...)
     ---------------------------------
     -- @field [parent=#process] #boolean state the state after finishing the process
     proc.state = state
+    kernel.debug("[PID"..proc.pid.."] state = ", state)
     ---------------------------------
     -- @field [parent=#process] #any err the error returned by function call (if state is false)
     proc.err = err
+    kernel.debug("[PID"..proc.pid.."] err = ", err)
     origremove(processes, proc)
     
     ---------------------------------
     -- @field [parent=#process] #string the process state; one of "preparing", "running" or "finished"
+    kernel.debug("[PID"..proc.pid.."] procstate = finished")
     proc.procstate = "finished"
 end -- function spawn0
 
@@ -57,7 +64,8 @@ end -- function spawn0
 -- @param #function func the function to be invoked
 -- @param ... args function arguments
 local function spawn(proc, func, ...)
-    kernel.spawnSandbox(spawn0, {}, proc, func, ...)
+    kernel.debug("[PID"..proc.pid.."] calling spawnSandbox")
+    kernel.spawnSandbox(spawn0, {}, nil, proc, func, ...) -- TODO whitelist from process builder instead of nil
 end -- function spawn
 
 ---------------------------------
@@ -87,6 +95,7 @@ M.createProcessBuilder = function()
     -- @return #process the new process
     r.buildAndExecute = function(func, ...)
         local pid = nextpid
+        kernel.debug("[PID"..pid.."] spawning new process", func, ...)
         nextpid = nextpid + 1
         --------------------------------------
         -- An isolated process
@@ -102,21 +111,32 @@ M.createProcessBuilder = function()
         proc.procstate = "preparing"
         
         -- save process into table
+        kernel.debug("[PID"..pid.."] storing process inside process table")
         originsert(processes, proc)
         
         ------------------------------------------
         -- joins process and awaits it termination
         -- @function [parent=#process] join
         proc.join = function()
+            kernel.debug("[PID"..pid.."] joining")
             while proc.procstate ~= "finished" do
+                kernel.debug("[PID"..pid.."] waiting for finished")
                 origyield()
             end
         end -- function join
         
         -- start co routine
+        kernel.debug("[PID"..pid.."] calling coroutine.create")
         proc.coroutine = origcocreate(spawn)
-        origcoresume(proc.coroutine, proc, func, ...)
-        
+        kernel.debug("[PID"..pid.."] calling coroutine.resume")
+        local state, err = origcoresume(proc.coroutine, proc, func, ...)
+        if not state then
+            kernel.debug("[PID"..pid.."] corouting returned with error "..err)
+            proc.err = err
+            proc.state = state
+            proc.procstate = "finished"
+        end
+        kernel.debug("[PID"..pid.."] returning new process")
         return proc
     end -- function buildAndExecute
     
