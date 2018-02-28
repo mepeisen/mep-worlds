@@ -57,7 +57,7 @@ end -- function spawn0
 -- @param #function func the function to be invoked
 -- @param ... args function arguments
 local function spawn(proc, func, ...)
-    kernel.spawnSandbox(true, spawn0, proc, func, ...)
+    kernel.spawnSandbox(spawn0, {}, proc, func, ...)
 end -- function spawn
 
 ---------------------------------
@@ -174,5 +174,32 @@ end -- function createProcessBuilder
 --orig.xpcall = xpcall
 --orig.pcall = pcall
 --orig.coroutine = coroutine
+--
+-- Events:
+-- alarm                http://computercraft.info/wiki/Alarm_(event)
+-- char                 http://computercraft.info/wiki/Char_(event)
+-- disk                 http://computercraft.info/wiki/Disk_(event)
+-- disk_eject           http://computercraft.info/wiki/Disk_eject_(event)
+-- http_failure         http://computercraft.info/wiki/Http_failure_(event)
+-- http_success         http://computercraft.info/wiki/Http_success_(event)
+-- key                  http://computercraft.info/wiki/Key_(event)
+-- key_up               http://computercraft.info/wiki/Key_up_(event)
+-- modem_message        http://computercraft.info/wiki/Modem_message_(event)           http://computercraft.info/wiki/Modem_(API)
+-- monitor_resize       http://computercraft.info/wiki/Monitor_resize_(event)
+-- monitor_touch        http://computercraft.info/wiki/Monitor_touch_(event)
+-- mouse_click          http://computercraft.info/wiki/Mouse_click_(event)
+-- mouse_drag           http://computercraft.info/wiki/Mouse_drag_(event)
+-- mouse_scroll         http://computercraft.info/wiki/Mouse_scroll_(event)
+-- mouse_up             http://computercraft.info/wiki/Mouse_up_(event)
+-- paste                http://computercraft.info/wiki/Paste_(event)
+-- peripheral           http://computercraft.info/wiki/Peripheral_(event)
+-- peripheral_detach    http://computercraft.info/wiki/Peripheral_detach_(event)
+-- rednet_message       http://computercraft.info/wiki/Rednet_message_(event)         http://computercraft.info/wiki/Rednet_(API)
+-- redstone             http://computercraft.info/wiki/Redstone_(event)
+-- task_complete        http://computercraft.info/wiki/Task_complete_(event)
+-- term_resize          http://computercraft.info/wiki/Term_resize(Event)             http://computercraft.info/wiki/Term_(API)
+-- terminate            http://computercraft.info/wiki/Terminate_(event)
+-- timer                http://computercraft.info/wiki/Timer_(event)
+-- turtle_inventory     http://computercraft.info/wiki/Turtle_inventory_(event)
 
 return M

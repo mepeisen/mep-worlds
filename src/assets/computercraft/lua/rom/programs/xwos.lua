@@ -38,114 +38,58 @@ end -- if valid
 kernelpaths[1] = kernels[osn][osv]
 
 -- prepare first sandboxing for kernel
+local oldGlob = getfenv(1)
+if oldGlob ~= _G then
+    print()
+    print("FAILED... please run XW-OS in startup script or on root console...")
+    print("Running inside other operating systems may not be supported...")
+    return nil
+end -- if not globals
 
+-- create an explicit copy of globals
+local newGlob = {}
+for k, v in oldGlob.items(oldGlob) do
+    newGlob[k] = v
+end -- for _G
 
-local sandbox
-local ex
-local origRequire = require
-local origFs = _G.fs
-local origStringGsub = _G.string.gsub
-local origItems = _G.pairs
+-- redirect require for kernel loading
+-- using functions from oldGlob for security reasons
+newGlob.require = function(path)
+    for k, v in oldGlob.items(kernelpaths) do
+        local target = v .. "/" .. oldGlob.string.gsub(path, "%.", "/")
+        local targetFile = target .. ".lua"
+        if oldGlob.fs.exists(targetFile) then
+            return oldGlob.require(target)
+        end -- if file exists
+    end -- for kernelpaths
+    return nil
+end -- function require
 
-ex = function(kernelpaths)
-    -- redirect require for kernel loading
-    _G.require = function(path)
-        print("require "..path)
-        for k, v in origItems(kernelpaths) do
-            local target = v .. "/" .. origStringGsub(path, "%.", "/")
-            local targetFile = target .. ".lua"
-            print("searching for "..targetFile)
-            if origFs.exists(targetFile) then
-                print("origRequire "..target)
-                return origRequire(target)
-            end -- if file exists
-        end -- for kernelpaths
-        return nil
-    end -- function require
+local function ex()
+    local kernel = require('xwos.kernel')
     
-    local kernel = _G.require('xwos.kernel')
-    
-    kernel.boot(myver, kernelpaths, origRequire, sandbox, tArgs)
+    kernel.boot(myver, kernelpaths, oldGlob, tArgs)
     kernel.startup()
 end -- function ex
 
-sandbox = function(secure, func, ...)
-    -- save globals
-    local origGlobal = _G
-    local newGlobal = {}
-    for k, v in origItems(origGlobal) do
-        newGlobal[k] = v
-    end -- for _G
-    print("creating sandbox") -- TODO remove
-    
-    if secure then
-        local function getStackDepth()
-            for i=1,50000,1 do -- 50000 should be really enough, default max limit is 256
-                local state = pcall(origGlobal.getfenv, i + 2)
-                if not state then
-                    return i
-                end -- if not state
-            end -- for
-            return 50000
-        end  -- function getStackDepth
-        
-        print("[sb] calling getStackDepth") -- TODO remove
-        local stackDepth = getStackDepth()
-        print("[sb] getStackDepth returns "..stackDepth) -- TODO remove
-    
-        newGlobal.setfenv = function(f, val)
-            print("[sb] called setfenv("..f..",...)") -- TODO remove
-            local curDepth = getStackDepth()
-            print("[sb] getStackDepth returns "..curDepth) -- TODO remove
-            local limit = curDepth - stackDepth
-            
-            if f == 0 then
-                local prev = newGlobal
-                newGlobal = val
-                origGlobal.setfenv(limit, newGlobal) -- TODO does this work?
-                return prev
-            end -- if global
-            
-            if f < 0 then
-                error("bad argument #1: level must be non-negative")
-            end -- if negative
-            if f < limit then
-                return origGlobal.setfenv(f + 1, val)
-            end -- if limit
-            error("bad argument #1: invalid level")
-        end -- function setfenv
-        
-        newGlobal.getfenv = function(f)
-            print("[sb] called getfenv("..f..")") -- TODO remove
-            if (f == 0) then
-                return newGlobal
-            end -- if global
-            local curDepth = getStackDepth()
-            print("[sb] getStackDepth returns "..curDepth) -- TODO remove
-            local limit = curDepth - stackDepth
-            if f < 0 then
-                error("bad argument #1: level must be non-negative")
-            end -- if negative
-            if f < limit then
-                return origGlobal.getfenv(f + 1)
-            end -- if limit
-            error("bad argument #1: invalid level")
-        end -- function getfenv
-    end -- if secure
-    
-    origGlobal.setfenv(1, newGlobal)
-    
-    -- call func
-    local status, err = pcall(func, ...)
-    
-    -- reset globals to saved values
-    origGlobal.setfenv(1, origGlobal)
-    
-    if not status then
-        error(err)
-    end -- if error
-end -- function sandbox
+local function wrap(name)
+    if newGlob[name] ~= nil then
+        local res = {}
+        for k, v in oldGlob.items(newGlob[name]) do
+            res[k] = v
+        end -- for _G
+        newGlob[name] = res
+    end -- if exists
+end -- function wrap
 
-sandbox(true, ex, kernelpaths)
+wrap("table")
+wrap("fs")
 
--- remote monitors: http://www.computercraft.info/forums2/index.php?/topic/25973-multiple-monitors-via-wired-network-cables/
+setfenv(1, newGlob)
+local state, err = pcall(ex)
+setfenv(1, oldGlob)
+
+if not state then
+    error(err)
+end
+
