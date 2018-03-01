@@ -152,11 +152,11 @@ M.createProcessBuilder = function()
             kernel.origGlob.queueEvent("xwos_terminate", pid)
         end -- function wakeup
         
-        local function processEvt(event, filter)
+        local function processEvt(lpid, event, filter)
             if event[1] == nil then
                 return nil
             end -- if event
-            kernel.debug("[PID"..pid.."] got event ", kernel.origGlob.unpack(event))
+            kernel.debug("[PID"..lpid.."] got event ", kernel.origGlob.unpack(event))
             
             if kernel.eventLog then
                 local str = kernel.origGlob.os.day() .. "-" .. kernel.origGlob.os.time() " EVENT: ".. kernel.origGlob.textutils.serialize(event)
@@ -171,14 +171,14 @@ M.createProcessBuilder = function()
                 for k, v in kernel.origGlob.pairs(timers) do
                     if v.proc == proc then
                         if filter == nil or event[1]==filter then
-                            kernel.debug("[PID"..pid.."] returning event ", kernel.origGlob.unpack(event))
+                            kernel.debug("[PID"..lpid.."] returning event ", kernel.origGlob.unpack(event))
                             return event
                         else -- if filter
-                            kernel.debug("[PID"..pid.."] discard event because of filter", kernel.origGlob.unpack(event))
+                            kernel.debug("[PID"..lpid.."] discard event because of filter", kernel.origGlob.unpack(event))
                             consumed = true
                         end -- if filter
                     else -- if proc
-                        kernel.debug("[PID"..pid.."] queue event for distribution to pid "..v.proc.pid, kernel.origGlob.unpack(event))
+                        kernel.debug("[PID"..lpid.."] queue event for distribution to pid "..v.proc.pid, kernel.origGlob.unpack(event))
                         originsert(v.proc.evqueue, event)
                         v.proc.wakeup()
                         consumed = true
@@ -189,18 +189,18 @@ M.createProcessBuilder = function()
             
             if event[1] == "xwos_wakeup" then
                 consumed = true
-                kernel.debug("[PID"..pid.."] wakeup received")
-                if event[2] ~= pid then
-                    kernel.debug("[PID"..pid.."] wrong pid, redistribute")
+                kernel.debug("[PID"..lpid.."] wakeup received")
+                if event[2] ~= lpid then
+                    kernel.debug("[PID"..lpid.."] wrong pid, redistribute")
                     kernel.origGlob.os.queueEvent(kernel.origGlob.unpack(event))
                 end -- if pid
             end -- if xwos_wakeup
             
             if event[1] == "xwos_terminate" then
                 consumed = true
-                kernel.debug("[PID"..pid.."] terminate received")
-                if event[2] ~= pid then
-                    kernel.debug("[PID"..pid.."] wrong pid, redistribute")
+                kernel.debug("[PID"..lpid.."] terminate received")
+                if event[2] ~= lpid then
+                    kernel.debug("[PID"..lpid.."] wrong pid, redistribute")
                     kernel.origGlob.os.queueEvent(kernel.origGlob.unpack(event))
                 else -- if pid
                     error('requesting process termination')
@@ -209,14 +209,14 @@ M.createProcessBuilder = function()
             
             if event[1] == "xwos_terminated" then
                 consumed = true
-                kernel.debug("[PID"..pid.."] terminated received")
+                kernel.debug("[PID"..lpid.."] terminated received")
                 if filter == "xwos_terminated" then
-                    kernel.debug("[PID"..pid.."] returning event ", kernel.origGlob.unpack(event))
+                    kernel.debug("[PID"..lpid.."] returning event ", kernel.origGlob.unpack(event))
                     return event
                 end -- if filter
                 for k, v in kernel.origGlob.pairs(processes) do
                     if v.pid == event[2] and v.joined > 0 then
-                        kernel.debug("[PID"..pid.."] redistributing because at least one process called join")
+                        kernel.debug("[PID"..lpid.."] redistributing because at least one process called join")
                         kernel.origGlob.os.queueEvent(kernel.origGlob.unpack(event))
                     end --
                 end -- for processes
@@ -226,7 +226,7 @@ M.createProcessBuilder = function()
             if not consumed then
                 for k, v in kernel.origGlob.pairs(processes) do
                     if v.procstate ~= "finished" then
-                        kernel.debug("[PID"..pid.."] queue event for distribution to all pids "..v.pid, kernel.origGlob.unpack(event))
+                        kernel.debug("[PID"..lpid.."] queue event for distribution to all pids "..v.pid, kernel.origGlob.unpack(event))
                         originsert(v.evqueue, event)
                         v.wakeup()
                     end -- if not finished
@@ -282,7 +282,7 @@ M.createProcessBuilder = function()
                         end -- for evqueue
                         
                         kernel.debug("[PID"..pid.."] invoke os.pullEvent ", filter)
-                        local event = processEvt({kernel.origGlob.os.pullEvent()}, filter)
+                        local event = processEvt(pid, {kernel.origGlob.os.pullEvent()}, filter)
                         if event ~= nil then
                             return kernel.origGlob.unpack(event)
                         end -- if event
@@ -298,15 +298,19 @@ M.createProcessBuilder = function()
         -- joins process and awaits it termination
         -- @function [parent=#process] join
         proc.join = function()
-            kernel.debug("[PID"..pid.."] joining")
+            local cpid = 0
+            if xwos ~= nil then
+                cpid = xwos.prm().pid()
+            end -- if xwos
+            kernel.debug("[PID"..cpid.."] joining "..pid)
             proc.joined = proc.joined + 1
             while proc.procstate ~= "finished" do
-                kernel.debug("[PID"..pid.."] waiting for finished (state="..proc.procstate..")")
-                local event = processEvt({origyield()}, "xwos_terminated")
-                if event ~= nil and event[2] ~= proc.pid then
+                kernel.debug("[PID"..cpid.."] waiting for finished of "..pid.." (state="..proc.procstate..")")
+                local event = processEvt(cpid, {origyield()}, "xwos_terminated")
+                if event ~= nil and event[2] ~= pid then
                     for k, v in kernel.origGlob.pairs(processes) do
                         if v.pid == event[2] and v.joined > 0 then
-                            kernel.debug("[PID"..pid.."] redistributing because at least one process called join")
+                            kernel.debug("[PID"..cpid.."] redistributing because at least one process called join of "..pid)
                             kernel.origGlob.os.queueEvent(kernel.origGlob.unpack(event))
                         end --
                     end -- for processes
@@ -342,9 +346,7 @@ M.createProcessBuilder = function()
     return r
 end -- function createProcessBuilder
 
--- TODO possibility to "shutdown" a process
-
--- TODO type processterm
+-- TODO type processterm (terminal wrapper)
 
 -- wrap lua console and wrap programs...
 

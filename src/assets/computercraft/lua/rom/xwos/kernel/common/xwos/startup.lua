@@ -8,12 +8,111 @@ local M = {}
 -- @function [parent=#xwos.startup] run
 -- @param xwos.kernel#xwos.kernel kernel the kernel reference
 M.installer = function(kernel)
-    kernel.print()
-    kernel.print("starting installer...")
+    local installerData = { lang = nil }
+    print()
+    print("starting installer...")
+    
+    print()
+    print("********* XW-OS ********** INSTALLER")
+    local langs = {
+        "en" -- TODO support language packs
+    }
+    while installerData.lang == nil do
+      print("")
+      print("Choose your language:")
+      local input = io.read()
+      if table.contains(langs, input) then
+          installerData.lang = input
+      else -- if contains
+          print("Invalid language. Currently supported: ")
+          for k, v in pairs(langs) do
+              write(v)
+              write(" ")
+          end -- for langs
+          print("")
+      end -- if not contains
+    end -- while not lang
+    
+    local admin = {}
+    print("")
+    print("Enter your administrators email address:")
+    admin.mail = io.read()
+    print("")
+    print("Enter your administrators login name:")
+    admin.login = io.read()
+    while admin.pass == nil do
+        print("")
+        print("Enter your administrators password:")
+        local pass1 = io.read()
+        print("")
+        print("Retype your administrators password:")
+        local pass2 = io.read()
+        
+        if pass1 ~= pass2 then
+            print("")
+            print("The passwords do not match...")
+        else -- if not pass equals
+            admin.pass = pass1
+        end -- if pass equals
+    end -- while not pass
+    
+    local user = {}
+    print("")
+    print("Enter your users email address:")
+    user.mail = io.read()
+    print("")
+    print("Enter your users login name:")
+    user.login = io.read()
+    while user.pass == nil do
+        print("")
+        print("Enter your users password:")
+        local pass1 = io.read()
+        print("")
+        print("Retype your users password:")
+        local pass2 = io.read()
+        
+        if pass1 ~= pass2 then
+            print("")
+            print("The passwords do not match...")
+        else -- if not pass equals
+            user.pass = pass1
+        end -- if pass equals
+    end -- while not pass
+    
+    print("")
+    print("")
+    print("***** starting installation")
+    print("")
+    print("Creating root...")
+    local proot = kernel.modules.security.createProfile("root")
+    print("Creating administrator...")
+    local padmin = kernel.modules.security.createProfile("admin")
+    print("Creating user...")
+    local puser = kernel.modules.security.createProfile("user")
+    print("Creating guest (inactive)...")
+    local pguest = kernel.modules.security.createProfile("guest")
     
     -- TODO start gui on primary terminal
     -- TODO create a wizard
     
+    -- TODO failing installer should set kernel.shutdown = true
+    
+    kernel.writeSecureData('core/install.dat', textutils.serialize(installerData))
+end -- function installer
+
+-------------------
+-- The login processing
+-- @function [parent=#xwos.startup] run
+-- @param #string installData
+-- @param xwos.kernel#xwos.kernel kernel the kernel reference
+M.login = function(installData, kernel)
+    print()
+    print("starting login...")
+    
+    -- for gui see http://harryfelton.web44.net/titanium/guide/download
+    -- lua minifier: https://gitlab.com/hbomb79/Titanium/blob/develop/bin/Minify.lua
+    
+    -- TODO start gui on primary terminal
 end -- function installer
 
 -------------------
@@ -21,65 +120,17 @@ end -- function installer
 -- @function [parent=#xwos.startup] run
 -- @param xwos.kernel#xwos.kernel kernel the kernel reference
 M.run = function(kernel)
-    kernel.debug("[start] beginning run")
     local installData = kernel.readSecureData('core/install.dat')
     kernel.debug("[start] checking installation")
     if installData == nil then
-        kernel.debug("[start] invoking installer")
+        kernel.debug("[start] starting installer")
         M.installer(kernel)
     end -- if not installed
-    kernel.debug("[start] beginning thread")
     
-    -- TODO
-    local function func1()
-        kernel.debug("[func1] getfenv")
-        local orig = getfenv(0)
-        kernel.debug("[func1] creating new")
-        local new = table.clone(orig)
-        kernel.debug("[func1] injecting print")
-        new.print = function(...)
-            orig.print("[1] ", ...)
-        end
-        kernel.debug("[func1] setenv")
-        setfenv(1, new)
-        kernel.debug("[func1] print")
-        print("Hello World!")
-        kernel.debug("[func1] sleep")
-        sleep(5)
-        kernel.debug("[func1] print")
-        print("Hello again");
-        kernel.debug("[func1] end")
-    end
-    local function func2()
-        kernel.debug("[func2] getfenv")
-        local orig = getfenv(0)
-        kernel.debug("[func2] creating new")
-        local new = table.clone(orig)
-        kernel.debug("[func2] injecting print")
-        new.print = function(...)
-            orig.print("[2] ", ...)
-        end
-        kernel.debug("[func2] setenv")
-        setfenv(1, new)
-        kernel.debug("[func2] sleep")
-        sleep(5)
-        kernel.debug("[func2] print")
-        print("Hello World!")
-        kernel.debug("[func2] sleep")
-        sleep(5)
-        kernel.debug("[func2] print")
-        print("Hello again");
-        kernel.debug("[func2] end")
-    end
-    kernel.debug("[start] create func1", func1)
-    local proc1 = kernel.modules.sandbox.createProcessBuilder().buildAndExecute(func1)
-    kernel.debug("[start] create func2", func2)
-    local proc2 = kernel.modules.sandbox.createProcessBuilder().buildAndExecute(func2)
-    print("Waiting for proc 1")
-    proc1.join()
-    print("Waiting for proc 2")
-    proc2.join()
-    print("Ending")
+    while not kernel.shutdown do
+        kernel.debug("[start] starting login")
+        M.login(textutils.unserialize(installData), kernel)
+    end -- while not shutdown
 end -- function run
 
 return M

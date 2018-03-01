@@ -1,3 +1,4 @@
 return {
- "sandbox"
+ "sandbox",
+ "security"
 }

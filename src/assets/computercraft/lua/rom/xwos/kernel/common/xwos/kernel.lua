@@ -23,6 +23,10 @@ M.require = nil
 -- @field [parent=#xwos.kernel.modules] xwos.kernel.sandbox#xwos.kernel.sandbox sandbox
 
 -------------------------------
+-- security kernel module
+-- @field [parent=#xwos.kernel.modules] xwos.kernel.security#xwos.kernel.security security
+
+-------------------------------
 -- true for kernel debugging; activated through script invocation/argument ("xwos debug")
 -- @field [parent=#xwos.kernel] #boolean kernelDebug
 M.kernelDebug = false
@@ -31,6 +35,11 @@ M.kernelDebug = false
 -- true for computer event logging; activated through script invocation/argument ("xwos eventLog")
 -- @field [parent=#xwos.kernel] #boolean eventLog
 M.eventLog = false
+
+-------------------------------
+-- true for kernel shutdown request
+-- @field [parent=#xwos.kernel] #boolean shutdown
+M.shutdown = true
 
 -------------------------------
 -- the original globals; widely used for security reasons and to access original code
@@ -449,7 +458,8 @@ end
 -- @function [parent=#xwos.kernel] startup
 M.startup = function()
     M.print("starting...")
-    local start = M.require("xwos/startup")
+    local startupData = M.readSecureData('core/startup.dat', "xwos/startup")
+    local start = M.require(startupData)
     local proc = M.modules.sandbox.createProcessBuilder().buildAndExecute(function() start.run(M) end)
     proc.join()
     M.print("shutting down...")
@@ -486,11 +496,12 @@ end -- function print
 -- read data file from secured kernel storage
 -- @function [parent=#xwos.kernel] readSecureData
 -- @param #string path the file to read
+-- @param #string def optional default data
 -- @return #string the file content or nil if file does not exist
-M.readSecureData = function(path)
+M.readSecureData = function(path, def)
     local f = "/xwos/" .. path
     if not M.origGlob.fs.exists(f) then
-        return nil
+        return def
     end -- if not exists
     local h = M.origGlob.fs.open()
     local res = h.readall()
