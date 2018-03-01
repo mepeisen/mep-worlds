@@ -337,16 +337,6 @@ table.containsKey = function(haystack, needle)
     return keystack[needle] ~= nil
 end -- function table.containsKey
 
-local function getStackDepth()
-    for i=1,50000,1 do -- 50000 should be really enough, default max limit is 256
-        local state = M.origGlob.pcall(M.origGlob.getfenv, i + 2)
-        if not state then
-            return i
-        end -- if not state
-    end -- for
-    return 50000
-end  -- function getStackDepth
-
 -------------------------------
 -- Boots kernel
 -- @function [parent=#xwos.kernel] boot
@@ -407,67 +397,35 @@ end -- function boot
 -- @param ... function arguments
 M.spawnSandbox = function(func, inject, whitelist, ...)
     M.debug("[sb] spawn new sandbox")
-    local orig = M.origGlob.getfenv(1)
+    local orig0 = M.origGlob.getfenv(0)
+    local orig1 = M.origGlob.getfenv(1)
     M.debug("[sb] cloning fenv")
-    local newGlobal = origTable.clone(orig)
-    M.debug("[sb] get stack depth")
-    local stackDepth = getStackDepth()
-    M.debug("[sb] stack depth == "..stackDepth)
+    local newGlobal = origTable.clone(orig1)
     
     for k, v in M.origGlob.pairs(_G) do
         if whitelist == nil or origTable.contains(whitelist, k) then
-            M.debug("[sb] copying "..k.." to fenv")
+            M.debug("[sb] copying "..k.." to fenv", v)
             newGlobal[k] = v
         end -- if whitelist
     end -- for _G
     for k, v in M.origGlob.pairs(inject) do
         M.debug("[sb] injecting "..k.." to fenv")
-        newGlobal[k] = v
+        if newGlobal[k] ~= nil and type(v) == "table" and type(newGlobal[k]) == "table" then
+            M.debug("[sb] injecting table to fenv")
+            newGlobal[k] = origTable.clone(newGlobal[k])
+            for k2, v2 in M.origGlob.pairs(v) do
+                M.debug("[sb] injecting "..k..","..k2.." with", v[k2])
+                newGlobal[k][k2] = v[k2]
+            end -- for children
+        else -- if exists
+            M.debug("[sb] injecting "..k.." with", v)
+            newGlobal[k] = v
+        end -- if not exists
     end -- for inject
-    
-    M.debug("[sb] installing setfenv")
-    newGlobal.setfenv = function(f, val)
-        M.debug("[sb] called setfenv("..f..",...)")
-        local curDepth = getStackDepth()
-        M.debug("[sb] getStackDepth returns "..curDepth)
-        local limit = curDepth - stackDepth
-        
-        if f == 0 then
-            local prev = newGlobal
-            newGlobal = val
-            M.origGlob.setfenv(limit, newGlobal) -- does this work? correct value?
-            return prev
-        end -- if global
-        
-        if f < 0 then
-            error("bad argument #1: level must be non-negative")
-        end -- if negative
-        if f < limit then
-            return M.origGlob.setfenv(f + 1, val)
-        end -- if limit
-        error("bad argument #1: invalid level")
-    end -- function setfenv
-    
-    M.debug("[sb] installing getfenv")
-    newGlobal.getfenv = function(f)
-        M.debug("[sb] called getfenv("..f..")")
-        if (f == 0) then
-            return newGlobal
-        end -- if global
-        local curDepth = getStackDepth()
-        M.debug("[sb] getStackDepth returns "..curDepth)
-        local limit = curDepth - stackDepth
-        if f < 0 then
-            error("bad argument #1: level must be non-negative")
-        end -- if negative
-        if f < limit then
-            return M.origGlob.getfenv(f + 1)
-        end -- if limit
-        error("bad argument #1: invalid level")
-    end -- function getfenv
     
     -- store env and invoke
     M.debug("[sb] installing new fenv")
+    M.origGlob.setfenv(0, newGlobal)
     M.origGlob.setfenv(1, newGlobal)
     M.debug("[sb] calling func", func)
     M.debug("[sb] arguments", ...)
@@ -478,7 +436,8 @@ M.spawnSandbox = function(func, inject, whitelist, ...)
     end
     -- reset globals to saved values
     M.debug("[sb] restore fenv")
-    M.origGlob.setfenv(1, orig)
+    M.origGlob.setfenv(0, orig0)
+    M.origGlob.setfenv(1, orig1)
     if not status then
         M.debug("[sb] rethrow error")
         error(err)
@@ -489,19 +448,6 @@ end
 -- starts the system
 -- @function [parent=#xwos.kernel] startup
 M.startup = function()
-    local inject = {}
-    if M.eventLog then
-        local nos = table.clone(origTable.os)
-        nos.queueEvent = function(event, ...)
-            local str = M.origGlob.os.day() .. "-" .. M.origGlob.os.time() " EVENT,"..event..": ".. M.origGlob.textutils.serialize({...})
-            M.debug(str)
-            local f = M.origGlob.fs.open("/core/log/event-log.txt", M.origGlob.fs.exists("/core/log/event-log.txt") and "a" or "w")
-            f.writeLine(str)
-            f.close()
-            origTable.os.queueEvent(event, ...)
-        end -- function queueEvent
-    end -- if eventLog
-
     M.print("starting...")
     local start = M.require("xwos/startup")
     local proc = M.modules.sandbox.createProcessBuilder().buildAndExecute(function() start.run(M) end)
