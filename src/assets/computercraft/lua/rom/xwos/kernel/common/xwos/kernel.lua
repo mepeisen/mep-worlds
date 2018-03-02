@@ -408,19 +408,18 @@ M.spawnSandbox = function(func, inject, whitelist, ...)
     M.debug("[sb] spawn new sandbox")
     local orig0 = M.origGlob.getfenv(0)
     local orig1 = M.origGlob.getfenv(1)
+    local origG = _G
     M.debug("[sb] cloning fenv")
     local newGlobal = origTable.clone(orig1)
     
-    for k, v in M.origGlob.pairs(_G) do
+    for k, v in M.origGlob.pairs(origG) do
         if whitelist == nil or origTable.contains(whitelist, k) then
             M.debug("[sb] copying "..k.." to fenv", v)
             newGlobal[k] = v
         end -- if whitelist
     end -- for _G
     for k, v in M.origGlob.pairs(inject) do
-        M.debug("[sb] injecting "..k.." to fenv")
         if newGlobal[k] ~= nil and type(v) == "table" and type(newGlobal[k]) == "table" then
-            M.debug("[sb] injecting table to fenv")
             newGlobal[k] = origTable.clone(newGlobal[k])
             for k2, v2 in M.origGlob.pairs(v) do
                 M.debug("[sb] injecting "..k..","..k2.." with", v[k2])

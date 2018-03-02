@@ -12,6 +12,12 @@ M.installer = function(kernel)
     print()
     print("starting installer...")
     
+    kernel.print("read: ", read)
+    kernel.print("read0: ", getfenv(0).read)
+    kernel.print("read1: ", getfenv(1).read)
+    kernel.print("read6: ", getfenv(6).read)
+    kernel.print("read7: ", getfenv(7).read)
+    kernel.print("read8: ", getfenv(8).read)
     print()
     print("********* XW-OS ********** INSTALLER")
     local langs = {
@@ -20,7 +26,7 @@ M.installer = function(kernel)
     while installerData.lang == nil do
       print("")
       print("Choose your language:")
-      local input = io.read()
+      local input = read()
       if table.contains(langs, input) then
           installerData.lang = input
       else -- if contains
@@ -36,17 +42,17 @@ M.installer = function(kernel)
     local admin = {}
     print("")
     print("Enter your administrators email address:")
-    admin.mail = io.read()
+    admin.mail = read()
     print("")
     print("Enter your administrators login name:")
-    admin.login = io.read()
+    admin.login = read()
     while admin.pass == nil do
         print("")
         print("Enter your administrators password:")
-        local pass1 = io.read()
+        local pass1 = read()
         print("")
         print("Retype your administrators password:")
-        local pass2 = io.read()
+        local pass2 = read()
         
         if pass1 ~= pass2 then
             print("")
@@ -59,17 +65,17 @@ M.installer = function(kernel)
     local user = {}
     print("")
     print("Enter your users email address:")
-    user.mail = io.read()
+    user.mail = read()
     print("")
     print("Enter your users login name:")
-    user.login = io.read()
+    user.login = read()
     while user.pass == nil do
         print("")
         print("Enter your users password:")
-        local pass1 = io.read()
+        local pass1 = read()
         print("")
         print("Retype your users password:")
-        local pass2 = io.read()
+        local pass2 = read()
         
         if pass1 ~= pass2 then
             print("")
