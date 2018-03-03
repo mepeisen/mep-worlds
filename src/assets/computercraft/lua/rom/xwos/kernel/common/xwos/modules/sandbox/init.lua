@@ -1,729 +1,393 @@
 -----------------------
--- @module xwos.kernel.sandbox
+-- @module xwos.modules.sandbox
 local M = {}
 
 local kernel -- xwos.kernel#xwos.kernel
-local processes = {}
-local nextpid = 1
 local originsert = table.insert
-local origsize = table.getn
-local origremove = table.removeValue
-local origcocreate = coroutine.create
-local origcoresume = coroutine.resume
-local origyield = coroutine.yield
-
--- TODO refactor following to some linked stack type
------------------------
--- process input type with mapping to previous input
--- @type procinput
-local procinput = nil
-
-local function acquireInput(proc)
-    -- first invocation has no kernel
-    if kernel ~= nil and pid ~= nil then
-        kernel.debug("[PID"..proc.pid.."] fetching user input (front process)")
-    end -- if kernel
-    local r = {}
-    ---------------------
-    -- release input if proc blocks it
-    -- @function [parent=#procinput] release
-    -- @param #process proc process to release the env
-    r.release = function(proc2)
-        if r.proc == proc2 then
-            kernel.debug("[PID"..proc2.pid.."] releasing user input (front process)")
-            procinput = r.prev
-            while procinput.proc ~= nil and procinput.proc.procstate == "finished" do
-                procinput = procinput.prev
-            end -- while finished
-            if procinput.proc ~= nil then
-                kernel.debug("[PID"..proc2.pid.."] switched user input to "..procinput.proc.pid.." (front process)")
-            end -- if proc
-        end -- if proc
-    end -- function release
-    ----------------------------------
-    -- @field [parent=#procinput] #procinput prev the previous input
-    r.prev = procinput
-    -----------------------
-    -- @field [parent=#procinput] #process proc the input process
-    r.proc = proc
-    procinput = r
-end -- function acquireInput
-
-acquireInput(nil)
-
-local timers = {}
 
 ---------------------------------
--- @function [parent=#xwos.kernel.sandbox] preboot
+-- @function [parent=#xwos.modules.sandbox] preboot
 -- @param xwos.kernel#xwos.kernel k
 M.preboot = function(k)
     k.debug("preboot sandbox")
     kernel = k
+    
+    -----------------------
+    -- process input type with mapping to previous input
+    -- @field [parent=#xwos.modules.sandbox] xwos.modules.sandbox.procinput#xwos.modules.sandbox.procinput procinput the input process management
+    M.procinput = kernel.require("xwos/modules/sandbox/procinput")
+    M.procinput.setKernel(kernel)
+    
+    -----------------------
+    -- timers started from processes
+    -- @field [parent=#xwos.modules.sandbox] xwos.modules.sandbox.timers#xwos.modules.sandbox.timers timers the timer management
+    M.timers = kernel.require("xwos/modules/sandbox/timers")
+    M.timers.setKernel(kernel)
+    
+    -----------------------
+    -- event queue handling
+    -- @field [parent=#xwos.modules.sandbox] xwos.modules.sandbox.evqueue#xwos.modules.sandbox.evqueue evqueue event queue management
+    M.evqueue = kernel.require("xwos/modules/sandbox/evqueue")
+    M.evqueue.setKernel(kernel)
+
 end -- function preboot
 
----------------------------------
--- @function [parent=#xwos.kernel.sandbox] boot
--- @param xwos.kernel#xwos.kernel k
-M.boot = function(k)
-    k.debug("boot sandbox")
-end -- function boot
-
----------------------------------
--- spawn a process (call from inside secured sandbox)
--- @function spawn0
--- @param #process proc the process to spawn
--- @param #function func the function to be invoked
--- @param ... args function arguments
-local function spawn0(proc, func, ...)
-    kernel.debug("[PID"..proc.pid.."] called spawn0")
+----------------------
+-- @param xwos.processes#xwos.process proc the underlying process
+-- @param #global env the global process environment
+local envFactory = function(proc, env)
+    -- TODO this is partly original code from bios.
+    -- we need to redeclare it to get into wrapped os.**** methods
+    -- maybe in future we find a solution to not redeclare it here
+    local biosRead = function( _sReplaceChar, _tHistory, _fnComplete, _sDefault )
+        if _sReplaceChar ~= nil and type( _sReplaceChar ) ~= "string" then
+            error( "bad argument #1 (expected string, got " .. type( _sReplaceChar ) .. ")", 2 ) 
+        end
+        if _tHistory ~= nil and type( _tHistory ) ~= "table" then
+            error( "bad argument #2 (expected table, got " .. type( _tHistory ) .. ")", 2 ) 
+        end
+        if _fnComplete ~= nil and type( _fnComplete ) ~= "function" then
+            error( "bad argument #3 (expected function, got " .. type( _fnComplete ) .. ")", 2 ) 
+        end
+        if _sDefault ~= nil and type( _sDefault ) ~= "string" then
+            error( "bad argument #4 (expected string, got " .. type( _sDefault ) .. ")", 2 ) 
+        end
+        term.setCursorBlink( true )
     
-    kernel.debug("[PID"..proc.pid.."] procstate = running")
-    proc.procstate = "running"
+        local sLine
+        if type( _sDefault ) == "string" then
+            sLine = _sDefault
+        else
+            sLine = ""
+        end
+        local nHistoryPos
+        local nPos = #sLine
+        if _sReplaceChar then
+            _sReplaceChar = string.sub( _sReplaceChar, 1, 1 )
+        end
     
-    kernel.debug("[PID"..proc.pid.."] calling func", func)
-    local state, err = pcall(func, ...)
-    ---------------------------------
-    -- @field [parent=#process] #boolean state the state after finishing the process
-    proc.state = state
-    kernel.debug("[PID"..proc.pid.."] state = ", state)
-    ---------------------------------
-    -- @field [parent=#process] #any err the error returned by function call (if state is false)
-    proc.err = err
-    kernel.debug("[PID"..proc.pid.."] err = ", err)
-    origremove(processes, proc)
-    
-    procinput.release(proc)
-    
-    ---------------------------------
-    -- @field [parent=#process] #string the process state; one of "preparing", "running" or "finished"
-    kernel.debug("[PID"..proc.pid.."] procstate = finished")
-    proc.procstate = "finished"
-    kernel.origGlob.os.queueEvent("xwos_terminated", proc.pid)
-end -- function spawn0
-
----------------------------------
--- spawn a process
--- @function spawn
--- @param #process proc the process to spawn
--- @param #function func the function to be invoked
--- @param ... args function arguments
-local function spawn(proc, func, ...)
-    kernel.debug("[PID"..proc.pid.."] calling spawnSandbox")
-    kernel.spawnSandbox(spawn0, proc.env, nil, proc, func, ...) -- TODO whitelist from process builder instead of nil
-end -- function spawn
-
----------------------------------
--- @function [parent=#xwos.kernel.sandbox] createProcess
--- @return xwos.kernel.sandbox#processbuilder new (empty) process builder
-M.createProcessBuilder = function()
-    ----------------------------------
-    -- @type #processbuilder
-    local r = {}
-    local opts = {}
-    
-    ----------------------------------
-    -- Sets the terminal to receive terminal requests
-    -- @function [parent=#processbuilder] terminal
-    -- @param #processterm term
-    -- @return #processbuilder this for chaining
-    r.terminal = function(term)
-        opts.terminal = term
-        return r
-    end -- function terminal
-    
-    ----------------------------------
-    -- Spawns a new process and execute functions within this new process
-    -- @function [parent=#processbuilder] buildAndExecute
-    -- @param #function func the function to be executed
-    -- @param ... the arguments passed to the function
-    -- @return #process the new process
-    r.buildAndExecute = function(func, ...)
-        local pid = nextpid
-        kernel.debug("[PID"..pid.."] spawning new process", func, ...)
-        nextpid = nextpid + 1
-        --------------------------------------
-        -- An isolated process
-        -- @type process
-        -- @field [parent=#process] #number pid process identification number
-        local proc = { pid = pid }
-        
-        --------------------------------------
-        -- @type xwosprm
-        local prm = {
-            --------------------------------------
-            -- Returns the current pid
-            -- @function [parent=#xwosprm] pid
-            -- @return #number
-            pid = function()
-                return pid
-            end
-        }
-        
-        --------------------------------------
-        -- @type xwos
-        local xwos = {
-            --------------------------------------
-            -- Returns the process manager
-            -- @function [parent=#xwos] prm
-            -- @return #xwosprm
-            prm = function()
-                return prm
-            end --  function prm
-        }
-        
-        --------------------------------------
-        -- @field [parent=#process] #table evqueue the process local event queue
-        proc.evqueue = {}
-        
-        --------------------------------------
-        -- wakeup process in reaction to events on local event queue
-        -- @function [parent=#process] wakeup
-        proc.wakeup = function()
-            -- kernel.origGlob.os.queueEvent("xwos_wakeup", pid)
-            if proc.coroutine ~= nil and proc.procstate ~= "finished" then
-                kernel.origGlob.coroutine.resume(proc.coroutine)
-            end -- if proc
-        end -- function wakeup
-        
-        --------------------------------------
-        -- request process to terminate
-        -- @function [parent=#process] terminate
-        proc.terminate = function()
-            kernel.origGlob.queueEvent("xwos_terminate", pid)
-        end -- function wakeup
-        
-        --------------------------------------
-        -- acquire input (front process)
-        -- @function [parent=#process] acquireInput
-        proc.acquireInput = function()
-            -- TODO is a stack always good?
-            -- switching between processes (alt+tab in windows) is not meant to build a stack of input
-            -- a stack of input will represent some kind of modal dialog over other modal dialog where closing one will pop up the previous one
-            -- think about it...
-            acquireInput(proc)
-        end -- function acquireInput
-        
-        --------------------------------------
-        -- release input (front process)
-        -- @function [parent=#process] releaseInput
-        proc.releaseInput = function()
-            procinput.release(proc)
-        end -- function acquireInput
-        
-        local function processEvt(lpid, event, filter)
-            if event[1] == nil then
-                return nil
-            end -- if event
-            kernel.debug("[PID"..lpid.."] got event ", kernel.origGlob.unpack(event))
-            
-            if kernel.eventLog then
-                local str = kernel.origGlob.os.day() .. "-" .. kernel.origGlob.os.time() " EVENT: ".. kernel.origGlob.textutils.serialize(event)
-                local f = kernel.origGlob.fs.open("/core/log/event-log.txt", kernel.origGlob.fs.exists("/core/log/event-log.txt") and "a" or "w")
-                f.writeLine(str)
-                f.close()
-            end -- if eventLog
-            
-            local consumed = false
-            
-            if event[1] == "timer" then
-                for k, v in kernel.origGlob.pairs(timers) do
-                    if v.proc == proc then
-                        if filter == nil or event[1]==filter then
-                            kernel.debug("[PID"..lpid.."] returning event ", kernel.origGlob.unpack(event))
-                            return event
-                        else -- if filter
-                            kernel.debug("[PID"..lpid.."] discard event because of filter", kernel.origGlob.unpack(event))
-                            consumed = true
-                        end -- if filter
-                    else -- if proc
-                        kernel.debug("[PID"..lpid.."] queue event for distribution to pid "..v.proc.pid, kernel.origGlob.unpack(event))
-                        originsert(v.proc.evqueue, event)
-                        v.proc.wakeup()
-                        consumed = true
-                    end -- if not proc
-                end -- for timers
-                -- fallthrough: distribute unknown timer event to all processes
-            end -- if timer
-            
-            if event[1] == "xwos_wakeup" then
-                consumed = true
-                kernel.debug("[PID"..lpid.."] wakeup received")
-                if event[2] ~= lpid then
-                    kernel.debug("[PID"..lpid.."] wrong pid, redistribute")
-                    kernel.origGlob.os.queueEvent(kernel.origGlob.unpack(event))
-                end -- if pid
-            end -- if xwos_wakeup
-            
-            if event[1] == "xwos_terminate" then
-                consumed = true
-                kernel.debug("[PID"..lpid.."] terminate received")
-                if event[2] ~= lpid then
-                    kernel.debug("[PID"..lpid.."] wrong pid, redistribute")
-                    kernel.origGlob.os.queueEvent(kernel.origGlob.unpack(event))
-                else -- if pid
-                    error('requesting process termination')
-                end -- if pid
-            end -- if xwos_terminate
-            
-            if event[1] == "xwos_terminated" then
-                consumed = true
-                kernel.debug("[PID"..lpid.."] terminated received")
-                if filter == "xwos_terminated" then
-                    kernel.debug("[PID"..lpid.."] returning event ", kernel.origGlob.unpack(event))
-                    return event
-                end -- if filter
-                for k, v in kernel.origGlob.pairs(processes) do
-                    if v.pid == event[2] and v.joined > 0 then
-                        kernel.debug("[PID"..lpid.."] redistributing because at least one process called join")
-                        kernel.origGlob.os.queueEvent(kernel.origGlob.unpack(event))
-                    end --
-                end -- for processes
-            end -- if xwos_terminated
-            
-            if event[1] == "char" or event[1] == "key" or event[1] == "paste" or event[1] == "key_up" then
-                consumed = true
-                kernel.debug("[PID"..lpid.."] user input received")
-                if procinput.proc ~= nil then
-                    kernel.debug("[PID"..lpid.."] queue event for distribution to user input pid "..procinput.proc.pid)
-                    originsert(procinput.proc.evqueue, event)
-                    procinput.proc.wakeup()
+        local tCompletions
+        local nCompletion
+        local function recomplete()
+            if _fnComplete and nPos == string.len(sLine) then
+                tCompletions = _fnComplete( sLine )
+                if tCompletions and #tCompletions > 0 then
+                    nCompletion = 1
                 else
-                    -- TODO what to do with input if no one likes it?
-                    -- think about special key bindings fetched from background processes
-                    -- currently we silently discard that kind of input
-                end -- 
-            end -- if char
-            
-            -- distribute event to all processes
-            if not consumed then
-                for k, v in kernel.origGlob.pairs(processes) do
-                    if v.procstate ~= "finished" then
-                        kernel.debug("[PID"..lpid.."] queue event for distribution to all pids "..v.pid, kernel.origGlob.unpack(event))
-                        originsert(v.evqueue, event)
-                        v.wakeup()
-                    end -- if not finished
-                end -- for processes
-            end -- if consumed
-            
-            return nil
-        end -- function processEvt
-        
-        -- this is original code from bios.
-        -- we need to redeclare it to get into wrapped os.**** methods
-        -- maybe in future we find a solution to not redeclare it here
-        local function biosRead( _sReplaceChar, _tHistory, _fnComplete, _sDefault )
-            if _sReplaceChar ~= nil and type( _sReplaceChar ) ~= "string" then
-                error( "bad argument #1 (expected string, got " .. type( _sReplaceChar ) .. ")", 2 ) 
-            end
-            if _tHistory ~= nil and type( _tHistory ) ~= "table" then
-                error( "bad argument #2 (expected table, got " .. type( _tHistory ) .. ")", 2 ) 
-            end
-            if _fnComplete ~= nil and type( _fnComplete ) ~= "function" then
-                error( "bad argument #3 (expected function, got " .. type( _fnComplete ) .. ")", 2 ) 
-            end
-            if _sDefault ~= nil and type( _sDefault ) ~= "string" then
-                error( "bad argument #4 (expected string, got " .. type( _sDefault ) .. ")", 2 ) 
-            end
-            term.setCursorBlink( true )
-        
-            local sLine
-            if type( _sDefault ) == "string" then
-                sLine = _sDefault
-            else
-                sLine = ""
-            end
-            local nHistoryPos
-            local nPos = #sLine
-            if _sReplaceChar then
-                _sReplaceChar = string.sub( _sReplaceChar, 1, 1 )
-            end
-        
-            local tCompletions
-            local nCompletion
-            local function recomplete()
-                if _fnComplete and nPos == string.len(sLine) then
-                    tCompletions = _fnComplete( sLine )
-                    if tCompletions and #tCompletions > 0 then
-                        nCompletion = 1
-                    else
-                        nCompletion = nil
-                    end
-                else
-                    tCompletions = nil
                     nCompletion = nil
                 end
-            end
-        
-            local function uncomplete()
+            else
                 tCompletions = nil
                 nCompletion = nil
             end
-        
-            local w = term.getSize()
-            local sx = term.getCursorPos()
-        
-            local function redraw( _bClear )
-                local nScroll = 0
-                if sx + nPos >= w then
-                    nScroll = (sx + nPos) - w
-                end
-        
-                local cx,cy = term.getCursorPos()
-                term.setCursorPos( sx, cy )
-                local sReplace = (_bClear and " ") or _sReplaceChar
-                if sReplace then
-                    term.write( string.rep( sReplace, math.max( string.len(sLine) - nScroll, 0 ) ) )
-                else
-                    term.write( string.sub( sLine, nScroll + 1 ) )
-                end
-        
-                if nCompletion then
-                    local sCompletion = tCompletions[ nCompletion ]
-                    local oldText, oldBg
-                    if not _bClear then
-                        oldText = term.getTextColor()
-                        oldBg = term.getBackgroundColor()
-                        term.setTextColor( colors.white )
-                        term.setBackgroundColor( colors.gray )
-                    end
-                    if sReplace then
-                        term.write( string.rep( sReplace, string.len( sCompletion ) ) )
-                    else
-                        term.write( sCompletion )
-                    end
-                    if not _bClear then
-                        term.setTextColor( oldText )
-                        term.setBackgroundColor( oldBg )
-                    end
-                end
-        
-                term.setCursorPos( sx + nPos - nScroll, cy )
-            end
-            
-            local function clear()
-                redraw( true )
-            end
-        
-            recomplete()
-            redraw()
-        
-            local function acceptCompletion()
-                if nCompletion then
-                    -- Clear
-                    clear()
-        
-                    -- Find the common prefix of all the other suggestions which start with the same letter as the current one
-                    local sCompletion = tCompletions[ nCompletion ]
-                    sLine = sLine .. sCompletion
-                    nPos = string.len( sLine )
-        
-                    -- Redraw
-                    recomplete()
-                    redraw()
-                end
-            end
-            while true do
-                local sEvent, param = os.pullEvent()
-                if sEvent == "char" then
-                    -- Typed key
-                    clear()
-                    sLine = string.sub( sLine, 1, nPos ) .. param .. string.sub( sLine, nPos + 1 )
-                    nPos = nPos + 1
-                    recomplete()
-                    redraw()
-        
-                elseif sEvent == "paste" then
-                    -- Pasted text
-                    clear()
-                    sLine = string.sub( sLine, 1, nPos ) .. param .. string.sub( sLine, nPos + 1 )
-                    nPos = nPos + string.len( param )
-                    recomplete()
-                    redraw()
-        
-                elseif sEvent == "key" then
-                    if param == keys.enter then
-                        -- Enter
-                        if nCompletion then
-                            clear()
-                            uncomplete()
-                            redraw()
-                        end
-                        break
-                        
-                    elseif param == keys.left then
-                        -- Left
-                        if nPos > 0 then
-                            clear()
-                            nPos = nPos - 1
-                            recomplete()
-                            redraw()
-                        end
-                        
-                    elseif param == keys.right then
-                        -- Right                
-                        if nPos < string.len(sLine) then
-                            -- Move right
-                            clear()
-                            nPos = nPos + 1
-                            recomplete()
-                            redraw()
-                        else
-                            -- Accept autocomplete
-                            acceptCompletion()
-                        end
-        
-                    elseif param == keys.up or param == keys.down then
-                        -- Up or down
-                        if nCompletion then
-                            -- Cycle completions
-                            clear()
-                            if param == keys.up then
-                                nCompletion = nCompletion - 1
-                                if nCompletion < 1 then
-                                    nCompletion = #tCompletions
-                                end
-                            elseif param == keys.down then
-                                nCompletion = nCompletion + 1
-                                if nCompletion > #tCompletions then
-                                    nCompletion = 1
-                                end
-                            end
-                            redraw()
-        
-                        elseif _tHistory then
-                            -- Cycle history
-                            clear()
-                            if param == keys.up then
-                                -- Up
-                                if nHistoryPos == nil then
-                                    if #_tHistory > 0 then
-                                        nHistoryPos = #_tHistory
-                                    end
-                                elseif nHistoryPos > 1 then
-                                    nHistoryPos = nHistoryPos - 1
-                                end
-                            else
-                                -- Down
-                                if nHistoryPos == #_tHistory then
-                                    nHistoryPos = nil
-                                elseif nHistoryPos ~= nil then
-                                    nHistoryPos = nHistoryPos + 1
-                                end                        
-                            end
-                            if nHistoryPos then
-                                sLine = _tHistory[nHistoryPos]
-                                nPos = string.len( sLine ) 
-                            else
-                                sLine = ""
-                                nPos = 0
-                            end
-                            uncomplete()
-                            redraw()
-        
-                        end
-        
-                    elseif param == keys.backspace then
-                        -- Backspace
-                        if nPos > 0 then
-                            clear()
-                            sLine = string.sub( sLine, 1, nPos - 1 ) .. string.sub( sLine, nPos + 1 )
-                            nPos = nPos - 1
-                            recomplete()
-                            redraw()
-                        end
-        
-                    elseif param == keys.home then
-                        -- Home
-                        if nPos > 0 then
-                            clear()
-                            nPos = 0
-                            recomplete()
-                            redraw()
-                        end
-        
-                    elseif param == keys.delete then
-                        -- Delete
-                        if nPos < string.len(sLine) then
-                            clear()
-                            sLine = string.sub( sLine, 1, nPos ) .. string.sub( sLine, nPos + 2 )                
-                            recomplete()
-                            redraw()
-                        end
-        
-                    elseif param == keys["end"] then
-                        -- End
-                        if nPos < string.len(sLine ) then
-                            clear()
-                            nPos = string.len(sLine)
-                            recomplete()
-                            redraw()
-                        end
-        
-                    elseif param == keys.tab then
-                        -- Tab (accept autocomplete)
-                        acceptCompletion()
-        
-                    end
-        
-                elseif sEvent == "term_resize" then
-                    -- Terminal resized
-                    w = term.getSize()
-                    redraw()
-        
-                end
-            end
-        
-            local cx, cy = term.getCursorPos()
-            term.setCursorBlink( false )
-            term.setCursorPos( w + 1, cy )
-            print()
-            
-            return sLine
-        end -- function biosRead
-        
-        --------------------------------------
-        -- @type procenv
-        -- @field [parent=#process] #procenv env the process start environment
-        proc.env = {
-            --------------------------------------
-            -- @field [parent=#procenv] #xwos xwos
-            xwos = xwos,
-            print = function(...)
-                kernel.origGlob.print(proc.pid, ...)
-            end, -- print
-            --------------------------------------
-            -- sleeps amount of seconds
-            -- @function [parent=#procenv] sleep
-            -- @param #number nTime number of seconds
-            sleep = function(nTime)
-                kernel.debug("[PID"..pid.."] sleep", nTime)
-                proc.env.os.sleep(nTime)
-            end, -- function sleep
-            read = function( _sReplaceChar, _tHistory, _fnComplete, _sDefault )
-                proc.acquireInput()
-                local res = {pcall(biosRead, _sReplaceChar,_tHistory,_fnComplete,_sDefault)}
-                proc.releaseInput()
-                if res[1] then
-                    return res[2]
-                end -- if res
-                error(res[2])
-            end, -- function read
-            
-            -------------------------------------
-            -- @field [parent=#procenv] os#os os the os api
-            os = {
-                sleep = function(nTime)
-                    kernel.debug("[PID"..pid.."] os.sleep", nTime)
-                    if nTime ~= nil and kernel.origGlob.type( nTime ) ~= "number" then
-                        kernel.origGlob.error( "bad argument #1 (expected number, got " .. kernel.origGlob.type( nTime ) .. ")", 2 )
-                    end
-                    local timer = proc.env.os.startTimer( nTime or 0 )
-                    repeat
-                        local sEvent, param = proc.env.os.pullEvent( "timer" )
-                    until param == timer
-                end, -- function os.sleep
-                startTimer = function(s)
-                    kernel.debug("[PID"..pid.."] os.startTimer", s)
-                    local timer = kernel.origGlob.os.startTimer(s)
-                    originsert(timers, {
-                        id = timer,
-                        proc = proc
-                    })
-                    return timer
-                end, -- function os.startTimer
-                pullEventRaw = function(filter)
-                    kernel.debug("[PID"..pid.."] os.pullEventRaw", filter)
-                    while true do
-                        for k,v in kernel.origGlob.ipairs(proc.evqueue) do
-                            local event = proc.evqueue[k]
-                            proc.evqueue[k] = nil
-                            if filter == nil or event[1]==filter then
-                                kernel.debug("[PID"..pid.."] returning event from local event queue", kernel.origGlob.unpack(event))
-                                return kernel.origGlob.unpack(event)
-                            else -- if filter
-                                kernel.debug("[PID"..pid.."] discard event from local event queue because of filter", kernel.origGlob.unpack(event))
-                            end -- if filter
-                        end -- for evqueue
-                        
-                        kernel.debug("[PID"..pid.."] invoke os.pullEventRaw", filter)
-                        local event = processEvt(pid, {kernel.origGlob.os.pullEventRaw()}, filter)
-                        if event ~= nil then
-                            return kernel.origGlob.unpack(event)
-                        end -- if event
-                    end -- endless loop
-                end, -- function os.pullEventRaw
-                pullEvent = function(filter)
-                    kernel.debug("[PID"..pid.."] os.pullEvent", filter)
-                    local eventData = {proc.env.os.pullEventRaw(filter)}
-                    if eventData[1] == "terminate" then
-                        kernel.origGlob.error( "Terminated", 0 )
-                    end
-                end -- function os.pullEvent
-            }
-        }
-        
-        proc.state = true
-        proc.procstate = "preparing"
-        
-        ------------------------------------------
-        -- joins process and awaits it termination
-        -- @function [parent=#process] join
-        proc.join = function()
-            local cpid = 0
-            if _G.xwos ~= nil then
-                cpid = _G.xwos.prm().pid()
-            end -- if xwos
-            kernel.debug("[PID"..cpid.."] joining "..pid)
-            proc.joined = proc.joined + 1
-            while proc.procstate ~= "finished" do
-                kernel.debug("[PID"..cpid.."] waiting for finished of "..pid.." (state="..proc.procstate..")")
-                local event = processEvt(cpid, {origyield()}, "xwos_terminated")
-                if event ~= nil and event[2] ~= pid then
-                    for k, v in kernel.origGlob.pairs(processes) do
-                        if v.pid == event[2] and v.joined > 0 then
-                            kernel.debug("[PID"..cpid.."] redistributing because at least one process called join of "..pid)
-                            kernel.origGlob.os.queueEvent(kernel.origGlob.unpack(event))
-                        end --
-                    end -- for processes
-                end -- if pid
-            end
-            kernel.debug("[PID"..pid.."] received finish notification")
-            proc.joined = proc.joined - 1
-        end -- function join
-        ------------------------------------------
-        -- @field [parent=#process] #number joined number of processes having called joined
-        proc.joined = 0
-        
-        -- start co routine
-        kernel.debug("[PID"..pid.."] calling coroutine.create")
-        proc.coroutine = origcocreate(spawn)
-        
-        -- save process into table
-        kernel.debug("[PID"..pid.."] storing process inside process table")
-        originsert(processes, proc)
-        
-        if procinput.proc == nil then
-            acquireInput(proc)
-        end -- if not procinput
-        
-        print("proc.env.read: ", proc.env.read)
-        
-        kernel.debug("[PID"..pid.."] calling coroutine.resume")
-        local state, err = origcoresume(proc.coroutine, proc, func, ...)
-        if not state then
-            kernel.debug("[PID"..pid.."] corouting returned with error "..err)
-            proc.err = err
-            proc.state = state
-            proc.procstate = "finished"
         end
-        kernel.debug("[PID"..pid.."] returning new process")
-        return proc
-    end -- function buildAndExecute
     
-    return r
-end -- function createProcessBuilder
+        local function uncomplete()
+            tCompletions = nil
+            nCompletion = nil
+        end
+    
+        local w = term.getSize()
+        local sx = term.getCursorPos()
+    
+        local function redraw( _bClear )
+            local nScroll = 0
+            if sx + nPos >= w then
+                nScroll = (sx + nPos) - w
+            end
+    
+            local cx,cy = term.getCursorPos()
+            term.setCursorPos( sx, cy )
+            local sReplace = (_bClear and " ") or _sReplaceChar
+            if sReplace then
+                term.write( string.rep( sReplace, math.max( string.len(sLine) - nScroll, 0 ) ) )
+            else
+                term.write( string.sub( sLine, nScroll + 1 ) )
+            end
+    
+            if nCompletion then
+                local sCompletion = tCompletions[ nCompletion ]
+                local oldText, oldBg
+                if not _bClear then
+                    oldText = term.getTextColor()
+                    oldBg = term.getBackgroundColor()
+                    term.setTextColor( colors.white )
+                    term.setBackgroundColor( colors.gray )
+                end
+                if sReplace then
+                    term.write( string.rep( sReplace, string.len( sCompletion ) ) )
+                else
+                    term.write( sCompletion )
+                end
+                if not _bClear then
+                    term.setTextColor( oldText )
+                    term.setBackgroundColor( oldBg )
+                end
+            end
+    
+            term.setCursorPos( sx + nPos - nScroll, cy )
+        end
+        
+        local function clear()
+            redraw( true )
+        end
+    
+        recomplete()
+        redraw()
+    
+        local function acceptCompletion()
+            if nCompletion then
+                -- Clear
+                clear()
+    
+                -- Find the common prefix of all the other suggestions which start with the same letter as the current one
+                local sCompletion = tCompletions[ nCompletion ]
+                sLine = sLine .. sCompletion
+                nPos = string.len( sLine )
+    
+                -- Redraw
+                recomplete()
+                redraw()
+            end
+        end
+        while true do
+            local sEvent, param = os.pullEvent()
+            if sEvent == "char" then
+                -- Typed key
+                clear()
+                sLine = string.sub( sLine, 1, nPos ) .. param .. string.sub( sLine, nPos + 1 )
+                nPos = nPos + 1
+                recomplete()
+                redraw()
+    
+            elseif sEvent == "paste" then
+                -- Pasted text
+                clear()
+                sLine = string.sub( sLine, 1, nPos ) .. param .. string.sub( sLine, nPos + 1 )
+                nPos = nPos + string.len( param )
+                recomplete()
+                redraw()
+    
+            elseif sEvent == "key" then
+                if param == keys.enter then
+                    -- Enter
+                    if nCompletion then
+                        clear()
+                        uncomplete()
+                        redraw()
+                    end
+                    break
+                    
+                elseif param == keys.left then
+                    -- Left
+                    if nPos > 0 then
+                        clear()
+                        nPos = nPos - 1
+                        recomplete()
+                        redraw()
+                    end
+                    
+                elseif param == keys.right then
+                    -- Right                
+                    if nPos < string.len(sLine) then
+                        -- Move right
+                        clear()
+                        nPos = nPos + 1
+                        recomplete()
+                        redraw()
+                    else
+                        -- Accept autocomplete
+                        acceptCompletion()
+                    end
+    
+                elseif param == keys.up or param == keys.down then
+                    -- Up or down
+                    if nCompletion then
+                        -- Cycle completions
+                        clear()
+                        if param == keys.up then
+                            nCompletion = nCompletion - 1
+                            if nCompletion < 1 then
+                                nCompletion = #tCompletions
+                            end
+                        elseif param == keys.down then
+                            nCompletion = nCompletion + 1
+                            if nCompletion > #tCompletions then
+                                nCompletion = 1
+                            end
+                        end
+                        redraw()
+    
+                    elseif _tHistory then
+                        -- Cycle history
+                        clear()
+                        if param == keys.up then
+                            -- Up
+                            if nHistoryPos == nil then
+                                if #_tHistory > 0 then
+                                    nHistoryPos = #_tHistory
+                                end
+                            elseif nHistoryPos > 1 then
+                                nHistoryPos = nHistoryPos - 1
+                            end
+                        else
+                            -- Down
+                            if nHistoryPos == #_tHistory then
+                                nHistoryPos = nil
+                            elseif nHistoryPos ~= nil then
+                                nHistoryPos = nHistoryPos + 1
+                            end                        
+                        end
+                        if nHistoryPos then
+                            sLine = _tHistory[nHistoryPos]
+                            nPos = string.len( sLine ) 
+                        else
+                            sLine = ""
+                            nPos = 0
+                        end
+                        uncomplete()
+                        redraw()
+    
+                    end
+    
+                elseif param == keys.backspace then
+                    -- Backspace
+                    if nPos > 0 then
+                        clear()
+                        sLine = string.sub( sLine, 1, nPos - 1 ) .. string.sub( sLine, nPos + 1 )
+                        nPos = nPos - 1
+                        recomplete()
+                        redraw()
+                    end
+    
+                elseif param == keys.home then
+                    -- Home
+                    if nPos > 0 then
+                        clear()
+                        nPos = 0
+                        recomplete()
+                        redraw()
+                    end
+    
+                elseif param == keys.delete then
+                    -- Delete
+                    if nPos < string.len(sLine) then
+                        clear()
+                        sLine = string.sub( sLine, 1, nPos ) .. string.sub( sLine, nPos + 2 )                
+                        recomplete()
+                        redraw()
+                    end
+    
+                elseif param == keys["end"] then
+                    -- End
+                    if nPos < string.len(sLine ) then
+                        clear()
+                        nPos = string.len(sLine)
+                        recomplete()
+                        redraw()
+                    end
+    
+                elseif param == keys.tab then
+                    -- Tab (accept autocomplete)
+                    acceptCompletion()
+    
+                end
+    
+            elseif sEvent == "term_resize" then
+                -- Terminal resized
+                w = term.getSize()
+                redraw()
+    
+            end
+        end
+    
+        local cx, cy = term.getCursorPos()
+        term.setCursorBlink( false )
+        term.setCursorPos( w + 1, cy )
+        print()
+        
+        return sLine
+    end -- function biosRead
 
--- TODO type processterm (terminal wrapper)
+    env.read = function( _sReplaceChar, _tHistory, _fnComplete, _sDefault )
+        proc.acquireInput()
+        local res = {pcall(biosRead, _sReplaceChar,_tHistory,_fnComplete,_sDefault)}
+        proc.releaseInput()
+        if res[1] then
+            return res[2]
+        end -- if res
+        error(res[2])
+    end -- function read
+    
+    env.sleep = function(nTime)
+      kernel.debug("[PID"..proc.pid.."] sleep", nTime)
+      if nTime ~= nil and type( nTime ) ~= "number" then
+          error( "bad argument #1 (expected number, got " .. type( nTime ) .. ")", 2 ) 
+      end
+      local timer = os.startTimer( nTime or 0 )
+      repeat
+          local sEvent, param = os.pullEvent( "timer" )
+      until param == timer
+    end -- function sleep
+    
+    -- clone os to manipulate it
+    env.os = table.clone(env.os)
+    env.os.sleep = function(nTime)
+      sleep(nTime)
+    end -- function os.sleep
+    
+    env.os.startTimer = function(s)
+        kernel.debug("[PID"..proc.pid.."] os.startTimer", s)
+        local timer = kernel.oldGlob.os.startTimer(s)
+        kernel.modules.instances.sandbox.timers.new(timer, proc)
+        return timer
+    end -- function os.startTimer
+    env.os.pullEventRaw = function(filter)
+        kernel.debug("[PID"..proc.pid.."] os.pullEventRaw", filter)
+        while true do
+            for k,v in kernel.oldGlob.ipairs(proc.evqueue) do
+                proc.evqueue[k] = nil
+                if filter == nil or v[1]==filter then
+                    kernel.debug("[PID"..proc.pid.."] returning event from local event queue", kernel.oldGlob.unpack(v))
+                    return kernel.oldGlob.unpack(v)
+                else -- if filter
+                    kernel.debug("[PID"..proc.pid.."] discard event from local event queue because of filter", kernel.oldGlob.unpack(v))
+                end -- if filter
+            end -- for evqueue
+            
+            kernel.debug("[PID"..proc.pid.."] invoke os.pullEventRaw", filter)
+            local event = M.evqueue.processEvt(proc.pid, proc, {kernel.oldGlob.os.pullEventRaw()}, filter)
+            if event ~= nil then
+                return kernel.oldGlob.unpack(event)
+            end -- if event
+        end -- endless loop
+    end -- function os.pullEventRaw
+    env.os.pullEvent = function(filter)
+        kernel.debug("[PID"..proc.pid.."] os.pullEvent", filter)
+        local eventData = {proc.env.os.pullEventRaw(filter)}
+        if eventData[1] == "terminate" then
+            kernel.oldGlob.error( "Terminated", 0 )
+        end
+    end -- function os.pullEvent
+    
+    -- TODO do we need this? we are declaring the functions already inside process thread with correct fenv
+    kernel.oldGlob.setfenv(biosRead, env)
+    kernel.oldGlob.setfenv(env.read, env)
+    kernel.oldGlob.setfenv(env.sleep, env)
+    kernel.oldGlob.setfenv(env.os.sleep, env)
+    kernel.oldGlob.setfenv(env.os.startTimer, env)
+    kernel.oldGlob.setfenv(env.os.pullEventRaw, env)
+    kernel.oldGlob.setfenv(env.os.pullEvent, env)
+end -- function envFactory
+
+---------------------------------
+-- @function [parent=#xwos.modules.sandbox] boot
+-- @param xwos.kernel#xwos.kernel k
+M.boot = function(k)
+    k.debug("boot sandbox")
+    
+    kernel.envFactories.sandbox = envFactory
+end -- function boot
 
 -- wrap lua console and wrap programs...
 

@@ -1,5 +1,5 @@
 -----------------------
--- @module xwos.kernel.security
+-- @module xwos.modules.security
 local M = {}
 
 local kernel -- xwos.kernel#xwos.kernel
@@ -45,7 +45,7 @@ local profiles = {
 }
 
 ---------------------------------
--- @function [parent=#xwos.kernel.security] preboot
+-- @function [parent=#xwos.modules.security] preboot
 -- @param xwos.kernel#xwos.kernel k
 M.preboot = function(k)
     k.debug("preboot security")
@@ -53,7 +53,7 @@ M.preboot = function(k)
 end -- function preboot
 
 ---------------------------------
--- @function [parent=#xwos.kernel.security] boot
+-- @function [parent=#xwos.modules.security] boot
 -- @param xwos.kernel#xwos.kernel k
 M.boot = function(k)
     k.debug("boot security")
@@ -61,7 +61,7 @@ end -- function boot
 
 ---------------------------------
 -- returns a security profile with given name
--- @function [parent=#xwos.kernel.security] profile
+-- @function [parent=#xwos.modules.security] profile
 -- @param #string name
 -- @return #secprofile
 M.profile = function(name)
@@ -70,7 +70,7 @@ end -- function boot
 
 ---------------------------------
 -- Creates a new security profile with given name
--- @function [parent=#xwos.kernel.security] profile
+-- @function [parent=#xwos.modules.security] profile
 -- @param #string name
 -- @return #secprofile
 M.createProfile = function(name)

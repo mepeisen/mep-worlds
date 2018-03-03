@@ -1,6 +1,6 @@
 term.clear()
 
-local tArgs = ...
+local tArgs = {...}
 
 local myver = "0.0.1" -- TODO manipulate through maven build
 local osvs = os.version()
@@ -11,7 +11,7 @@ local osv = osvIter()
 local kernelpaths = { "", "/rom/xwos/kernel/common" }
 local kernels = {}
 kernels["CraftOS"] = {}
-kernels["CraftOS"]["1.8"] = "/rom/xwos/kernel/1_8"
+kernels["CraftOS"]["1.8"] = "/rom/xwos/kernel/1/8"
 
 print("** booting XW-OS........")
 print("** XW-OS version " .. myver)
@@ -47,10 +47,13 @@ if old2 ~= _G or old1.require == nil then
     return nil
 end -- if not globals
 local oldGlob = {}
-for k, v in old2.pairs(old2) do
+for k, v in pairs(_G) do
     oldGlob[k] = v
 end -- for _G
-for k, v in old2.pairs(old1) do
+for k, v in pairs(old2) do
+    oldGlob[k] = v
+end -- for _G
+for k, v in pairs(old1) do
     oldGlob[k] = v
 end -- for _G
 
@@ -62,35 +65,24 @@ end -- for _G
 
 -- redirect require for kernel loading
 -- using functions from oldGlob for security reasons
-newGlob.require = function(path)
+local function krequire(path)
     for k, v in oldGlob.pairs(kernelpaths) do
         local target = v .. "/" .. oldGlob.string.gsub(path, "%.", "/")
         local targetFile = target .. ".lua"
         if oldGlob.fs.exists(targetFile) then
-            return oldGlob.require(target)
+            local res = oldGlob.require(target)
+            -- print("loaded file "..target)
+            return res
         end -- if file exists
     end -- for kernelpaths
     return nil
 end -- function require
 
---local function wrap(name)
---    if newGlob[name] ~= nil then
---        local res = {}
---        for k, v in oldGlob.pairs(newGlob[name]) do
---            res[k] = v
---        end -- for _G
---        newGlob[name] = res
---    end -- if exists
---end -- function wrap
---
---wrap("table")
---wrap("fs")
-
 setfenv(1, newGlob)
 local state, err = pcall(function()
-        local kernel = require('xwos.kernel')
+        local kernel = krequire('xwos.kernel') -- xwos.kernel#xwos.kernel
         
-        kernel.boot(myver, kernelpaths, oldGlob, tArgs)
+        kernel.boot(myver, kernelpaths, krequire, oldGlob, tArgs)
         kernel.startup()
     end -- function ex
 )
