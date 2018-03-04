@@ -18,7 +18,7 @@ end -- function setKernel
 -- Process and distribute event from event queue (part of pullEvent etc.)
 -- @function [parent=#xwos.modules.sandbox.evqueue] processEvt
 -- @param #number lpid the local pid for logging
--- @param xwos.process#xwos.process proc the process invoking this method
+-- @param xwos.process#xwos.process proc the process invoking this method; may be nil for kernel process
 -- @param #table event the event to deliver
 -- @param #string filter optional filter passed to pullEvent
 M.processEvt = function(lpid, proc, event, filter)
@@ -88,8 +88,15 @@ M.processEvt = function(lpid, proc, event, filter)
         end -- if filter
         for k, v in kernel.oldGlob.pairs(kernel.processes) do
             if kernel.oldGlob.type(v) == "table" and v.pid == event[2] and v.joined > 0 then
-                kernel.debug("[PID"..lpid.."] redistributing because at least one process called join")
-                kernel.oldGlob.os.queueEvent(kernel.oldGlob.unpack(event))
+                kernel.debug("[PID"..lpid.."] redistributing to all other processes because at least one process called join of "..v.pid)
+                        
+                for k2, v2 in kernel.oldGlob.pairs(kernel.processes) do
+                    if kernel.oldGlob.type(v2) == "table" and v2 ~= proc and v2.procstate~= "finished" then
+                        kernel.debug("[PID"..lpid.."] redistributing because at least one process called join of "..v2.pid)
+                        originsert(v2.evqueue, event)
+                        v2.wakeup()
+                    end --
+                end -- for processes
             end --
         end -- for processes
     end -- if xwos_terminated

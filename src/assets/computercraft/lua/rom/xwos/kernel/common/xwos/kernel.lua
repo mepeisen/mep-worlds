@@ -162,17 +162,19 @@ M.boot = function(ver, kernelpaths, krequire, oldGlob, args)
     M.modules.preboot(M)
     M.modules.boot(M)
     
-    M.debug("preparing sandbox for root process")
-    local nenv = {}
+    --------------------------------
+    -- @field [parent=#xwos.kernel] #global nenv the new environment for processes
+    M.nenv = {}
+    M.debug("preparing sandbox for root process", M.nenv)
     local nenvmt = {
         __index = function(table, key)
             local e = origGetfenv(0)
-            if (e == nenv) then return nil end
+            if (e == M.nenv) then return nil end
             return e[key]
         end -- function __index
     }
-    origsetmeta(nenv, nenvmt)
-    origSetfenv(nenvmt.__index, nenv)
+    origsetmeta(M.nenv, nenvmt)
+    origSetfenv(nenvmt.__index, M.nenv)
     local function wrapfenv(table, env, blacklist)
         local R = {}
         for k,v in origpairs(table) do
@@ -193,7 +195,7 @@ M.boot = function(ver, kernelpaths, krequire, oldGlob, args)
     end -- function wrapfenv
     --------------------------------
     -- @field [parent=#xwos.kernel] #table oldfenv the old fenv for global functions
-    M.oldfenv = wrapfenv(oldGlob, nenv, {
+    M.oldfenv = wrapfenv(oldGlob, M.nenv, {
         getfenv=true,
         setfenv=true,
         shell={run=true, clearAlias=true, dir=true, getRunningProgram=true},
@@ -208,21 +210,21 @@ end -- function boot
 -- Startup xwos
 -- @function [parent=#xwos.kernel] startup
 M.startup = function()
-    M.debug("preparing new environment for root process")
     local nenv = {}
+    M.debug("preparing new environment for root process", nenv)
     for k,v in origpairs(M.oldGlob) do
-        nenv[k] = M.oldGlob[k]
+        nenv[k] = v
     end -- for oldGlob
-    nenv.print = function(...)
+    nenv.print = function(...) -- TODO remove
         M.oldGlob.print("->", ...)
     end -- function print
     
     M.debug("creating root process")
-    local proc = M.processes.new(M, nenv, M.envFactories) -- TODO factories from root profile (per profile factories)
-    local startupData = M.readSecureData('core/startup.dat', "/rom/xwos/kernel/common/xwos/test.lua") -- TODO startup script
+    local proc = M.processes.new(nil, M, nenv, M.envFactories) -- TODO factories from root profile (per profile factories)
+    local startupData = M.readSecureData('core/startup.dat', "/rom/xwos/kernel/common/xwos/testsleep.lua") -- TODO startup script
     M.debug("spawning thread with startup script " .. startupData)
     proc.spawn(startupData)
-    proc.join()
+    proc.join(nil)
     
     M.debug("cleanup root process sandbox")
     -- cleanup

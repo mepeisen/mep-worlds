@@ -36,6 +36,9 @@ end -- function preboot
 -- @param xwos.processes#xwos.process proc the underlying process
 -- @param #global env the global process environment
 local envFactory = function(proc, env)
+    kernel.debug("[PID"..proc.pid.."] preparing env", env)
+    env.pid = proc.pid
+
     -- TODO this is partly original code from bios.
     -- we need to redeclare it to get into wrapped os.**** methods
     -- maybe in future we find a solution to not redeclare it here
@@ -320,7 +323,7 @@ local envFactory = function(proc, env)
     end -- function read
     
     env.sleep = function(nTime)
-      kernel.debug("[PID"..proc.pid.."] sleep", nTime)
+      kernel.debug("[PID"..proc.pid.."] sleep", nTime, kernel.oldGlob.getfenv(0), kernel.oldGlob.getfenv(env.sleep))
       if nTime ~= nil and type( nTime ) ~= "number" then
           error( "bad argument #1 (expected number, got " .. type( nTime ) .. ")", 2 ) 
       end
@@ -368,16 +371,97 @@ local envFactory = function(proc, env)
         if eventData[1] == "terminate" then
             kernel.oldGlob.error( "Terminated", 0 )
         end
+        return kernel.oldGlob.unpack(eventData)
     end -- function os.pullEvent
+    ---------------------------------------
+    -- operating system access
+    -- @type xwos
+    -- @field [parent=#global] #xwos xwos predefined operating system accessor
+    env.xwos = {}
+    ---------------------------------------
+    -- debugging output
+    -- @function [parent=#xwos] debug
+    -- @param #string msg
+    env.xwos.debug = function(msg)
+        -- TODO find a way to pass variables etc.
+        -- check for possible sandbox breaks during tostring
+        if kernel.oldGlob.type(msg) ~= "string" then
+            error("Wrong argument type (only strings allowed)")
+        else -- if not string
+            kernel.debug(msg)
+        end -- if string
+    end -- function debug
+    ---------------------------------------
+    -- process manager
+    -- @type xwos.pmr
+    -- @field [parent=#xwos] #xwos.pmr pmr process manager
+    env.xwos.pmr = {}
+    -- TODO demon child threads (threads to be fnished before process ends)
+    -- TODO on terminate main process terminat all child threads
+    ---------------------------------------
+    -- create a new child thread
+    -- @function [parent=#xwos.pmr] createThread
+    -- @param #table newenv the environment of the new thread
+    -- @return #xwos.pmr.thread
+    env.xwos.pmr.createThread = function(newenv)
+        local nenv = {}
+        for k,v in kernel.oldGlob.pairs(kernel.oldGlob) do
+            nenv[k] = v
+        end -- for oldGlob
+        local function wrap(target, src)
+            for k,v in kernel.oldGlob.pairs(src) do
+                if kernel.oldGlob.type(v) == "table" and kernel.oldGlob.type(target[k]) == "table" then
+                    wrap(v, target[k])
+                else -- if tables
+                    target[k] = v
+                end -- if tables
+            end -- for src
+        end -- function wrap
+        if newenv ~= nil then
+            wrap(nenv, newenv)
+        end -- if nenv
+        local nproc = kernel.processes.new(proc, kernel, env, kernel.envFactories)
+        ---------------------------------------
+        -- the new thread
+        -- @type xwos.pmr.thread
+        local R = {}
+        ---------------------------------------
+        -- join thread and wait for finish
+        -- @function [parent=#xwos.pmr.thread] join
+        R.join = function()
+            nproc.join(proc)
+        end -- function join
+        ---------------------------------------
+        -- terminate thread
+        -- @function [parent=#xwos.pmr.thread] terminate
+        R.termninate = function()
+            nproc.termninate()
+        end -- function termninate
+        ---------------------------------------
+        -- spawn thread and invoke function
+        -- @function [parent=#xwos.pmr.thread] spawn
+        -- @param #function func the function to invoke
+        -- @param ... arguments
+        R.spawn = function(func, ...)
+            nproc.spawn(func, ...)
+        end -- function termninate
+        -- TODO do we need this? we are declaring the functions already inside process thread with correct fenv
+        kernel.oldGlob.setfenv(R.join, kernel.nenv)
+        kernel.oldGlob.setfenv(R.terminate, kernel.nenv)
+        kernel.oldGlob.setfenv(R.spawn, kernel.nenv)
+        return R
+    end -- function createThread
     
     -- TODO do we need this? we are declaring the functions already inside process thread with correct fenv
-    kernel.oldGlob.setfenv(biosRead, env)
-    kernel.oldGlob.setfenv(env.read, env)
-    kernel.oldGlob.setfenv(env.sleep, env)
-    kernel.oldGlob.setfenv(env.os.sleep, env)
-    kernel.oldGlob.setfenv(env.os.startTimer, env)
-    kernel.oldGlob.setfenv(env.os.pullEventRaw, env)
-    kernel.oldGlob.setfenv(env.os.pullEvent, env)
+    kernel.oldGlob.setfenv(biosRead, kernel.nenv)
+    kernel.oldGlob.setfenv(env.read, kernel.nenv)
+    kernel.oldGlob.setfenv(env.sleep, kernel.nenv)
+    kernel.oldGlob.setfenv(env.os.sleep, kernel.nenv)
+    kernel.oldGlob.setfenv(env.os.startTimer, kernel.nenv)
+    kernel.oldGlob.setfenv(env.os.pullEventRaw, kernel.nenv)
+    kernel.oldGlob.setfenv(env.os.pullEvent, kernel.nenv)
+    kernel.oldGlob.setfenv(env.xwos.debug, kernel.nenv)
+    kernel.oldGlob.setfenv(env.xwos.pmr.createThread, kernel.nenv)
 end -- function envFactory
 
 ---------------------------------

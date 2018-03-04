@@ -8,9 +8,11 @@ local origtype = type
 local origdofile = dofile
 local origpcall = pcall
 local origpackage = package
+local origprint = print
 local origser = textutils.serialize
 local origpairs = pairs
 local origyield = coroutine.yield
+local originsert = table.insert
 
 local kernel -- xwos.kernel#xwos.kernel
 
@@ -26,11 +28,12 @@ local nextPid = 0
 --------------------------------
 -- creates a new process
 -- @function [parent=#xwos.processes] new
+-- @param p the parent process
 -- @param xwos.kernel#xwos.kernel k the kernel table
 -- @param #global env the global process environment
 -- @param #table factories functions with signature (proc, env) to initialize the new process or environment
 -- @return #xwos.process
-processes.new = function(k, env, factories)
+processes.new = function(p, k, env, factories)
     kernel = k
     --------------------------------
     -- process type
@@ -54,6 +57,32 @@ processes.new = function(k, env, factories)
     -- @field [parent=#xwos.process] #string procstate the process state; "initializing", "running" or "terminated"
     R.procstate = "initializing"
     kernel.debug("[PID"..R.pid.."] pocstate = initializing")
+    
+    --------------------------------
+    -- @field [parent=#xwos.process] #xwos.process parent the parent process
+    R.parent = p
+    
+    --------------------------------
+    -- @field [parent=#xwos.process] #global env the process environment
+    R.env = {}
+    kernel.debug("[PID"..R.pid.."] environments", env)
+    local nenvmt = {
+        __index = function(table, key)
+            if key == "pid" then
+                return R.pid
+            end -- if pid
+            local res = env[key]
+            if res == nil then
+                if R.parent ~= nil then
+                    -- parent should at least lead to PID 0. PID 0 already should contain all the visible and public globals all processes are allowed to use
+                    res = R.parent.env[key]
+                end -- if parent
+            end -- if not res (env)
+            return res
+        end -- function __index
+    }
+    origsetmeta(R.env, nenvmt)
+    origSetfenv(nenvmt.__index, R.env)
         
     --------------------------------------
     -- acquire input (front process)
@@ -69,24 +98,34 @@ processes.new = function(k, env, factories)
     ------------------------------------------
     -- joins process and awaits it termination
     -- @function [parent=#process] join
-    R.join = function()
-        local env = origGetfenv(0)
-        local cpid = env.pid or 0
-        kernel.debug("[PID"..cpid.."] joining "..R.pid)
+    -- @param #xwos.process cproc calling process
+    R.join = function(cproc)
+        local cpid = "*"
+        if cproc ~= nil then
+            cpid = cproc.pid
+        end -- if cproc
+        kernel.debug("[PID"..cpid.."] joining")
         R.joined = R.joined + 1
         while R.procstate ~= "finished" do
             kernel.debug("[PID"..cpid.."] waiting for finished of "..R.pid.." (state="..R.procstate..")")
-            local event = kernel.modules.instances.sandbox.evqueue.processEvt(cpid, kernel.processes[cpid], {origyield()}, "xwos_terminated")
+            local event = kernel.modules.instances.sandbox.evqueue.processEvt(cpid, cproc, {origyield()}, "xwos_terminated")
             if event ~= nil and event[2] ~= R.pid then
                 for k, v in kernel.oldGlob.pairs(processes) do
                     if kernel.oldGlob.type(v)=="table" and v.pid == event[2] and v.joined > 0 then
-                        kernel.debug("[PID"..cpid.."] redistributing because at least one process called join of "..R.pid)
-                        kernel.oldGlob.os.queueEvent(kernel.oldGlob.unpack(event))
+                        kernel.debug("[PID"..cpid.."] redistributing to all other processes because at least one process called join of "..R.pid)
+                        
+                        for k2, v2 in kernel.oldGlob.pairs(kernel.processes) do
+                            if kernel.oldGlob.type(v2) == "table" and v2 ~= cproc and v2.procstate~= "finished" then
+                                kernel.debug("[PID"..cpid.."] redistributing because at least one process called join of "..R.pid)
+                                originsert(v2.evqueue, event)
+                                v2.wakeup()
+                            end --
+                        end -- for processes
                     end --
                 end -- for processes
             end -- if pid
         end
-        kernel.debug("[PID"..R.pid.."] received finish notification")
+        kernel.debug("[PID"..cpid.."] received finish notification or "..R.pid)
         R.joined = R.joined - 1
     end -- function join
         
@@ -128,6 +167,7 @@ processes.new = function(k, env, factories)
     -- @param #function func the function to invoke
     -- @param ... the arguments for given function
     R.spawn = function(func, ...)
+        local env0 = kernel.nenv
         kernel.debug("[PID"..R.pid.."] prepare spawn")
         -- TODO ... may contain functions and objects with metatables; this may cause problems by mxing environments
         -- establish an alternative for IPC (inter process communication)
@@ -137,35 +177,25 @@ processes.new = function(k, env, factories)
             kernel.debug("[PID"..R.pid.."] pocstate = finished")
             R.result = res
             R.procstate = "finished"
+            kernel.oldGlob.os.queueEvent("xwos_terminated", R.pid)
             return
         end -- if not res
         
-        local nenv = {}
-        local nenvmt = {
-            __index = function(table, key)
-                if key == "pid" then
-                    return R.pid
-                end -- if pid
-                return env[key]
-            end -- function __index
-        }
-        origsetmeta(nenv, nenvmt)
-        origSetfenv(nenvmt.__index, nenv)
         local spawn0 = function(...)
             kernel.debug("[PID"..R.pid.."] pocstate = running")
             R.procstate = "running"
-            origSetfenv(0, nenv)
-            origSetfenv(1, nenv)
+            kernel.debug("[PID"..R.pid.."] using env", R.env, env0)
+            origSetfenv(0, R.env)
             for k, v in origpairs(factories) do
                 kernel.debug("[PID"..R.pid.."] invoke factory", k, v)
-                v(R, nenv)
+                v(R, R.env)
             end -- for factories
             if origtype(func) == "string" then
                 local func2 = function(...)
                     kernel.debug("[PID"..R.pid.."] doFile", func)
                     return origdofile(func, ...)
                 end -- function func2
-                origSetfenv(func2, nenv)
+                origSetfenv(func2, kernel.nenv)
                 --------------------------------
                 -- @field [parent=#xwos.process] #table result the return state from process function
                 R.result = {origpcall(func2, ...)}
@@ -178,47 +208,49 @@ processes.new = function(k, env, factories)
                 kernel.debug("[PID"..R.pid.."] ERR:", R.result[2])
             end -- if not res
             R.procstate = "finished"
+            kernel.oldGlob.os.queueEvent("xwos_terminated", R.pid)
         end -- function spawn0
-        nenv.getfenv = function(n)
+        R.env.getfenv = function(n)
+            -- TODO: Hide kernel.nenv because one may decide to manipulate it to inject variables into other threads :-(
             local t = origtype(n)
             if t == "number" then
                 if n == 0 then
-                    return nenv
+                    return kernel.nenv
                 end -- if 0
             end -- if number
             return origGetfenv(n)
         end -- function get
-        nenv.setfenv = function(n, v)
+        R.env.setfenv = function(n, v)
             -- TODO maybe we can compare current fenv with THIS nenv and nenv from kernel;
             -- if matches we deny changing the fenv
             -- if not matches we allow changing because it was loaded inside process
             
             -- do not allow changing fenv at all
             -- simply return current one
-            return origGetfenv(n, v)
+            return R.env.getfenv(n, v)
         end -- function setfenv
         kernel.debug("[PID"..R.pid.."] prepare package")
-        nenv.package = {}
+        R.env.package = {}
         -- taken from bios.lua; must be overriden because of env
         -- TODO maybe we find a better solution than copying all the stuff
-        nenv.package.loaded = {
+        R.env.package.loaded = {
             -- _G = _G,
             bit32 = bit32,
             coroutine = coroutine, -- TODO wrap
             math = math,
-            package = nenv.package,
+            package = R.env.package,
             string = string,
             table = table,
         }
         -- TODO paths
-        nenv.package.path = "?;?.lua;?/init.lua;/rom/modules/main/?;/rom/modules/main/?.lua;/rom/modules/main/?/init.lua"
+        R.env.package.path = "?;?.lua;?/init.lua;/rom/modules/main/?;/rom/modules/main/?.lua;/rom/modules/main/?/init.lua"
         if turtle then
-            nenv.package.path = nenv.package.path..";/rom/modules/turtle/?;/rom/modules/turtle/?.lua;/rom/modules/turtle/?/init.lua"
+            R.env.package.path = R.env.package.path..";/rom/modules/turtle/?;/rom/modules/turtle/?.lua;/rom/modules/turtle/?/init.lua"
         elseif command then
-            nenv.package.path = nenv.package.path..";/rom/modules/command/?;/rom/modules/command/?.lua;/rom/modules/command/?/init.lua"
+            R.env.package.path = R.env.package.path..";/rom/modules/command/?;/rom/modules/command/?.lua;/rom/modules/command/?/init.lua"
         end
-        nenv.package.config = "/\n;\n?\n!\n-"
-        nenv.package.preload = {}
+        R.env.package.config = "/\n;\n?\n!\n-"
+        R.env.package.preload = {}
         local loader1 =  function( name )
             if package.preload[name] then
                 return package.preload[name]
@@ -250,13 +282,13 @@ processes.new = function(k, env, factories)
             end
             return nil, sError
         end -- function loader2
-        nenv.package.loaders = {
+        R.env.package.loaders = {
             loader1,
             loader2
         }
   
         local sentinel = {}
-        nenv.require = function( name )
+        R.env.require = function( name )
             if type( name ) ~= "string" then
                 error( "bad argument #1 (expected string, got " .. type( name ) .. ")", 2 )
             end
@@ -287,13 +319,13 @@ processes.new = function(k, env, factories)
             error(sError, 2)
         end -- function require
         
-        kernel.debug("[PID"..R.pid.."] setting new env")
-        origSetfenv(spawn0, nenv)
-        origSetfenv(loader1, nenv)
-        origSetfenv(loader2, nenv)
-        origSetfenv(nenv.require, nenv)
-        origSetfenv(nenv.getfenv, nenv)
-        origSetfenv(nenv.setfenv, nenv)
+        kernel.debug("[PID"..R.pid.."] setting new env", env0)
+        origSetfenv(spawn0, env0)
+        origSetfenv(loader1, env0)
+        origSetfenv(loader2, env0)
+        origSetfenv(R.env.require, env0)
+        origSetfenv(R.env.getfenv, env0)
+        origSetfenv(R.env.setfenv, env0)
         --------------------------------
         -- @field [parent=#xwos.process] coroutine#coroutine co the coroutine
         R.co = cocreate(spawn0)
@@ -303,12 +335,9 @@ processes.new = function(k, env, factories)
             kernel.debug("[PID"..R.pid.."] pocstate = finished")
             R.result = res
             R.procstate = "finished"
+            kernel.oldGlob.os.queueEvent("xwos_terminated", R.pid)
         end -- if not res
     end -- function spawn
-    
-    --------------------------------
-    -- @field [parent=#xwos.process] #global env the process environment
-    R.env = env
     
     processes[R.pid] = R
     kernel.debug("[PID"..R.pid.."] returning new process")
