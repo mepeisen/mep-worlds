@@ -17,7 +17,7 @@ term.clear()
 
 local tArgs = {...}
 
-local myver = "0.0.1" -- TODO manipulate through maven build
+local myver = "0.0.2" -- TODO manipulate through maven build
 local osvs = os.version()
 local osvIter = string.gmatch(osvs, "%S+")
 local osn = osvIter()

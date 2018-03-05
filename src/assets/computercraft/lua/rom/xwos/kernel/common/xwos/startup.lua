@@ -27,12 +27,6 @@ M.installer = function(kernel)
     print()
     print("starting installer...")
     
-    kernel.print("read: ", read)
-    kernel.print("read0: ", getfenv(0).read)
-    kernel.print("read1: ", getfenv(1).read)
-    kernel.print("read6: ", getfenv(6).read)
-    kernel.print("read7: ", getfenv(7).read)
-    kernel.print("read8: ", getfenv(8).read)
     print()
     print("********* XW-OS ********** INSTALLER")
     local langs = {

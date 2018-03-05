@@ -10,6 +10,20 @@
 
 
 
+GUIs:
+titanium
+
+http://www.computercraft.info/forums2/index.php?/topic/25954-enios-the-interactive-gui-os/
+
+https://github.com/possi/computercraft_gui
+
+http://www.computercraft.info/forums2/index.php?/topic/13944-graffiti-v172-the-first-ide-for-guis/
+https://github.com/Encreedem/Graffiti
+
+http://www.computercraft.info/forums2/index.php?/topic/14681-widget-api-full-featured-gui/
+
+
+
 Hardware-Situationen:
 	-> Turtle mit Extra Modem (Wifi)
 	-> Computer mit extra Monitor und mit Extra Modem
