@@ -1,8 +1,14 @@
 
+
+-- TODO remote monitors: http://www.computercraft.info/forums2/index.php?/topic/25973-multiple-monitors-via-wired-network-cables/
+-- TODO http://computercraft.info/wiki/Category:Unofficial_APIs
+-- TODO http://computercraft.info/wiki/Category:User_Created_Peripherals
+-- TODO http://www.computercraft.info/wiki/Category:Peripheral_APIs
+
 -- TODO:  commands.<command> see http://computercraft.info/wiki/Commands_(API)     http://computercraft.info/wiki/Commands.list
 -- TODO:  commands.async.<command>
 
--- TODO: Freies loading.gif (ajax gif stammt von https://loading.io/assets/img/ajax.gif, könnte geschützt sein)
+-- TODO: Freies loading.gif (ajax gif stammt von https://loading.io/assets/img/ajax.gif, kï¿½nnte geschï¿½tzt sein)
 
 
 Hardware-Situationen:

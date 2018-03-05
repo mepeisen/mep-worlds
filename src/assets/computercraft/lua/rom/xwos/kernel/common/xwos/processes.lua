@@ -1,3 +1,17 @@
+--    This file is part of xwos.
+--
+--    xwos is free software: you can redistribute it and/or modify
+--    it under the terms of the GNU General Public License as published by
+--    the Free Software Foundation, either version 3 of the License, or
+--    (at your option) any later version.
+--
+--    xwos is distributed in the hope that it will be useful,
+--    but WITHOUT ANY WARRANTY; without even the implied warranty of
+--    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+--    GNU General Public License for more details.
+--
+--    You should have received a copy of the GNU General Public License
+--    along with xwos.  If not, see <http://www.gnu.org/licenses/>.
 
 local cocreate = coroutine.create
 local coresume = coroutine.resume
@@ -6,9 +20,11 @@ local origSetfenv = setfenv
 local origsetmeta = setmetatable
 local origtype = type
 local origdofile = dofile
+local origloadfile = loadfile
 local origpcall = pcall
 local origpackage = package
 local origprint = print
+local origerror = error
 local origser = textutils.serialize
 local origpairs = pairs
 local origyield = coroutine.yield
@@ -64,13 +80,10 @@ processes.new = function(p, k, env, factories)
     
     --------------------------------
     -- @field [parent=#xwos.process] #global env the process environment
-    R.env = {}
+    R.env = { pid = R.pid }
     kernel.debug("[PID"..R.pid.."] environments", env)
     local nenvmt = {
         __index = function(table, key)
-            if key == "pid" then
-                return R.pid
-            end -- if pid
             local res = env[key]
             if res == nil then
                 if R.parent ~= nil then
@@ -193,6 +206,12 @@ processes.new = function(p, k, env, factories)
             if origtype(func) == "string" then
                 local func2 = function(...)
                     kernel.debug("[PID"..R.pid.."] doFile", func)
+                    local fnFile, e = origloadfile(func, kernel.nenv)
+                    if fnFile then
+                        return fnFile()
+                    else -- if res
+                        origerror( e, 2 )
+                    end -- if not res
                     return origdofile(func, ...)
                 end -- function func2
                 origSetfenv(func2, kernel.nenv)

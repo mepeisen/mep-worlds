@@ -1,16 +1,32 @@
+--    This file is part of xwos.
+--
+--    xwos is free software: you can redistribute it and/or modify
+--    it under the terms of the GNU General Public License as published by
+--    the Free Software Foundation, either version 3 of the License, or
+--    (at your option) any later version.
+--
+--    xwos is distributed in the hope that it will be useful,
+--    but WITHOUT ANY WARRANTY; without even the implied warranty of
+--    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+--    GNU General Public License for more details.
+--
+--    You should have received a copy of the GNU General Public License
+--    along with xwos.  If not, see <http://www.gnu.org/licenses/>.
+
     local function func1()
+    xwos.debug(tostring(getfenv(func1))..tostring(getfenv(load)))
         print("[1]pid=",pid)
         print("[1]Hello World!")
         -- TODO sleep seems to not use the globals ?????
-        os.sleep(5)
+        sleep(5)
         print("[1]Hello again");
     end
     local function func2()
         -- TODO pid seems to not use the globals ?????
         print("[2]pid=",pid)
-        os.sleep(5)
+        sleep(5)
         print("[2]Hello World!")
-        os.sleep(5)
+        sleep(5)
         print("[2]Hello again");
     end
     print("[0]pid=",pid)
