@@ -14,7 +14,6 @@
 --    along with xwos.  If not, see <http://www.gnu.org/licenses/>.
 
     local function func1()
-    xwos.debug(tostring(getfenv(func1))..tostring(getfenv(load)))
         print("[1]pid=",pid)
         print("[1]Hello World!")
         -- TODO sleep seems to not use the globals ?????
