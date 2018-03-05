@@ -1,3 +1,5 @@
+--    Copyright Martin Eisengardt 2018 xworlds.eu
+--    
 --    This file is part of xwos.
 --
 --    xwos is free software: you can redistribute it and/or modify
