@@ -16,12 +16,10 @@
     local function func1()
         print("[1]pid=",pid)
         print("[1]Hello World!")
-        -- TODO sleep seems to not use the globals ?????
         sleep(5)
         print("[1]Hello again");
     end
     local function func2()
-        -- TODO pid seems to not use the globals ?????
         print("[2]pid=",pid)
         sleep(5)
         print("[2]Hello World!")
