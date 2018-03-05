@@ -1,0 +1,86 @@
+xwos/extensions/moses		--> 		https://github.com/Yonaba/Moses
+License: MIT
+
+xwos/extensions/allen		-->			https://github.com/Yonaba/Allen
+License: MIT
+
+xwos/extensions/nums		-->			https://github.com/user-none/lua-nums
+License: MIT
+
+
+TODO:
+oop/concurrency:
+		(base)				https://luarocks.org/modules/yonaba/30log
+		(concurrency)		https://luarocks.org/modules/seba/activelua-learningtool
+		(concurrency)		https://luarocks.org/modules/bartbes/async
+		(chains)			https://luarocks.org/modules/ryanplusplus/chain
+		(base)				https://luarocks.org/modules/siffiejoe/classy
+		(core)				https://luarocks.org/modules/hisham/compat52
+		(core)				https://luarocks.org/modules/siffiejoe/compat53
+		(concurrency)		https://luarocks.org/modules/luarocks/concurrentlua
+		(concurrency)		https://luarocks.org/modules/tieske/copas
+		(concurrency)		https://luarocks.org/modules/hisham/copas-async
+		(concurrency)		https://luarocks.org/modules/tieske/copastimer
+		(concurrency)		https://luarocks.org/modules/saucisson/coronest
+		(concurrency)		https://luarocks.org/modules/tieske/corowatch
+		(concurrency)		https://luarocks.org/modules/hisham/coxpcall
+		(concurrency)		https://luarocks.org/modules/daurnimator/cqueues
+gui:
+		(toolkit)			https://github.com/PedroAlvesV/AbsTK
+security:
+		(encryption)		https://luarocks.org/modules/moteus/aesfileencrypt
+		(encryption)		https://luarocks.org/modules/mw/bencode
+		(encryption)		https://luarocks.org/modules/moteus/bgcrypto-aes
+		(hash)				https://luarocks.org/modules/moteus/bgcrypto-hmac
+		(encryption)		https://luarocks.org/modules/moteus/bgcrypto-pbkdf2
+		(encryption)		https://luarocks.org/modules/moteus/bgcrypto-sha
+		(encryption)		https://luarocks.org/modules/xpol/cctea
+command line:
+		(args)				https://luarocks.org/modules/mpeterv/alt-getopt
+		(args)				https://luarocks.org/modules/geoffleyland/argcheck
+		(args) 				https://luarocks.org/modules/gilzoide/argmatcher
+		(args)				https://luarocks.org/modules/mpeterv/argparse
+		(args)				https://luarocks.org/modules/mah0x211/argv
+		(cli)				https://luarocks.org/modules/luarocks/cl
+		(cli)				https://luarocks.org/modules/peterbillam/commandlineui
+mixed:
+		(type check)		http://siffiejoe.github.io/lua-annotate/
+		(arrays)			https://luarocks.org/modules/evandrolg/array
+		(locale)			https://luarocks.org/modules/damvgn/babel
+		(numbers)			https://luarocks.org/modules/catwell/base2base
+		(numbers/text)		https://luarocks.org/modules/leafo/base58
+		(numbers)			https://luarocks.org/modules/aiq/basexx
+		(text)				https://luarocks.org/modules/karai17/bbcode
+		(numbers)			https://luarocks.org/modules/jorj/bigint
+		(ser/binary/text)	https://luarocks.org/modules/rayaman/bin
+		(ser)				https://luarocks.org/modules/bakpakin/binser
+		(searches)			https://luarocks.org/modules/tieske/binaryheap
+		(numbers)			https://luarocks.org/modules/luarocks/bitlib
+		(numbers)			https://luarocks.org/modules/mah0x211/bitvec
+		(searches)			https://luarocks.org/modules/profan/bk-tree
+		(cache)				https://luarocks.org/modules/kapouer/cache-protocols
+		(database)			https://luarocks.org/modules/jbochi/cassandra
+		(type check)		https://luarocks.org/modules/luarocks/checks
+		(numbers)			https://luarocks.org/modules/gregfjohnson/cmath
+		(collections)		https://luarocks.org/modules/clockvapor/collections
+		(config)			https://luarocks.org/modules/luarocks/config
+		(numbers)			https://luarocks.org/modules/shakesoda/cpml
+		(numbers)			https://luarocks.org/modules/prki/cpml-ci
+		(text)				https://luarocks.org/modules/siffiejoe/cprint
+		(csv)				https://luarocks.org/modules/geoffleyland/csv
+		(numbers)			https://luarocks.org/modules/catwell/cwbase
+deployment:
+		(package)			https://luarocks.org/modules/siffiejoe/amalg
+		(tests)				https://luarocks.org/modules/olivine-labs/busted
+		(tests)				https://luarocks.org/modules/3scale/busted-ffi
+		(tests)				https://luarocks.org/modules/kikito/busted-stable
+		(classes)			https://github.com/saucisson/lua-c3
+		(test)				https://luarocks.org/modules/catwell/cwtest
+		
+??? https://luarocks.org/modules/luisfbatels/blitz-extensions
+??? https://luarocks.org/modules/darkstalker/brain
+
+
+TODO: https://github.com/LewisJEllis/awesome-lua#utility-belts
+
+		
