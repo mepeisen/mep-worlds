@@ -26,6 +26,8 @@ local origprint = print
 local origtostring = tostring
 
 local origTable = table
+local origString = string
+local origStringMeta = getmetatable("")
 
 --------------------------------
 -- local kernel
@@ -52,7 +54,7 @@ local bootSequence = {
 -- @param #function krequire require function to include kernel files
 -- @param global#global args the command line arguments
 M.boot = function(ver, kernelpaths, krequire, oldGlob, args)
-    local moses = krequire('/xwos/extensions/moses/moses_min')
+    print("installing extension moses...")
     table = {}
     -- TODO moses "functions" function maybe a security hole if invoked with nil (returning moses library functions with broken fenv???)
     -- TODO moses contains some local functions, may be a security hole because of broken fenv???
@@ -60,6 +62,7 @@ M.boot = function(ver, kernelpaths, krequire, oldGlob, args)
     for k,v in origpairs(origTable) do
         table[k] = v
     end -- for table
+    local moses = krequire('/xwos/extensions/moses/moses_min')
     table.clear = moses.clear
     table.each = moses.each
     table.eachi = moses.eachi
@@ -216,6 +219,77 @@ M.boot = function(ver, kernelpaths, krequire, oldGlob, args)
         return false
     end -- function table.contains
     
+    print("installing extension allen...")
+    string = {}
+    -- TODO allen contains some local functions, may be a security hole because of broken fenv???
+    -- TODO support allen aliases
+    for k,v in origpairs(origString) do
+        string[k] = v
+    end -- for string
+    local stringMeta = {}
+    for k,v in origpairs(origStringMeta) do
+        stringMeta[k] = v
+    end -- for string
+    origsetmeta("", stringMeta)
+    local allen = krequire('/xwos/extensions/allen/allen')
+    string.capitalizeFirst = allen.capitalizeFirst
+    string.capitalizesEach = allen.capitalizesEach
+    string.capitalize = allen.capitalize
+    string.lowerFirst = allen.lowerFirst
+    string.lower = allen.lower
+    string.isLowerCase = allen.isLowerCase
+    string.isUpperCase = allen.isUpperCase
+    string.startsLowerCase = allen.startsLowerCase
+    string.startsUpperCase = allen.startsUpperCase
+    string.swapCase = allen.swapCase
+    string.levenshtein = allen.levenshtein
+    string.chop = allen.chop
+    string.clean = allen.clean
+    string.escape = allen.escape
+    string.substitute = allen.substitute
+    string.includes = allen.includes
+    string.chars = allen.chars
+    string.isAlpha = allen.isAlpha
+    string.isNumeric = allen.isNumeric
+    string.index = allen.index
+    string.isEmail = allen.isEmail
+    string.count = allen.count
+    string.insert = allen.insert
+    string.isBlank = allen.isBlank
+    string.join = allen.join
+    string.lines = allen.lines
+    string.splice = allen.splice
+    string.startsWith = allen.startsWith
+    string.endsWith = allen.endsWith
+    string.succ = allen.succ
+    string.pre = allen.pre
+    string.titleize = allen.titleize
+    string.camelize = allen.camelize
+    string.underscored = allen.underscored
+    string.dasherize = allen.dasherize
+    string.humanize = allen.humanize
+    string.numberFormat = allen.numberFormat
+    string.words = allen.words
+    string.pad = allen.pad
+    string.lpad = allen.lpad
+    string.rpad = allen.rpad
+    string.lrpad = allen.lrpad
+    string.strRight = allen.strRight
+    string.strRightBack = allen.strRightBack
+    string.strLeft = allen.strLeft
+    string.strLeftBack = allen.strLeftBack
+    string.toSentence = allen.toSentence
+    string.rep = allen.rep
+    string.surround = allen.surround
+    string.quote = allen.quote
+    string.bytes = allen.bytes
+    string.byteAt = allen.byteAt
+    string.isLuaKeyword = allen.isLuaKeyword
+    string.isToken = allen.isToken
+    string.isIdentifier = allen.isIdentifier
+    string.is = allen.is
+    string.statistics = allen.statistics
+    
     --------------------------------
     -- @field [parent=#xwos.kernel] #table kernelpaths the paths for including kernel
     M.kernelpaths = kernelpaths
@@ -359,10 +433,16 @@ M.startup = function()
     end -- function unwrapfenv
     unwrapfenv(M.oldGlob, M.oldfenv)
     
+    -- TODO xwos startup script changed environment already...
+    -- out cleanup may not work (or is not needed). Review this
     -- uninstall moses
     table = origTable
     functions = nil
     objects = nil
+    
+    -- uninstall allen
+    string = origString
+    origsetmeta("", origStringMeta)
     
     M.debug("last actions before shutdown")
     if proc.result[1] then

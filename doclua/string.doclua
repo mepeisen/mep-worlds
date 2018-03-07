@@ -228,4 +228,416 @@
 -- @param #string s string to handle.
 -- @return #string a upper case version of `s`.
 
+-------------------------------------------------------------------------------
+-- Capitalizes the first character of a given string.
+-- <br/><em>Aliased as `capFirst`</em>.
+-- @function [parent=#string] capitalizeFirst
+-- @param #string str a string
+-- @return #string a string
+
+-------------------------------------------------------------------------------
+-- Capitalizes each word in a given string.
+-- <br/><em>Aliased as `capEach` and `caps`</em>.
+-- @function [parent=#string] capitalizesEach
+-- @param #string str a string
+-- @return #string a string
+
+-------------------------------------------------------------------------------
+-- Capitalizes substring i to j in a given string
+-- <br/><em>Aliased as `cap`.</em>.
+-- @function [parent=#string] capitalize
+-- @param #string str a string
+-- @param #number i the starting index. Defaults to 1 if not given. Can be negative (counting from right to left)
+-- @param #number j the ending index. Defaults to the string length if not given.
+-- @return #string a substring of the given string
+
+-------------------------------------------------------------------------------
+-- Lowers the first character in a given string
+-- @function [parent=#string] lowerFirst
+-- @param #string str a string
+-- @return #string a string
+
+-------------------------------------------------------------------------------
+-- Lowers substring i to j in a given string
+-- @function [parent=#string] lower
+-- @param #string str a string
+-- @param #number i the starting index. Defaults to 1 if not given. Can be negative (counting from right to left)
+-- @param #number j the ending index. Default to string length if not given.
+-- @return #string a string
+
+-------------------------------------------------------------------------------
+-- Tests if a given string contains only upper-case characters.
+-- <br/><em>Aliased as `isLower`.</em>.
+-- @function [parent=#string] isLowerCase
+-- @param #string str a string
+-- @return #boolean a boolean
+
+-------------------------------------------------------------------------------
+-- Tests if a given string contains only lower-case characters.
+-- <br/><em>Aliased as `isUpper`.</em>.
+-- @function [parent=#string] isUpperCase
+-- @param #string str a string
+-- @return #boolean a boolean
+
+-------------------------------------------------------------------------------
+-- Tests if a given string starts with a lower-case character
+-- <br/><em>Aliased as `startsLower`.</em>.
+-- @function [parent=#string] startsLowerCase
+-- @param #string str a string
+-- @return #boolean a boolean
+
+-------------------------------------------------------------------------------
+-- Tests if a given string starts with an upper-case character
+-- <br/><em>Aliased as `startsUpper`.</em>.
+-- @function [parent=#string] startsUpperCase
+-- @param #string str a string
+-- @return #boolean a boolean
+
+-------------------------------------------------------------------------------
+-- Swaps the case of each characters in substring i to j inside a given string
+-- @function [parent=#string] swapCase
+-- @param #string str a string
+-- @param #number i the starting index. Defaults to 1 if not given. Can be negative (counting from right to left)
+-- @param int j the ending index. Default to string length if not given
+-- @return #string a string
+
+-------------------------------------------------------------------------------
+-- Returns the <em>Levenshtein distance</em> between two strings.
+-- See <a href="http://en.wikipedia.org/wiki/Levenshtein_distance" id="Levenshtein Distance on Wikipedia">Levenshtein Distance on Wikipedia</a>
+-- @function [parent=#string] levenshtein
+-- @param #string strA a string
+-- @param #string strB another string
+-- @return #number an integer representing the distance between the two given strings
+
+-------------------------------------------------------------------------------
+-- Converts a string to an array of n characters
+-- <br/><em>Aliased as `split`.</em>.
+-- @function [parent=#string] chop
+-- @param #string str a string
+-- @param #number n an integer. Defaults to 1 if not given.
+-- @return #table an array of strings, each one having a length of n characters at least.
+
+-------------------------------------------------------------------------------
+-- Clears all special characters or characters matching a given pattern inside a given string
+-- <br/><em>Aliased as `trim`.</em>.
+-- @function [parent=#string] clean
+-- @param #string str a string
+-- @param #string pat a pattern matching string to be cleaned from the original string. If not given, will clean non-alphanumeric characters.
+-- @return #string a string
+
+-------------------------------------------------------------------------------
+-- Escapes any magic character in agiven string
+-- <br/><em>Aliased as `esc`.</em>.
+-- @function [parent=#string] escape
+-- @param #string str a string
+-- @return #string a string
+
+-------------------------------------------------------------------------------
+-- Substitutes any sequence matching ${var} or $var with a given value
+-- <br/><em>Aliased as `subst` and `interpolate`.</em>.
+-- @function [parent=#string] substitute
+-- @param #string str a string
+-- @param #any var a value to be used to replace ${var} or $var occurences
+-- @return #string a string
+
+-------------------------------------------------------------------------------
+-- Tests if a given substring is included in a given string
+-- @function [parent=#string] includes
+-- @param #string str a string
+-- @param #string sub a substring
+-- @return #boolean a boolean
+
+-------------------------------------------------------------------------------
+-- Converts a given string to an array of chars
+-- <br/><em>Aliased as `explode`.</em>.
+-- @function [parent=#string] chars
+-- @param #string str a string
+-- @return #table an array of chars
+
+-------------------------------------------------------------------------------
+-- Checks if a given string contains only alphabetic characters
+-- @function [parent=#string] isAlpha
+-- @param #string str a string
+-- @return #boolean a boolean
+
+-------------------------------------------------------------------------------
+-- Checks if a given string contains only digits.
+-- <br/><em>Aliased as `isNum`.</em>.
+-- @function [parent=#string] isNumeric
+-- @param #string str a string
+-- @return #boolean a boolean
+
+-------------------------------------------------------------------------------
+-- Indexes a string like an array, returning a character. 
+-- <br/><em>Aliased as `charAt`.</em>.
+-- @function [parent=#string] index
+-- @param #string str a string
+-- @return #number i an index
+
+-------------------------------------------------------------------------------
+-- Checks if a given string matches an email address syntax.
+-- Not compliant with any RFC standards though.
+-- @function [parent=#string] isEmail
+-- @param #string str a string
+-- @return #boolean a boolean
+
+-------------------------------------------------------------------------------
+-- Returns the number of substring occurences in a given string
+-- @function [parent=#string] count
+-- @param #string str a string
+-- @param #string sub a substring or a pattern matching string
+-- @return #number the expected count
+
+-------------------------------------------------------------------------------
+-- Inserts a given substring at index position in a given string
+-- @function [parent=#string] insert
+-- @param #string str a string
+-- @param #string substring the substring to be inserted
+-- @param #number index the insert position, defaults to the end of the string when not given
+-- @return #string a string
+
+-------------------------------------------------------------------------------
+-- Tests if a given string contain any alphanumeric character
+-- @function [parent=#string] isBlank
+-- @return #boolean a boolean
+
+-------------------------------------------------------------------------------
+-- Returns a string composed of a concatenation of all given arguments, separated with a given separator
+-- @function [parent=#string] join
+-- @param #string sep a string separator
+-- @param ... a list of strings to be concatenated
+-- @return #string a string
+
+-------------------------------------------------------------------------------
+-- Splits a given string in an array on the basis of end-lines characters (`\n` and/or `\r`).
+-- @function [parent=#string] lines
+-- @param #string str a string
+-- @return #table an array of string
+
+-------------------------------------------------------------------------------
+-- Replaces `howMany` characters after index position in a given string with a given substring
+-- @function [parent=#string] splice
+-- @param #string str a string
+-- @param #number index an index position in the string
+-- @param #number howMany the number of characters to be removed after index.
+-- @param #string substring the substring that will replace the removed sequence.
+-- @return #string a string
+
+-------------------------------------------------------------------------------
+-- Tests if a given string starts with a given pattern
+-- @function [parent=#string] startsWith
+-- @param #string str a string
+-- @param #string starts a pattern or a string
+-- @return #boolean a boolean
+
+-------------------------------------------------------------------------------
+-- Tests if a given string ends with a given pattern
+-- @function [parent=#string] endsWith
+-- @param #string str a string
+-- @param #string ends a pattern or a string
+-- @return #boolean a boolean
+
+-------------------------------------------------------------------------------
+-- Returns the successor of a given character. In case the input was a string of characters, 
+-- returns a new string where each character is the successor of the character at the same position in the passed-in string
+-- @function [parent=#string] succ
+-- @param #string str a string
+-- @param #number n the n-th successor of a character in the Ascii set
+-- @return #string a string
+
+-------------------------------------------------------------------------------
+-- Returns the predecessor of a given character. In case the input was a string of characters, 
+-- returns a new string where each character is the predecessor of the character at the same position in the passed-in string
+-- @function [parent=#string] pre
+-- @param #string str a string
+-- @param #number n the n-th predecessor of a character in the Ascii set
+-- @return #string a string
+
+-------------------------------------------------------------------------------
+-- Title-izes a given string (each word beginning with a capitalized letter)
+-- @function [parent=#string] titleize
+-- @param #string str a string
+-- @return #string a string
+
+-------------------------------------------------------------------------------
+-- Converts a given string (underscored or dasherized) into camelized style
+-- @function [parent=#string] camelize
+-- @param #string str a string
+-- @return #string a string
+
+-------------------------------------------------------------------------------
+-- Converts a given string (camelized or dasherized) into underscored style
+-- @function [parent=#string] underscored
+-- @param #string str a string
+-- @return #string a string
+
+-------------------------------------------------------------------------------
+-- Converts a given string (unerscored or camelized) into dasherized style
+-- @function [parent=#string] dasherize
+-- @param #string str a string
+-- @return #string a string
+
+-------------------------------------------------------------------------------
+-- Converts a given string (underscored, humanized, dasherized or camelized) into a human-readable form
+-- @function [parent=#string] humanize
+-- @param #string str a string
+-- @return #string a string
+
+-------------------------------------------------------------------------------
+-- Formats a given number to a string
+-- @function [parent=#string] numberFormat
+-- @param #number num a number.
+-- @param #number decimals the number of decimals after the whole part. Defaults to 0 when omitted.
+-- @param #string thousandSeparator the symbol used to separate thousands. Defaults to `,` when not given.
+-- @param #string decimalSeparator the symbol used to separate the whole part from the decimal part. Defaults to `.` when not given.
+-- @param #string sign the string to be used to replace the minus symbol for negative numbers. Defaults to `-` when omitted.
+-- @return #string a string
+
+-------------------------------------------------------------------------------
+-- Converts a given string into an array of words
+-- @function [parent=#string] words
+-- @param #string str a string
+-- @return #table an array of string
+
+-------------------------------------------------------------------------------
+-- Pads a given string with characters
+-- @function [parent=#string] pad
+-- @param #string str a string
+-- @param #number length the final string length
+-- @param #string padStr the padding string character
+-- @param #string side the padding direction. Should be either 'left' (see @{lpad}), 'right' (see @{rpad}) or 'both' (see @{lrpad}).
+-- @return #string a string
+
+-------------------------------------------------------------------------------
+-- Left-pads a given string
+-- <br/><em>Aliased as `rjust`.</em>.
+-- @function [parent=#string] lpad
+-- @param #string str a string
+-- @param #number length the final string length
+-- @param #string padStr the padding string character
+-- @return #string a string
+
+-------------------------------------------------------------------------------
+-- Right-pads a given string
+-- <br/><em>Aliased as `ljust`.</em>.
+-- @function [parent=#string] rpad
+-- @param #string str a string
+-- @param #number length the final string length
+-- @param #string padStr the padding string character
+-- @return #string a string
+
+-------------------------------------------------------------------------------
+-- Left and right padding for strings.
+-- <br/><em>Aliased as `center`.</em>.
+-- @function [parent=#string] lrpad
+-- @param #string str a string
+-- @param #number length the final string length
+-- @param #string padStr the padding string character
+-- @return #string a string
+
+-------------------------------------------------------------------------------
+-- Returns the substring after the first pattern occurence in a given string
+-- @function [parent=#string] strRight
+-- @param #string str a string
+-- @param #string pattern a pattern-matching string
+-- @return #string a string
+
+-------------------------------------------------------------------------------
+-- Returns the substring after the last pattern occurence in a given string
+-- @function [parent=#string] strRightBack
+-- @param #string str a string
+-- @param #string pattern a pattern-matching string
+-- @return #string a string
+
+-------------------------------------------------------------------------------
+-- Returns the substring before the first pattern occurence in a given string
+-- @function [parent=#string] strLeft
+-- @param #string str a string
+-- @param #string pattern a pattern-matching string
+-- @return #string a string
+
+-------------------------------------------------------------------------------
+-- Returns the substring before the last pattern occurence in a given string
+-- @function [parent=#string] strLeftBack
+-- @param #string str a string
+-- @param #string pattern a pattern-matching string
+-- @return #string a string
+
+-------------------------------------------------------------------------------
+-- Converts an array of strings into a human-readable string
+-- @function [parent=#string] toSentence
+-- @param #table an array of values
+-- @param #string delimiter a delimiter. Defaults to comma character when not given.
+-- @param #string lastDelimiter the last delimiter to be used. Defaults to ` and ` when not given.
+-- @return #string a string
+
+-------------------------------------------------------------------------------
+-- Repeats a given string concatenated with a given separator count times.
+-- @function [parent=#string] rep
+-- @param #string str a string
+-- @param #number count the repetitions count. Defaults to 2 when not given.
+-- @param #string sep a separator. Defaults to space character when not given.
+-- @return #string a string
+
+-------------------------------------------------------------------------------
+-- Wraps a given string
+-- @function [parent=#string] surround
+-- @param #string str a string
+-- @return #string a wrapped string
+
+-------------------------------------------------------------------------------
+-- Returns a quoted string
+-- @function [parent=#string] quote
+-- @param #string str a string
+-- @return #string a quoted string
+
+-------------------------------------------------------------------------------
+-- Returns an array of Ascii codes for a given set of characters
+-- @function [parent=#string] bytes
+-- @param #string str a string
+-- @return #table an array of ascii codes
+
+-------------------------------------------------------------------------------
+-- Returns the Ascii code of the i-th character in the given string
+-- @function [parent=#string] byteAt
+-- @param #string str a string
+-- @param #number i an index
+-- @return #number a number representing the Ascii code of the i-th char
+
+-------------------------------------------------------------------------------
+-- Checks if the given string is a Lua reserved keyword.
+-- <br/><em>Aliased as `isLuaKword` and `isReserved`.</em>.
+-- @function [parent=#string] isLuaKeyword
+-- @param #string str a string
+-- @return #boolean a boolean
+
+-------------------------------------------------------------------------------
+-- Tests if a given substring is a known Lua token (operator).
+-- <br/><em>Aliased as `isOperator` and `isOp`.</em>.
+-- @function [parent=#string] isToken
+-- @param #string str a string
+-- @return #boolean a boolean
+
+-------------------------------------------------------------------------------
+-- Tests if a given substring is a valid Lua identifier for a variable
+-- <br/><em>Aliased as `isIden` and `isVarName`.</em>.
+-- @function [parent=#string] isIdentifier
+-- @param #string str a string
+-- @return #boolean a boolean
+
+-------------------------------------------------------------------------------
+-- Checks if the given input is has a known Lua type or matches an expected type.
+-- @function [parent=#string] is
+-- @param #any var some variable
+-- @param #string expectedType an expected type for the passed-in variable. If not given, the function will check if the actual variable type is known to Lua.
+-- @return #boolean a boolean
+
+-------------------------------------------------------------------------------
+-- Returns a table listing counts for each match to a given pattern
+-- <br/><em>Aliased as `stats`.</em>.
+-- @function [parent=#string] statistics
+-- @param #string str a string
+-- @param #string pat a pattern matching string
+-- @return #table an array
+
 return nil
