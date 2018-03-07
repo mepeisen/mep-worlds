@@ -26,6 +26,7 @@ local origprint = print
 local origtostring = tostring
 
 local origTable = table
+
 table = {}
 for k,v in origpairs(origTable) do
     table[k] = v
@@ -121,6 +122,96 @@ local bootSequence = {
 -- @param #function krequire require function to include kernel files
 -- @param global#global args the command line arguments
 M.boot = function(ver, kernelpaths, krequire, oldGlob, args)
+    local moses = krequire('xwos/extensions/moses/moses_min.lua')
+    table = {}
+    for k,v in origpairs(origTable) do
+        table[k] = v
+    end -- for table
+    table.clear = moses.clear
+    table.each = moses.each
+    table.eachi = moses.eachi
+    table.at = moses.at
+    table.count = moses.count
+    table.countf = moses.countf
+    table.cycle = moses.cycle
+    table.map = moses.map
+    table.reduce = moses.reduce
+    table.reduceby = moses.reduceby
+    table.reduceRight = moses.reduceRight
+    table.mapReduce = moses.mapReduce
+    table.mapReduceRight = moses.mapReduceRight
+    table.include = moses.include
+    table.detect = moses.detect
+    table.where = moses.where
+    table.findWhere = moses.findWhere
+    table.select = moses.select
+    table.reject = moses.reject
+    table.all = moses.all
+    table.invoke = moses.invoke
+    table.pluck = moses.pluck
+    table.max = moses.max
+    table.min = moses.min
+    table.shuffle = moses.shuffle
+    table.same = moses.same
+    table.sort = moses.sort
+    table.sortBy = moses.sortBy
+    table.groupBy = moses.groupBy
+    table.countBy = moses.countBy
+    table.size = moses.size
+    table.containsKey = moses.containsKey
+    table.sameKeys = moses.sameKeys
+    table.sample = moses.sample
+    table.sampleProb = moses.sampleProb
+    table.toArray = moses.toArray
+    table.find = moses.find
+    table.reverse = moses.reverse
+    table.fill = moses.fill
+    table.selectWhile = moses.selectWhile
+    table.dropWhile = moses.dropWhile
+    table.sortedIndex = moses.sortedIndex
+    table.indexOf = moses.indexOf
+    table.lastIndexOf = moses.lastIndexOf
+    table.findIndex = moses.findIndex
+    table.findLastIndex = moses.findLastIndex
+    table.addTop = moses.addTop
+    table.push = moses.push
+    table.pop = moses.pop
+    table.unshift = moses.unshift
+    table.pull = moses.pull
+    table.removeRange = moses.removeRange
+    table.chunk = moses.chunk
+    table.slice = moses.slice
+    table.first = moses.first
+    table.initial = moses.initial
+    table.last = moses.last
+    table.rest = moses.rest
+    table.nth = moses.nth
+    table.compact = moses.compact
+    table.flattern = moses.flattern
+    table.difference = moses.difference
+    table.union = moses.union
+    table.intersection = moses.intersection
+    table.symmetricDifference = moses.symmetricDifference
+    table.unique = moses.unique
+    table.isunique = moses.isunique
+    table.zip = moses.zip
+    table.append = moses.append
+    table.interleave = moses.interleave
+    table.interpose = moses.interpose
+    table.range = moses.range
+    table.rep = moses.rep
+    table.partition = moses.partition
+    table.sliding = moses.sliding
+    table.permutation = moses.permutation
+    table.invert = moses.invert
+    table.concat = moses.concat
+    -- TODO functions: noop, identity, constant, memoize, once, before, after, compose, pipe, complement, juxtapose,
+    -- TODO wrap, times, bind, bind2, bindn, bindAll, uniqueId, iterator, array, flip, over, overEvery, overSome,
+    -- TODO overArgs, partial, partialRight, curry, time, keys, values, kvpairs, toObj, property, propertyOf,
+    -- TODO toBoolean, extend, functions, clone, tap, has, pick, omit, template, isEqual, result, isTable, isCallable,
+    -- TODO isArray, isIterable, isEmpty, isString, isFunction, isNil, isNumber, isNaN, isFinite, isBoolean, isInteger,
+    -- TODO chain, obj:value, import
+    
     --------------------------------
     -- @field [parent=#xwos.kernel] #table kernelpaths the paths for including kernel
     M.kernelpaths = kernelpaths

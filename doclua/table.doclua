@@ -1,0 +1,660 @@
+-------------------------------------------------------------------------------
+-- @module table
+
+-- taken from moses.lua
+-- version 1.6.1
+
+------------------------------------------------------------------------------- 
+-- Clears a table. All its values become nil.
+-- @function [parent=#table] clear
+-- @param #table t a table
+-- @return #table the given table, cleared.
+
+------------------------------------------------------------------------------- 
+-- Iterates on key-value pairs, calling `f (k, v)` at every step.
+-- <br/><em>Aliased as `forEach`</em>.
+-- @function [parent=#table] each
+-- @param #table t a table
+-- @param #function f a function, prototyped as `f (k, v, ...)`
+-- @param ... Optional args to be passed to `f`
+
+------------------------------------------------------------------------------- 
+-- Iterates on integer key-value pairs, calling `f(k, v)` every step. 
+-- Only applies to values located at integer keys. The table can be a sparse array. 
+-- Iteration will start from the lowest integer key found to the highest one.
+-- <br/><em>Aliased as `forEachi`</em>.
+-- @function [parent=#table] eachi
+-- @param #table t a table
+-- @param #function f a function, prototyped as `f (k, v, ...)`
+-- @param ... Optional args to be passed to `f`
+
+------------------------------------------------------------------------------- 
+-- Collects values at given keys and return them wrapped in an array.
+-- @function [parent=#table] at
+-- @param #table t a table
+-- @param ... A variable number of keys to collect values
+-- @return #table an array-list of values
+
+------------------------------------------------------------------------------- 
+-- Counts occurrences of a given value in a table. Uses @{isEqual} to compare values.
+-- @function [parent=#table] count
+-- @param #table t a table
+-- @param #any value a value to be searched in the table. If not given, the @{size} of the table will be returned
+-- @return #number the count of occurrences of the given value
+
+------------------------------------------------------------------------------- 
+-- Counts occurrences validating a predicate. Same as @{count}, but uses an iterator. 
+-- Returns the count for values passing the test `f (k, v, ...)`
+-- @function [parent=#table] countf
+-- @param #table t a table
+-- @param #function f an iterator function, prototyped as `f (k, v, ...)`
+-- @param ... Optional args to be passed to `f`
+-- @return #number the count of values validating the predicate
+
+------------------------------------------------------------------------------- 
+-- Loops `n` times through a table. In case `n` is omitted, it will loop forever.
+-- In case `n` is lower or equal to 0, it returns an empty function.
+-- <br/><em>Aliased as `loop`</em>.
+-- @function [parent=#table] cycle
+-- @param #table t a table
+-- @param #number n the number of loops
+-- @return #function an iterator function yielding key-value pairs from the passed-in table.
+
+------------------------------------------------------------------------------- 
+-- Maps `f (k, v)` on key-value pairs, collects and returns the results.
+-- <br/><em>Aliased as `collect`</em>.
+-- @function [parent=#table] map
+-- @param #table t a table
+-- @param #function f  an iterator function, prototyped as `f (k, v, ...)`
+-- @param ... Optional args to be passed to `f`
+-- @return #table a table of results
+
+------------------------------------------------------------------------------- 
+-- Reduces a table, left-to-right. Folds the table from the first element to the last element
+-- to a single value, using a given iterator and an initial state.
+-- The iterator takes a state and a value and returns a new state.
+-- <br/><em>Aliased as `inject`, `foldl`</em>.
+-- @function [parent=#table] reduce
+-- @param #table t a table
+-- @param #function f an iterator function, prototyped as `f (state, value)`
+-- @param #any state an initial state of reduction. Defaults to the first value in the table.
+-- @return #any the final state of reduction
+
+------------------------------------------------------------------------------- 
+-- Reduces values in a table passing a given predicate. Folds the table left-to-right, considering
+-- only values validating a given predicate.
+-- @function [parent=#table] reduceby
+-- @param #table t a table
+-- @param #function f an iterator function, prototyped as `f (state, value)`
+-- @param #any state an initial state of reduction.
+-- @param #function pred a predicate function `pred (k, v, ...)` to select values to be considered for reduction
+-- @param ... optional args to be passed to `pred`
+-- @return #any the final state of reduction
+
+------------------------------------------------------------------------------- 
+-- Reduces a table, right-to-left. Folds the table from the last element to the first element 
+-- to single value, using a given iterator and an initial state.
+-- The iterator takes a state and a value, and returns a new state.
+-- <br/><em>Aliased as `injectr`, `foldr`</em>.
+-- @function [parent=#table] reduceRight
+-- @param #table t a table
+-- @param #function f an iterator function, prototyped as `f (state, value)`
+-- @param #any state an initial state of reduction. Defaults to the last value in the table.
+-- @return #any the final state of reduction
+
+------------------------------------------------------------------------------- 
+-- Reduces a table while saving intermediate states. Folds the table left-to-right
+-- using a given iterator and an initial state. The iterator takes a state and a value, 
+-- and returns a new state. The result is an array of intermediate states.
+-- <br/><em>Aliased as `mapr`</em>
+-- @function [parent=#table] mapReduce
+-- @param #table t a table
+-- @param #function f an iterator function, prototyped as `f (state, value)`
+-- @param #any state an initial state of reduction. Defaults to the first value in the table.
+-- @return #table an array of states
+
+------------------------------------------------------------------------------- 
+-- Reduces a table while saving intermediate states. Folds the table right-to-left
+-- using a given iterator and an initial state. The iterator takes a state and a value, 
+-- and returns a new state. The result is an array of intermediate states.
+-- <br/><em>Aliased as `maprr`</em>
+-- @function [parent=#table] mapReduceRight
+-- @param #table t a table
+-- @param #function f an iterator function, prototyped as `f (state, value)`
+-- @param #any state an initial state of reduction. Defaults to the last value in the table.
+-- @return #table an array of states
+
+------------------------------------------------------------------------------- 
+-- Performs a linear search for a value in a table. It does not work for nested tables.
+-- The given value can be a function prototyped as `f (v, value)` which should return true when
+-- any v in the table equals the value being searched. 
+-- <br/><em>Aliased as `any`, `some`, `contains`</em>
+-- @function [parent=#table] include
+-- @param #table t a table
+-- @param #any value a value to search for
+-- @return #boolean a boolean : `true` when found, `false` otherwise
+
+------------------------------------------------------------------------------- 
+-- Performs a linear search for a value in a table. Returns the key of the value if found.
+-- The given value can be a function prototyped as `f (v, value)` which should return true when
+-- any v in the table equals the value being searched. 
+-- @function [parent=#table] detect
+-- @param #table t a table
+-- @param #any,#function value a value to search for
+-- @return #any the key of the value when found or __nil__
+
+------------------------------------------------------------------------------- 
+-- Returns all values having specified keys `props`.
+-- @function [parent=#table] where
+-- @param #table t a table
+-- @param #table props a set of keys
+-- @return #table an array of values from the passed-in table
+
+------------------------------------------------------------------------------- 
+-- Returns the first value having specified keys `props`.
+-- @function [parent=#table] findWhere
+-- @param #table t a table
+-- @param #table props a set of keys
+-- @return #any a value from the passed-in table
+
+------------------------------------------------------------------------------- 
+-- Selects and returns values passing an iterator test.
+-- <br/><em>Aliased as `filter`</em>.
+-- @function [parent=#table] select
+-- @param #table t a table
+-- @param #function f an iterator function, prototyped as `f (k, v, ...)`
+-- @param ... Optional args to be passed to `f`
+-- @return #table the selected values
+
+------------------------------------------------------------------------------- 
+-- Clones a table while dropping values passing an iterator test.
+-- <br/><em>Aliased as `discard`</em>
+-- @function [parent=#table] reject
+-- @param #table t a table
+-- @param #function f an iterator function, prototyped as `f (k, v, ...)`
+-- @param ... Optional args to be passed to `f`
+-- @return #table the remaining values
+
+------------------------------------------------------------------------------- 
+-- Checks if all values in a table are passing an iterator test.
+-- <br/><em>Aliased as `every`</em>
+-- @function [parent=#table] all
+-- @param #table t a table
+-- @param #function f an iterator function, prototyped as `f (k, v, ...)`
+-- @param ... Optional args to be passed to `f`
+-- @return #boolean `true` if all values passes the predicate, `false` otherwise
+
+------------------------------------------------------------------------------- 
+-- Invokes a method on each value in a table.
+-- @function [parent=#table] invoke
+-- @param #table t a table
+-- @param #function method a function, prototyped as `f (v, ...)`
+-- @param ... Optional args to be passed to `method`
+-- @return #any the result of the call `f (v, ...)`
+
+------------------------------------------------------------------------------- 
+-- Extracts values in a table having a given key.
+-- @function [parent=#table] pluck
+-- @param #table t a table
+-- @param #any key a key, will be used to index in each value: `value[key]`
+-- @return #table an array of values having the given key
+
+------------------------------------------------------------------------------- 
+-- Returns the max value in a collection. If an transformation function is passed, it will
+-- be used to evaluate values by which all objects will be sorted.
+-- @function [parent=#table] max
+-- @param #table t a table
+-- @param #function transform a transformation function, prototyped as `transform (v, ...)`, defaults to @{identity}
+-- @param ... Optional args to be passed to `transform`
+-- @return #any the max value found
+
+------------------------------------------------------------------------------- 
+-- Returns the min value in a collection. If an transformation function is passed, it will
+-- be used to evaluate values by which all objects will be sorted.
+-- @function [parent=#table] min
+-- @param #table t a table
+-- @param #function transform a transformation function, prototyped as `transform (v, ...)`, defaults to @{identity}
+-- @param ... Optional args to be passed to `transform`
+-- @return #any the min value found
+
+------------------------------------------------------------------------------- 
+-- Returns a shuffled copy of a given collection. If a seed is provided, it will
+-- be used to init the pseudo random number generator (using `math.randomseed`).
+-- @function [parent=#table] shuffle
+-- @param #table t a table
+-- @param #number seed a seed
+-- @return #table a shuffled copy of the given table
+
+------------------------------------------------------------------------------- 
+-- Checks if two tables are the same. It compares if both tables features the same values,
+-- but not necessarily at the same keys.
+-- @function [parent=#table] same
+-- @param #table a a table
+-- @param #table b another table
+-- @return #boolean `true` or `false`
+
+------------------------------------------------------------------------------- 
+-- Sorts a table, in-place. If a comparison function is given, it will be used to sort values.
+-- @function [parent=#table] sort
+-- @param #table t a table
+-- @param #function comp a comparison function prototyped as `comp (a, b)`, defaults to <tt><</tt> operator.
+-- @return #table the initial table, sorted.
+
+------------------------------------------------------------------------------- 
+-- Sorts a table in-place using a transform. Values are ranked in a custom order of the results of
+-- running `transform (v)` on all values. `transform` may also be a string name property  sort by. 
+-- `comp` is a comparison function.
+-- @function [parent=#table] sortBy
+-- @param #table t a table
+-- @param #function transform a `transform` function to sort elements prototyped as `transform (v)`. Defaults to @{identity}
+-- @param #function comp a comparision function, defaults to the `<` operator
+-- @return #table a new array of sorted values
+
+------------------------------------------------------------------------------- 
+-- Splits a table into subsets groups.
+-- @function [parent=#table] groupBy
+-- @param #table t a table
+-- @param #function iter an iterator function, prototyped as `iter (k, v, ...)`
+-- @param ... Optional args to be passed to `iter`
+-- @return #table a table of subsets groups
+
+------------------------------------------------------------------------------- 
+-- Groups values in a collection and counts them.
+-- @function [parent=#table] countBy
+-- @param #table t a table
+-- @param #function iter an iterator function, prototyped as `iter (k, v, ...)`
+-- @param ... Optional args to be passed to `iter`
+-- @return #table a table of subsets groups names paired with their count
+
+------------------------------------------------------------------------------- 
+-- Counts the number of values in a collection. If being passed more than one argument
+-- it will return the count of all passed-in arguments.
+-- @function [parent=#table] size
+-- @param ... Optional variable number of arguments
+-- @return #number a count
+
+------------------------------------------------------------------------------- 
+-- Checks if all the keys of `other` table exists in table `t`. It does not
+-- compares values. The test is not commutative, i.e table `t` may contains keys
+-- not existing in `other`.
+-- @function [parent=#table] containsKeys
+-- @param #table t a table
+-- @param #table other another table
+-- @return #boolean `true` or `false`
+
+------------------------------------------------------------------------------- 
+-- Checks if both given tables have the same keys. It does not compares values.
+-- @function [parent=#table] sameKeys
+-- @param #table tA a table
+-- @param #table tB another table
+-- @return #boolean `true` or `false`
+
+------------------------------------------------------------------------------- 
+-- Samples `n` random values from an array. If `n` is not specified, returns a single element.
+-- It uses internally @{shuffle} to shuffle the array before sampling values. If `seed` is passed,
+-- it will be used for shuffling.
+-- @function [parent=#table] sample
+-- @param #table array an array
+-- @param #number n a number of elements to be sampled. Defaults to 1.
+-- @param #number seed an optional seed for shuffling 
+-- @return #table,#any an array of selected values or a single value when `n` == 1
+
+------------------------------------------------------------------------------- 
+-- Return elements from a sequence with a given probability. It considers each value independently. 
+-- Providing a seed will result in deterministic sampling. Given the same seed it will return the same sample
+-- every time.
+-- @function [parent=#table] sampleProb
+-- @param #table array an array
+-- @param #number prob a probability for each element in array to be selected
+-- @param #number seed an optional seed for deterministic sampling
+-- @return #table an array of selected values
+
+------------------------------------------------------------------------------- 
+-- Converts a list of arguments to an array.
+-- @function [parent=#table] toArray
+-- @param ... a list of arguments
+-- @return #table an array of all passed-in args
+
+------------------------------------------------------------------------------- 
+-- Looks for the first occurrence of a given value in an array. Returns the value index if found.
+-- Uses @{isEqual} to compare values.
+-- @function [parent=#table] find
+-- @param #table array an array of values
+-- @param #any value a value to lookup for
+-- @param #number from the index from where the search will start. Defaults to 1.
+-- @return #number the index of the value if found in the array, `nil` otherwise.
+
+------------------------------------------------------------------------------- 
+-- Returns an array where values are in reverse order. The passed-in array should not be sparse.
+-- @function [parent=#table] reverse
+-- @param #table array an array
+-- @return #table a reversed array
+
+------------------------------------------------------------------------------- 
+-- Replaces elements in a given array with a given value. In case `i` and `j` are given
+-- it will only replaces values at indexes between `[i,j]`. In case `j` is greather than the array
+-- size, it will append new values, increasing the array.
+-- @function [parent=#table] fill
+-- @param #table array an array
+-- @param #any value a value
+-- @param #number i the index from which to start replacing values. Defaults to 1.
+-- @param #number j the index where to stop replacing values. Defaults to the array size.
+-- @return #table the original array with values changed
+
+------------------------------------------------------------------------------- 
+-- Collects values from a given array. The passed-in array should not be sparse.
+-- This function collects values as long as they satisfy a given predicate and returns on the first falsy test.
+-- <br/><em>Aliased as `takeWhile`</em>
+-- @function [parent=#table] selectWhile
+-- @param #table array an array
+-- @param #function f an iterator function prototyped as `f (k, v, ...)`
+-- @param ... Optional args to be passed to `f`
+-- @return #table a new table containing all values collected
+
+------------------------------------------------------------------------------- 
+-- Collects values from a given array. The passed-in array should not be sparse.
+-- This function collects values as long as they do not satisfy a given predicate and returns on the first truthy test.
+-- <br/><em>Aliased as `rejectWhile`</em>
+-- @function [parent=#table] dropWhile
+-- @param #table array an array
+-- @param #function f an iterator function prototyped as `f (k,v, ...)`
+-- @param ... Optional args to be passed to `f`
+-- @return #table a new table containing all values collected
+
+------------------------------------------------------------------------------- 
+-- Returns the index at which a value should be inserted. This index is evaluated so 
+-- that it maintains the sort. If a comparison function is passed, it will be used to sort
+-- values.
+-- @function [parent=#table] sortedIndex
+-- @param #table array an array
+-- @param #any the value to be inserted
+-- @param #function comp an comparison function prototyped as `f (a, b)`, defaults to <tt><</tt> operator.
+-- @param #function sort whether or not the passed-in array should be sorted
+-- @return #number the index at which the passed-in value should be inserted
+
+------------------------------------------------------------------------------- 
+-- Returns the index of the first occurence of value in an array.
+-- @function [parent=#table] indexOf
+-- @param #table array an array
+-- @param #any value the value to search for
+-- @return #number the index of the passed-in value
+
+------------------------------------------------------------------------------- 
+-- Returns the index of the last occurrence of value in an array.
+-- @function [parent=#table] lastIndexOf
+-- @param #table array an array
+-- @param #any value the value to search for
+-- @return #number the index of the last occurrence of the passed-in value or __nil__
+
+------------------------------------------------------------------------------- 
+-- Returns the first index at which a predicate returns true.
+-- @function [parent=#table] findIndex
+-- @param #table array an array
+-- @param #function predicate a predicate function prototyped as `predicate (k, v, ...)`
+-- @param ... optional arguments to `pred`
+-- @return #number the index found or __nil__
+
+------------------------------------------------------------------------------- 
+-- Returns the last index at which a predicate returns true.
+-- @function [parent=#table] findLastIndex
+-- @param #table array an array
+-- @param #function predicate a predicate function prototyped as `predicate (k, v, ...)`
+-- @param ... optional arguments to `pred`
+-- @return #number the index found or __nil__
+
+------------------------------------------------------------------------------- 
+-- Adds all passed-in values at the top of an array. The last elements will bubble to the
+-- top of the given array.
+-- @function [parent=#table] addTop
+-- @param #table array an array
+-- @param ... a variable number of arguments
+-- @return #table the passed-in array with new values added
+
+------------------------------------------------------------------------------- 
+-- Pushes all passed-in values at the end of an array.
+-- @function [parent=#table] push
+-- @param #table array an array
+-- @param ... a variable number of arguments
+-- @return #table the passed-in array with new added values
+
+------------------------------------------------------------------------------- 
+-- Removes and returns the values at the top of a given array.
+-- <br/><em>Aliased as `shift`</em>
+-- @function [parent=#table] pop
+-- @param #table array an array
+-- @param #number n the number of values to be popped. Defaults to 1.
+-- @return #any the popped values
+
+------------------------------------------------------------------------------- 
+-- Removes and returns the values at the end of a given array.
+-- @function [parent=#table] unshift
+-- @param #table array an array
+-- @param #number n the number of values to be unshifted. Defaults to 1.
+-- @return #any the values
+
+------------------------------------------------------------------------------- 
+-- Removes all provided values in a given array.
+-- <br/><em>Aliased as `remove`</em>
+-- @function [parent=#table] pull
+-- @param #table array an array
+-- @param ... a variable number of values to be removed from the array
+-- @return #table the passed-in array with values removed
+
+------------------------------------------------------------------------------- 
+-- Removes values at index within the range `[start, finish]`.
+-- <br/><em>Aliased as `rmRange`, `chop`</em>
+-- @function [parent=#table] removeRange
+-- @param #table array an array
+-- @param #number start the lower bound index, defaults to the first index in the array.
+-- @param #number finish the upper bound index, defaults to the array length.
+-- @return #table the passed-in array with values removed
+
+------------------------------------------------------------------------------- 
+-- Chunks together consecutive values. Values are chunked on the basis of the return
+-- value of a provided predicate `f (k, v, ...)`. Consecutive elements which return 
+-- the same value are chunked together. Leaves the first argument untouched if it is not an array.
+-- @function [parent=#table] chunk
+-- @param #table array an array
+-- @param #function f an iterator function prototyped as `f (k, v, ...)`
+-- @param ... Optional args to be passed to `f`
+-- @return #table a table of chunks (arrays)
+
+------------------------------------------------------------------------------- 
+-- Slices values indexed within `[start, finish]` range.
+-- <br/><em>Aliased as `_.sub`</em>
+-- @function [parent=#table] slice
+-- @param #table array an array
+-- @param #number start the lower bound index, defaults to the first index in the array.
+-- @param #number finish the upper bound index, defaults to the array length.
+-- @return #table a new array of sliced values
+
+------------------------------------------------------------------------------- 
+-- Returns the first N values in an array.
+-- <br/><em>Aliased as `head`, `take`</em>
+-- @function [parent=#table] first
+-- @param #table array an array
+-- @param #number n the number of values to be collected, defaults to 1.
+-- @return #table a new array
+
+------------------------------------------------------------------------------- 
+-- Returns all values in an array excluding the last N values.
+-- @function [parent=#table] initial
+-- @param #table array an array
+-- @param #number n the number of values to be left, defaults to the array length.
+-- @return #table a new array
+
+------------------------------------------------------------------------------- 
+-- Returns the last N values in an array.
+-- @function [parent=#table] last
+-- @param #table array an array
+-- @param #number n the number of values to be collected, defaults to the array length.
+-- @return #table a new array
+
+------------------------------------------------------------------------------- 
+-- Removes all values before index.
+-- <br/><em>Aliased as `tail`</em>
+-- @function [parent=#table] rest
+-- @param #table array an array
+-- @param #number index an index, defaults to 1
+-- @return #table a new array
+
+------------------------------------------------------------------------------- 
+-- Returns the value at a given index.
+-- @function [parent=#table] nth
+-- @param #table array an array
+-- @param #number index an index
+-- @return #any the value at the given index
+
+------------------------------------------------------------------------------- 
+-- Removes all falsy (false and nil) values.
+-- @function [parent=#table] compact
+-- @param #table array an array
+-- @return #table a new array
+
+------------------------------------------------------------------------------- 
+-- Flattens a nested array. Passing `shallow` will only flatten at the first level.
+-- @function [parent=#table] flatten
+-- @param #table array an array
+-- @param #boolean shallow specifies the flattening depth
+-- @return #table a new array, flattened
+
+------------------------------------------------------------------------------- 
+-- Returns values from an array not present in all passed-in args.
+-- <br/><em>Aliased as `without` and `diff`</em>
+-- @function [parent=#table] difference
+-- @param #table array an array
+-- @param #table another array
+-- @return #table a new array
+
+------------------------------------------------------------------------------- 
+-- Returns the duplicate-free union of all passed in arrays.
+-- @function [parent=#table] union
+-- @param ... a variable number of arrays arguments
+-- @return #table a new array
+
+------------------------------------------------------------------------------- 
+-- Returns the  intersection of all passed-in arrays.
+-- Each value in the result is present in each of the passed-in arrays.
+-- @function [parent=#table] intersection
+-- @param #table array an array
+-- @param ... a variable number of array arguments
+-- @return #table a new array
+
+------------------------------------------------------------------------------- 
+-- Performs a symmetric difference. Returns values from `array` not present in `array2` and also values
+-- from `array2` not present in `array`.
+-- <br/><em>Aliased as `symdiff`</em>
+-- @function [parent=#table] symmetricDifference
+-- @param #table array an array
+-- @param #table array2 another array
+-- @return #table a new array
+
+------------------------------------------------------------------------------- 
+-- Produces a duplicate-free version of a given array.
+-- <br/><em>Aliased as `uniq`</em>
+-- @function [parent=#table] unique
+-- @param #table array an array
+-- @return #table a new array, duplicate-free
+
+------------------------------------------------------------------------------- 
+-- Checks if a given array contains distinct values. Such an array is made of distinct elements,
+-- which only occur once in this array.
+-- <br/><em>Aliased as `isuniq`</em>
+-- @function [parent=#table] isunique
+-- @param #table array an array
+-- @return #boolean `true` if the given array is unique, `false` otherwise.
+
+------------------------------------------------------------------------------- 
+-- Merges values of each of the passed-in arrays in subsets.
+-- Only values indexed with the same key in the given arrays are merged in the same subset.
+-- <br/><em>Aliased as `transpose`</em>
+-- @function [parent=#table] zip
+-- @param ... a variable number of array arguments
+-- @return #table a new array
+
+------------------------------------------------------------------------------- 
+-- Clones `array` and appends `other` values.
+-- @function [parent=#table] append
+-- @param #table array an array
+-- @param #table other an array
+-- @return #table a new array
+
+------------------------------------------------------------------------------- 
+-- Interleaves arrays. It returns a single array made of values from all
+-- passed in arrays in their given order, interleaved.
+-- @function [parent=#table] interleave
+-- @param ... a variable list of arrays
+-- @return #table a new array
+
+------------------------------------------------------------------------------- 
+-- Interposes value in-between consecutive pair of values in `array`.
+-- @function [parent=#table] interpose
+-- @param #any value a value
+-- @param #table array an array
+-- @return a new array
+
+------------------------------------------------------------------------------- 
+-- Produces a flexible list of numbers. If one positive value is passed, will count from 0 to that value,
+-- with a default step of 1. If two values are passed, will count from the first one to the second one, with the
+-- same default step of 1. A third value passed will be considered a step value.
+-- @function [parent=#table] range
+-- @param #any from the initial value of the range
+-- @param #any to the final value of the range
+-- @param #number step the step of count
+-- @return #table a new array of numbers
+
+------------------------------------------------------------------------------- 
+-- Creates an array list of `n` values, repeated.
+-- @function [parent=#table] rep
+-- @param #any value a value to be repeated
+-- @param #number n the number of repetitions of value.
+-- @return #table a new array of `n` values
+
+------------------------------------------------------------------------------- 
+-- Iterator returning partitions of an array. It returns arrays of length `n` 
+-- made of values from the given array. If the last partition has lower elements than `n` and 
+-- `pad` is supplied, it will be adjusted to `n` of elements with `pad` value.
+-- @function [parent=#table] partition
+-- @param #table array an array
+-- @param #number n the size of partitions. Should be greater than 0. Defaults to 1.
+-- @param #any pad a value to adjust the last subsequence to the `n` elements
+-- @return #function an iterator function
+
+------------------------------------------------------------------------------- 
+-- Iterator returning sliding partitions of an array. It returns overlapping subsequences
+-- of length `n`. If the last subsequence has lower elements than `n` and `pad` is 
+-- supplied, it will be adjusted to `n` elements with `pad` value.
+-- @function [parent=#table] sliding.
+-- @param #table array an array
+-- @param #number n the size of partitions. Should be greater than 1. Defaults to 2.
+-- @param #any pad a value to adjust the last subsequence to the `n` elements
+-- @return #function an iterator function
+
+------------------------------------------------------------------------------- 
+-- Iterator returning the permutations of an array. It returns arrays made of all values
+-- from the passed-in array, with values permuted.
+-- @function [parent=#table] permutation
+-- @param #table array an array
+-- @return #function an iterator function
+
+------------------------------------------------------------------------------- 
+-- Swaps keys with values. Produces a new array where previous keys are now values, 
+-- while previous values are now keys.
+-- <br/><em>Aliased as `mirror`</em>
+-- @function [parent=#table] invert
+-- @param #table array a given array
+-- @return #table a new array
+
+------------------------------------------------------------------------------- 
+-- Concatenates values in a given array. Handles booleans as well. If `sep` string is
+-- passed, it will be used as a separator. Passing `i` and `j` will result in concatenating
+-- only values within `[i, j]` range.
+-- <br/><em>Aliased as `join`</em>
+-- @function [parent=#table] concat
+-- @param #table array a given array
+-- @param #string sep a separator string, defaults to the empty string `''`.
+-- @param #number i the starting index, defaults to 1.
+-- @param #number j the final index, defaults to the array length.
+-- @return #string a string
+
+return nil

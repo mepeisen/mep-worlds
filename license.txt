@@ -4,6 +4,9 @@ License: MIT
 xwos/extensions/allen		-->			https://github.com/Yonaba/Allen
 License: MIT
 
+
+
+TODO: Only supports Lua 5.2 etc. (operator // etc.)
 xwos/extensions/nums		-->			https://github.com/user-none/lua-nums
 License: MIT
 
