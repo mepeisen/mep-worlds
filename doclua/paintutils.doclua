@@ -1,0 +1,52 @@
+-------------------------------------------------------------------------------
+-- Paintutils is a default API for advanced systems which can draw pixels and lines, load and draw image files. You can use colors API for easier color manipulation. 
+-- @module paintutils
+
+-------------------------------------------------------------------------------
+-- Loads and returns an image object from path. 
+-- @function [parent=#paintutils] loadImage
+-- @param #string path 
+-- @return #table image
+ 
+-------------------------------------------------------------------------------
+-- Draws an image at (x, y) where image is an image object. 
+-- @function [parent=#paintutils] drawImage
+-- @param #table image
+-- @param #number x
+-- @param #number y 
+
+-------------------------------------------------------------------------------
+-- Draws a pixel at (x, y) in the specified color. 
+-- @function [parent=#paintutils] drawPixel
+-- @param #number x
+-- @param #number y
+-- @param #number color optional
+ 
+-------------------------------------------------------------------------------
+-- Draws a line from (startX, startY) to (endX, endY) in the specified color. 
+-- @function [parent=#paintutils] drawLine
+-- @param #number startX
+-- @param #number startY
+-- @param #number endX
+-- @param #number endY
+-- @param #number color optional 
+
+-------------------------------------------------------------------------------
+-- Draws a box from (startX, startY) to (endX, endY) in the specified color. Requires version 1.64 or newer. 
+-- @function [parent=#paintutils] drawBox
+-- @param #number startX
+-- @param #number startY
+-- @param #number endX
+-- @param #number endY
+-- @param #number color optional 
+
+-------------------------------------------------------------------------------
+-- Draws a filled box from (startX, startY) to (endX, endY) in the specified color. Requires version 1.64 or newer. 
+-- @function [parent=#paintutils] drawFilledBox
+-- @param #number startX
+-- @param #number startY
+-- @param #number endX
+-- @param #number endY
+-- @param #number color optional 
+
+return nil

@@ -1,0 +1,131 @@
+-------------------------------------------------------------------------------
+-- Lua global variables.
+-- The basic library provides some core functions to Lua.
+-- All the preloaded module of Lua are declared here.
+-- @module global
+
+------------------------------------------------------------------------------
+-- pre loaded module
+-- @field[parent = #global] bit#bit bit preloaded module
+
+------------------------------------------------------------------------------
+-- pre loaded module
+-- @field[parent = #global] colors#colors colors preloaded module
+
+------------------------------------------------------------------------------
+-- pre loaded module
+-- @field[parent = #global] commands#commands commands preloaded module
+
+------------------------------------------------------------------------------
+-- pre loaded module
+-- @field[parent = #global] coroutine#coroutine coroutine preloaded module
+
+------------------------------------------------------------------------------
+-- pre loaded module
+-- @field[parent = #global] disk#disk disk preloaded module
+
+------------------------------------------------------------------------------
+-- pre loaded module
+-- @field[parent = #global] functions#functions moses functions
+
+------------------------------------------------------------------------------
+-- pre loaded module
+-- @field[parent = #global] fs#fs fs preloaded module
+
+------------------------------------------------------------------------------
+-- pre loaded module
+-- @field[parent = #global] gps#gps gps preloaded module
+
+------------------------------------------------------------------------------
+-- pre loaded module
+-- @field[parent = #global] help#help help preloaded module
+
+------------------------------------------------------------------------------
+-- pre loaded module
+-- @field[parent = #global] http#http http preloaded module
+
+------------------------------------------------------------------------------
+-- pre loaded module
+-- @field[parent = #global] io#io io preloaded module
+
+------------------------------------------------------------------------------
+-- pre loaded module
+-- @field[parent = #global] keys#keys keys preloaded module
+
+------------------------------------------------------------------------------
+-- pre loaded module
+-- @field[parent = #global] math#math math preloaded module
+
+------------------------------------------------------------------------------
+-- pre loaded module
+-- @field[parent = #global] monitor#monitor monitor preloaded module
+
+------------------------------------------------------------------------------
+-- pre loaded module
+-- @field[parent = #global] multishell#multishell multishell preloaded module
+
+------------------------------------------------------------------------------
+-- pre loaded module
+-- @field[parent = #global] objects#objects moses object functions
+
+------------------------------------------------------------------------------
+-- pre loaded module
+-- @field[parent = #global] os#os os preloaded module
+
+------------------------------------------------------------------------------
+-- pre loaded module
+-- @field[parent = #global] paintutils#paintutils paintutils preloaded module
+
+------------------------------------------------------------------------------
+-- pre loaded module
+-- @field[parent = #global] parallel#parallel parallel preloaded module
+
+------------------------------------------------------------------------------
+-- pre loaded module
+-- @field[parent = #global] peripheral#peripheral peripheral preloaded module
+
+------------------------------------------------------------------------------
+-- pre loaded module
+-- @field[parent = #global] rednet#rednet rednet preloaded module
+
+------------------------------------------------------------------------------
+-- pre loaded module
+-- @field[parent = #global] redstone#redstone redstone preloaded module
+
+------------------------------------------------------------------------------
+-- pre loaded module
+-- @field[parent = #global] settings#settings settings preloaded module
+
+------------------------------------------------------------------------------
+-- pre loaded module
+-- @field[parent = #global] shell#shell shell preloaded module
+
+------------------------------------------------------------------------------
+-- pre loaded module
+-- @field[parent = #global] string#string string preloaded module
+
+------------------------------------------------------------------------------
+-- pre loaded module
+-- @field[parent = #global] table#table table preloaded module
+
+------------------------------------------------------------------------------
+-- pre loaded module
+-- @field[parent = #global] term#term term preloaded module
+
+------------------------------------------------------------------------------
+-- pre loaded module
+-- @field[parent = #global] textutils#textutils textutils preloaded module
+
+------------------------------------------------------------------------------
+-- pre loaded module
+-- @field[parent = #global] turtle#turtle turtle preloaded module
+
+------------------------------------------------------------------------------
+-- pre loaded module
+-- @field[parent = #global] vector#vector vector preloaded module
+
+------------------------------------------------------------------------------
+-- pre loaded module
+-- @field[parent = #global] window#window window preloaded module
+
+return nil

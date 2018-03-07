@@ -1,0 +1,43 @@
+-------------------------------------------------------------------------------
+-- Only available to the fabled Command Computer (itself only available to ops in creative mode, running CC 1.7 or later), the commands API allows your system to directly execute Minecraft commands and gather data from the results. 
+-- @module commands
+
+-------------------------------------------------------------------------------
+-- Executes the specified command, yields until the result is determined, then returns it. 
+-- @function [parent=#commands] exec
+-- @param #string command
+-- @return #boolean success
+-- @return #table output
+
+-------------------------------------------------------------------------------
+-- Executes the specified command, but doesn't yield. Queues a "task_complete" event after the command is executed. 
+-- @function [parent=#commands] execAsync
+-- @param #string command
+-- @return #number taskId
+
+-------------------------------------------------------------------------------
+-- Returns a numerically indexed table filled with strings representing acceptable commands for commands.exec() / commands.execAsync(). 
+-- @function [parent=#commands] list
+-- @return #table commands
+
+-------------------------------------------------------------------------------
+-- Returns the Minecraft world coordinates of the computer running the command. 
+-- @function [parent=#commands] getBlockInfo
+-- @param #number x
+-- @param #number y
+-- @param #number z
+-- @return #table blockinfo
+
+-------------------------------------------------------------------------------
+-- Returns a table containing sub-tables with info about the blocks within the specified world locations. Added by CC 1.76 
+-- @function [parent=#commands] getBlockInfos
+-- @param #number x1
+-- @param #number y1
+-- @param #number z1
+-- @param #number x2
+-- @param #number y2
+-- @param #number z2
+-- @return #table blocks info
+
+
+return nil

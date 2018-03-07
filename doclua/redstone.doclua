@@ -1,0 +1,72 @@
+-------------------------------------------------------------------------------
+-- The Redstone API contains methods to control attached -- @function [parent=#redstone]  All methods from the redstone API can also be called using "rs", which points to the same library. For example, instead of -- @function [parent=#redstone] getSides(), rs.getSides() can be used. 
+-- In addition to regular redstone / RedPower cables for regular signals, bundled cables may be used to send/receive "combined" signals through the one face. The Colors API offers functions that're helpful information in dealing with these.  
+-- @module redstone
+
+-------------------------------------------------------------------------------
+-- Returns a table of possible sides.
+-- @function [parent=#redstone] getSides
+-- @return #table
+
+-------------------------------------------------------------------------------
+-- Returns the current redstone input signal state on side.
+-- @function [parent=#redstone] getInput
+-- @param #string side
+-- @return #boolean
+
+-------------------------------------------------------------------------------
+-- Sets or resets a redstone signal on side.
+-- @function [parent=#redstone] setOutput
+-- @param #string side
+-- @param #boolean value
+
+-------------------------------------------------------------------------------
+-- Returns the current redstone output signal on side.
+-- @function [parent=#redstone] getOutput
+-- @param #string side
+-- @return #boolean
+
+-------------------------------------------------------------------------------
+-- (Requires CC1.51 and above) Returns the current redstone input signal strength on side. If no input is present, returns 0. If a redstone source (such as a redstone torch or block) is directly adjacent to the computer, returns 15.
+-- @function [parent=#redstone] getAnalogInput
+-- @param #string side
+-- @return #number
+
+-------------------------------------------------------------------------------
+-- (Requires CC1.51 and above) Sets or resets a redstone signal on side to strength (where strength is a positive integer).
+-- @function [parent=#redstone] setAnalogOutput
+-- @param #string side
+-- @param #number strength
+
+-------------------------------------------------------------------------------
+-- (Requires CC1.51 and above) Returns the current redstone output signal strength on side.
+-- @function [parent=#redstone] getAnalogOutput
+-- @param #string side
+-- @return #number
+
+-------------------------------------------------------------------------------
+-- Returns the state (as a number) of a bundled cable connected to side.
+-- @function [parent=#redstone] getBundledInput
+-- @param #string side
+-- @return #number
+
+-------------------------------------------------------------------------------
+-- Returns the set of wires in a bundled cable which are being activated by the terminal on side.
+-- @function [parent=#redstone] getBundledOutput
+-- @param #string side
+-- @return #number
+
+-------------------------------------------------------------------------------
+-- Sets one or multiple colored signals in a bundled cable attached to side. colors will determine which signals are activated. In order to set multiple signals, add the color values of the colors you want to activate. To turn off all of the colors, use 0.
+-- @function [parent=#redstone] setBundledOutput
+-- @param #string side
+-- @param #number colors
+
+-------------------------------------------------------------------------------
+-- Returns true if color is active in a bundled cable attached to side. Else, returns false.
+-- @function [parent=#redstone] testBundledInput
+-- @param #string side
+-- @param #number color
+-- @return #boolean
+ 
+return nil

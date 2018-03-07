@@ -1,0 +1,218 @@
+-------------------------------------------------------------------------------
+-- Moses object helpers
+-- @module objects
+
+-------------------------------------------------------------------------------
+-- Returns the keys of the object properties.
+-- @function [parent=#objects]  keys
+-- @param #table obj an object
+-- @return #table an array
+
+-------------------------------------------------------------------------------
+-- Returns the values of the object properties.
+-- @function [parent=#objects]  values
+-- @param #table obj an object
+-- @return #table an array
+
+-------------------------------------------------------------------------------
+-- Converts keys and values a an array-list of [k, v].
+-- @function [parent=#objects]  kvpairs
+-- @param #table obj an object
+-- @return #table an array list of key-values pairs
+
+-------------------------------------------------------------------------------
+-- Converts an array list of `kvpairs` to an object. Keys are taken
+-- from the 1rst column in the `kvpairs` sequence, associated with values in the 2nd
+-- column
+-- @function [parent=#objects]  toObj
+-- @param #table kvpairs an array-list of `kvpairs`
+-- @return #table an object
+
+-------------------------------------------------------------------------------
+-- Returns a function that will return the key property of any passed-in object.
+-- @function [parent=#objects]  property
+-- @param #any key a key property name
+-- @return #function a function which should accept an object as argument
+
+-------------------------------------------------------------------------------
+-- Returns a function which will return the value of an object property. 
+-- @function [parent=#objects]  propertyOf
+-- @param #table obj an object
+-- @return #function a function which should accept a key property argument
+
+-------------------------------------------------------------------------------
+-- Converts any given value to a boolean
+-- @function [parent=#objects]  toBoolean
+-- @param #any value a value. Can be of any type
+-- @return #boolean `true` if value is true, `false` otherwise (false or nil).
+
+-------------------------------------------------------------------------------
+-- Extends an object properties. It copies the properties of extra passed-in objects
+-- into the destination object, and returns the destination object. The last objects
+-- will override properties of the same name.
+-- @function [parent=#objects]  extend
+-- @param #table destObj a destination object
+-- @param ... a list of objects
+-- @return #table the destination object extended
+
+-------------------------------------------------------------------------------
+-- Returns a sorted list of all methods names found in an object. If the given object
+-- has a metatable implementing an `__index` field pointing to another table, will also recurse on this
+-- table if `recurseMt` is provided. If `obj` is omitted, it defaults to the library functions.
+-- <br/><em>Aliased as `methods`</em>.
+-- @function [parent=#objects]  functions
+-- @param #table obj an object. Defaults to Moses library functions.
+-- @return #table an array-list of methods names
+
+-------------------------------------------------------------------------------
+-- Clones a given object properties. If `shallow` is passed will also clone nested array properties.
+-- @function [parent=#objects]  clone
+-- @param #table obj an object
+-- @param #boolean shallow whether or not nested array-properties should be cloned, defaults to false.
+-- @return #table a copy of the passed-in object
+
+-------------------------------------------------------------------------------
+-- Invokes interceptor with the object, and then returns object.
+-- The primary purpose of this method is to "tap into" a method chain, in order to perform operations 
+-- on intermediate results within the chain.
+-- @function [parent=#objects]  tap
+-- @param #table obj an object
+-- @param #function f an interceptor function, should be prototyped as `f (obj, ...)`
+-- @param ... args to be passed to `f`
+-- @return #table the passed-in object
+
+-------------------------------------------------------------------------------
+-- Checks if a given object implements a property.
+-- @function [parent=#objects]  has
+-- @param #table obj an object
+-- @param #any key a key property to be checked
+-- @return #boolean `true` or `false`
+
+-------------------------------------------------------------------------------
+-- Returns an object copy having white-listed properties.
+-- <br/><em>Aliased as `choose`</em>.
+-- @function [parent=#objects]  pick
+-- @param #table obj an object
+-- @param ... a variable number of string keys
+-- @return #table the filtered object
+
+-------------------------------------------------------------------------------
+-- Returns an object copy without black-listed properties.
+-- <br/><em>Aliased as `drop`</em>.
+-- @function [parent=#objects]  omit
+-- @param #table obj an object
+-- @param ... a variable number of string keys
+-- @return #table the filtered object
+
+-------------------------------------------------------------------------------
+-- Applies a template to an object, preserving non-nil properties.
+-- <br/><em>Aliased as `defaults`</em>.
+-- @function [parent=#objects]  template
+-- @param #table obj an object
+-- @param #table template a template object. Defaults to an empty table `{}`.
+-- @return #table the passed-in object filled
+
+-------------------------------------------------------------------------------
+-- Performs a deep comparison test between two objects. Can compare strings, functions 
+-- (by reference), nil, booleans. Compares tables by reference or by values. If `useMt` 
+-- is passed, the equality operator `==` will be used if one of the given objects has a 
+-- metatable implementing `__eq`.
+-- <br/><em>Aliased as `_.compare`</em>
+-- @function [parent=#objects]  isEqual
+-- @param #table objA an object
+-- @param #table objB another object
+-- @param #boolean useMt whether or not `__eq` should be used, defaults to false.
+-- @return #boolean `true` or `false`
+
+-------------------------------------------------------------------------------
+-- Invokes an object method. It passes the object itself as the first argument. if `method` is not
+-- callable, will return `obj[method]`.
+-- @function [parent=#objects]  result
+-- @param #table obj an object
+-- @param #string method a string key to index in object `obj`.
+-- @param ... Optional args to be passed to `method`
+-- @return #any the returned value of `method (obj, ...)` call
+
+-------------------------------------------------------------------------------
+-- Checks if the given arg is a table.
+-- @function [parent=#objects]  isTable
+-- @param #any t a value to be tested
+-- @return #boolean `true` or `false`
+
+-------------------------------------------------------------------------------
+-- Checks if the given argument is callable. Assumes `obj` is callable if
+-- it is either a function or a table having a metatable implementing `__call` metamethod.
+-- @function [parent=#objects]  isCallable
+-- @param #any obj an object
+-- @return #boolean `true` or `false`
+
+-------------------------------------------------------------------------------
+-- Checks if the given argument is an array. Assumes `obj` is an array
+-- if is a table with consecutive integer keys starting at 1.
+-- @function [parent=#objects]  isArray
+-- @param #any obj an object
+-- @return #boolean `true` or `false`
+
+-------------------------------------------------------------------------------
+-- Checks if the given object is iterable with `pairs` (or `ipairs`).
+-- @function [parent=#objects]  isIterable
+-- @param #any obj an object
+-- @return #boolean `true` if the object can be iterated with `pairs` (or `ipairs`), `false` otherwise
+
+-------------------------------------------------------------------------------
+-- Checks if the given pbject is empty. If `obj` is a string, will return `true`
+-- if `#obj == 0`. Otherwise, if `obj` is a table, will return whether or not this table
+-- is empty. If `obj` is `nil`, it will return true.
+-- @function [parent=#objects]  isEmpty
+-- @param #any obj an object
+-- @return #boolean `true` or `false`
+
+-------------------------------------------------------------------------------
+-- Checks if the given argument is a string.
+-- @function [parent=#objects]  isString
+-- @param #any obj an object
+-- @return #boolean `true` or `false`
+
+-------------------------------------------------------------------------------
+-- Checks if the given argument is a function.
+-- @function [parent=#objects]  isFunction
+-- @param #any obj an object
+-- @return #boolean `true` or `false`
+
+-------------------------------------------------------------------------------
+-- Checks if the given argument is nil.
+-- @function [parent=#objects]  isNil
+-- @param #any obj an object
+-- @return #boolean `true` or `false`
+
+-------------------------------------------------------------------------------
+-- Checks if the given argument is a number.
+-- @function [parent=#objects]  isNumber
+-- @param #any obj an object
+-- @return #boolean `true` or `false`
+
+-------------------------------------------------------------------------------
+-- Checks if the given argument is NaN (see [Not-A-Number](http://en.wikipedia.org/wiki/NaN)).
+-- @function [parent=#objects]  isNaN
+-- @param #any obj an object
+-- @return #boolean `true` or `false`
+
+-------------------------------------------------------------------------------
+-- Checks if the given argument is a finite number.
+-- @function [parent=#objects]  isFinite
+-- @param #any obj an object
+-- @return #boolean `true` or `false`
+
+-------------------------------------------------------------------------------
+-- Checks if the given argument is a boolean.
+-- @function [parent=#objects]  isBoolean
+-- @param #any obj an object
+-- @return #boolean `true` or `false`
+
+-------------------------------------------------------------------------------
+-- Checks if the given argument is an integer.
+-- @function [parent=#objects]  isInteger
+-- @param #any obj an object
+-- @return #boolean `true` or `false`
+
+return nil

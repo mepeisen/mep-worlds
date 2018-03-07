@@ -1,0 +1,77 @@
+-------------------------------------------------------------------------------
+-- The Textutils API is used to format and manipulate strings easily. 
+-- @module textutils
+
+-------------------------------------------------------------------------------
+-- Writes string text at current cursor position, character-by-character. Number argument rate is optional and is defaulted to 20. The higher the value of rate, the faster text is written (passing a value of 1 writes one character per second).
+-- @function [parent=#textutils] slowWrite
+-- @param #string text
+-- @param #number rate 
+ 
+-------------------------------------------------------------------------------
+-- Prints string text at current cursor position, character-by-character. Number argument rate is optional and is defaulted to 20. The higher the value of rate, the faster text is printed (passing a value of 1 prints one character per second). This function also prints a newline. 
+-- @function [parent=#textutils] slowPrint
+-- @param #string text
+-- @param #number rate 
+
+-------------------------------------------------------------------------------
+-- Takes input time and formats it in a more readable format. If the second value is true, returns time in twenty-four hour format; if the second value is false, returns time in twelve-hour format, with AM or PM. Default for twentyFourHour is false. 
+-- @function [parent=#textutils] formatTime
+-- @param #number time
+-- @param #boolean twentyFourHour 
+-- @return #string formattedTime 
+
+-------------------------------------------------------------------------------
+-- Prints tables in an ordered form. Each table is a row, the column width is auto-adjusted. If it encounters a number instead of a table then sets the text color to it. 
+-- @function [parent=#textutils] tabulate
+-- @param #table table/number color
+-- @param #table table2/number color2
+-- @param ... 
+
+-------------------------------------------------------------------------------
+-- Prints tables in an ordered form, like textutils.tabulate. However, it waits for confirmation before scrolling down. 
+-- @function [parent=#textutils] pagedTabulate
+-- @param #table table/number color
+-- @param #table table2/number color2
+-- @param #... 
+
+-------------------------------------------------------------------------------
+-- Prints string text onto the screen, but waits for confirmation (after at least freeLines have been scrolled) before scrolling down further. Default for freeLines is 0. 
+-- @function [parent=#textutils] pagedPrint
+-- @param #string text 
+-- @param #number freeLines optional
+-- @return #number linesPrinted 
+
+-------------------------------------------------------------------------------
+-- Returns a string representation of the data data for storage or transmission. Also exists as textutils.serialise under CC 1.6 or later. 
+-- @function [parent=#textutils] serialize
+-- @param #any data
+-- @return #string serializedData
+ 
+-------------------------------------------------------------------------------
+-- Returns the data reassembled from string serializedData. Used mainly together with textutils.serialize(). Also exists as textutils.unserialise under CC 1.6 or later. 
+-- @function [parent=#textutils] unserialize
+-- @param #string serializedData
+-- @return #any unserializedData 
+
+-------------------------------------------------------------------------------
+-- Returns a JSON representation of the data data in a form of a string, mainly for command usage. Also exists as textutils.serialiseJSON. Requires CC 1.7 or later. 
+-- @function [parent=#textutils] serializeJSON
+-- @param #any data
+-- @param #boolean unquote keys optional
+-- @return #string serializedData 
+
+-------------------------------------------------------------------------------
+-- Makes a string safe to encode into a url. Spaces are replaced with +s. Unsafe characters such as '\', '£' and '}' are translated into ASCII code and preceded with a % for transmission. For reference visit: [1]. 
+-- @function [parent=#textutils] urlEncode
+-- @param #string urlUnsafeString
+-- @return #string urlSafeString 
+
+-------------------------------------------------------------------------------
+-- Returns a list of strings that could be combined with the provided name to produce valid entries in the specified environment. Requires version 1.74 or later. 
+-- @function [parent=#textutils] complete
+-- @param #string partialName 
+-- @param #table environment optional
+-- @return #table matches 
+ 
+return nil

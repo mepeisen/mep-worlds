@@ -1,0 +1,32 @@
+-------------------------------------------------------------------------------
+-- The Help API allows you to mess around with the help files. 
+-- @module help
+
+-------------------------------------------------------------------------------
+-- Returns the list of locations the API will look in for help files.
+-- @function [parent=#help] path
+-- @return #string path  
+ 
+-------------------------------------------------------------------------------
+-- Sets the list of locations the API will look in for help files.
+-- @function [parent=#help] setPath
+-- @param #string path
+ 
+-------------------------------------------------------------------------------
+-- Returns the path to the file containing the help page for topic, or nil if the topic cannot be found.
+-- @function [parent=#help] lookup
+-- @param #string topic
+-- @return #string path 
+ 
+-------------------------------------------------------------------------------
+-- Returns a list of all available help topics.
+-- @function [parent=#help] topics
+-- @return #table topics
+ 
+-------------------------------------------------------------------------------
+-- Returns a list of suffixes that can be concatenated with the prefix to get valid topic titles. Requires CC 1.74 or later.
+-- @function [parent=#help] completeTopic
+-- @param #string topic prefix
+-- @return #table topic suffixes  
+
+return nil

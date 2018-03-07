@@ -1,0 +1,55 @@
+-------------------------------------------------------------------------------
+-- The Bit API is for manipulating numbers using bitwise binary operations. 
+-- All of these functions treat the numbers as 32-bit integers, and will raise an error if an input number is greater than 4,294,967,295. 
+-- @module bit
+
+-------------------------------------------------------------------------------
+-- Shifts a number left by a specified number of bits. 
+-- @function [parent=#bit] blshift
+-- @param #number n
+-- @param #number bits
+-- @return #number result
+
+-------------------------------------------------------------------------------
+-- Shifts a number right arithmetically by a specified number of bits. 
+-- @function [parent=#bit] brshift
+-- @param #number n
+-- @param #number bits
+-- @return #number result
+
+-------------------------------------------------------------------------------
+-- Shifts a number right logically by a specified number of bits. 
+-- @function [parent=#bit] blogic_rshift
+-- @param #number n
+-- @param #number bits
+-- @return #number result
+
+-------------------------------------------------------------------------------
+-- Computes the bitwise exclusive OR of two numbers. 
+-- @function [parent=#bit] bxor
+-- @param #number m
+-- @param #number n
+-- @return #number result
+
+-------------------------------------------------------------------------------
+-- Computes the bitwise inclusive OR of two numbers. 
+-- @function [parent=#bit] bor
+-- @param #number m
+-- @param #number n
+-- @return #number result
+
+-------------------------------------------------------------------------------
+-- Computes the bitwise AND of two numbers. 
+-- @function [parent=#bit] band
+-- @param #number m
+-- @param #number n
+-- @return #number result
+
+-------------------------------------------------------------------------------
+-- Computes the bitwise NOT of a number. 
+-- @function [parent=#bit] bnot
+-- @param #number m
+-- @param #number n
+-- @return #number result
+
+return nil

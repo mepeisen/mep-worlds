@@ -1,0 +1,23 @@
+-------------------------------------------------------------------------------
+-- Parallel is an API which allows you to multitask.
+-- Functions are not actually executed simultaniously, but rather this API will automatically switch between them whenever they yield (eg whenever they call coroutine.yield(), or functions that call that - eg os.pullEvent() - or functions that call that, etc - basically, anything that causes the function to "pause").
+-- Each function executed in "parallel" gets its own copy of the event queue, and so "event consuming" functions (again, mostly anything that causes the script to pause - eg sleep(), rednet.receive(), most of the turtle API, etc) can safely be used in one without affecting the event queue accessed by the other. 
+-- @module parallel
+
+-------------------------------------------------------------------------------
+-- Runs all the functions at the same time, and stops when any of them returns. 
+-- @function [parent=#parallel] waitForAny
+-- @param #function function1
+-- @param #function function2
+-- @param ... functions
+-- @return #number stopped function
+
+-------------------------------------------------------------------------------
+-- Runs all the functions at the same time, and stops when all of them have returned. 
+-- @function [parent=#parallel] waitForAll
+-- @param #function function1
+-- @param #function function2
+-- @param ... functions
+ 
+ return nil
+ 

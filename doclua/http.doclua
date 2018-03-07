@@ -1,0 +1,34 @@
+-------------------------------------------------------------------------------
+-- The HTTP API allows interfacing with websites and downloading from them. 
+-- @module http
+ 
+-------------------------------------------------------------------------------
+-- Sends a HTTP request to a website, asynchronously. 
+-- @function [parent=#http] request
+-- @param #string url
+-- @param #string postData optional
+-- @param #table headers optional
+
+-------------------------------------------------------------------------------
+-- Sends a HTTP GET request to a website, synchronously. 
+-- @function [parent=#http] get
+-- @param #string url
+-- @param #table headers optional
+-- @return #table handle 
+
+-------------------------------------------------------------------------------
+-- Sends a HTTP POST request to a website, synchronously. 
+-- @function [parent=#http] post
+-- @param #string url
+-- @param #string postData
+-- @param #table headers optional
+-- @return #table handle 
+
+-------------------------------------------------------------------------------
+-- Checks if a URL is valid and is included in the HTTP whitelist.   
+-- @function [parent=#http] checkURL
+-- @param #string url
+-- @return #boolean success
+-- @return #string error 
+
+return nil

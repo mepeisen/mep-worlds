@@ -1,0 +1,11 @@
+-------------------------------------------------------------------------------
+-- The Terminal API provides functions for writing text to the terminal and monitors, and drawing ASCII graphics.
+-- Functions in italics are only available to Monitors. Functions in bold are available only to Windows.    
+-- @module monitor
+
+-------------------------------------------------------------------------------
+-- Sets the text scale. Available only to monitor objects.
+-- @function [parent=#monitor] setTextScale
+-- @param #number scale
+
+return nil

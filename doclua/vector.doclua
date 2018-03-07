@@ -1,0 +1,73 @@
+-------------------------------------------------------------------------------
+-- The vector API provides methods to create and manipulate vectors.
+-- An introduction to vectors can be found on Wikipedia.     
+-- @module vector
+
+-------------------------------------------------------------------------------
+-- Creates a vector.
+-- @function [parent=#vector] new
+-- @param #number x
+-- @param #number y
+-- @param #number z
+-- @return #vectorA vector 
+
+-------------------------------------------------------------------------------
+-- Adds vectorB to vectorA and returns the resulting vector. Can also be used by writing vectorA + vectorB.
+-- @function [parent=#vectorA] add
+-- @param #vectorA vectorB
+-- @return vectorA
+
+-------------------------------------------------------------------------------
+-- Subtracts vectorB from vectorA and returns the resulting vector. Can also be used by writing vectorA - vectorB.
+-- @function [parent=#vectorA] sub
+-- @param #vectorA vectorB
+-- @return #vectorA
+
+-------------------------------------------------------------------------------
+-- Scalar multiplies vectorA with n and returns the resulting vector. Can also be used by writing vectorA * n.
+-- @function [parent=#vectorA] mul
+-- @param #number n
+-- @return #vectorA 
+
+-------------------------------------------------------------------------------
+-- Returns the dot product of vectorA and vectorB.
+-- @function [parent=#vectorA] dot
+-- @param #vectorA vectorB
+-- @return #vectorA 
+
+-------------------------------------------------------------------------------
+-- Returns the vector which resulted in the cross product of vectorA and vectorB.
+-- @function [parent=#vectorA] cross
+-- @param #vectorA vectorB
+-- @return #vectorA
+
+-------------------------------------------------------------------------------
+-- Returns the vector's length.
+-- @function [parent=#vectorA] length
+-- @return #number
+
+-------------------------------------------------------------------------------
+-- Normalizes the vector and returns the result as a new vector.
+-- @function [parent=#vectorA] normalize
+-- @return #vectorA
+
+-------------------------------------------------------------------------------
+-- Rounds the vector coordinates to the nearest integers and returns the result as a new vector.
+-- @function [parent=#vectorA] round
+-- @return #vectorA
+
+-------------------------------------------------------------------------------
+-- Returns a string representation of the vector in the form of "x,y,z".
+-- @function [parent=#vectorA] tostring
+-- @return #string
+
+-------------------------------------------------------------------------------
+-- @field [parent=#vectorA] #number x
+
+-------------------------------------------------------------------------------
+-- @field [parent=#vectorA] #number y
+
+-------------------------------------------------------------------------------
+-- @field [parent=#vectorA] #number z
+ 
+return nil

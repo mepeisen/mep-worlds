@@ -1,0 +1,115 @@
+-------------------------------------------------------------------------------
+-- The shell API allows you to interface with ComputerCraft's shell - CraftOS. The shell API is only available when programs are ran from the shell or using shell.run/shell.openTab.
+-- Note that this "API" is not loaded into _G using os.loadAPI() - instead, it's loaded by the shell script itself into a separate user environment, one which also holds global variables for any other scripts the user executes. The multishell API is handled in the same manner. They can thus be easily sandboxed (allowing for multiple shells to run on the same system at once - the APIs for each being able to return relevant results for each instance), though it does mean other APIs can't refer to these functions (as they lack access to the environment table dedicated to user scripts).   
+-- @module shell
+
+-------------------------------------------------------------------------------
+-- Exits the current shell. 
+-- @function [parent=#shell] exit 
+
+-------------------------------------------------------------------------------
+-- Returns the path to the working directory.
+-- @function [parent=#shell] dir
+-- @return #string directory
+ 
+-------------------------------------------------------------------------------
+-- Sets the working directory. 
+-- @function [parent=#shell] setDir
+-- @param #string path
+ 
+-------------------------------------------------------------------------------
+-- Returns the path.
+-- @function [parent=#shell] path
+-- @return #string path
+ 
+-------------------------------------------------------------------------------
+-- Sets the path. 
+-- @function [parent=#shell] setPath
+-- @param #string path 
+
+-------------------------------------------------------------------------------
+-- Resolves a local path to an absolute path.
+-- @function [parent=#shell] resolve
+-- @param #string localPath
+-- @return #string absolutePath
+ 
+-------------------------------------------------------------------------------
+-- Resolves the absolute path to the program whose name you provided. 
+-- @function [parent=#shell] resolveProgram
+-- @param #string name
+-- @return #string absolutePath
+ 
+-------------------------------------------------------------------------------
+-- Returns aliases.
+-- @function [parent=#shell] aliases
+-- @return #table aliases
+ 
+-------------------------------------------------------------------------------
+-- Sets an alias for program. 
+-- @function [parent=#shell] setAlias
+-- @param #string alias
+-- @param #string program 
+
+-------------------------------------------------------------------------------
+-- Clears an alias.
+-- @function [parent=#shell] clearAlias
+-- @param #string alias 
+
+-------------------------------------------------------------------------------
+-- Returns a table of files in the current directory and in all paths in shell.path. 
+-- @function [parent=#shell] programs
+-- @param #boolean showHidden optional
+-- @return #table programs
+ 
+-------------------------------------------------------------------------------
+-- Returns the absolute path to the currently-executing program.
+-- @function [parent=#shell] getRunningProgram
+-- @return #string path
+ 
+-------------------------------------------------------------------------------
+-- Runs a command (program). 
+-- @function [parent=#shell] run
+-- @param #string command
+-- @param #string args1 optional
+-- @param #string args2 optional
+-- @param #... args
+-- @return #boolean success
+ 
+-------------------------------------------------------------------------------
+-- Runs a program in another multishell tab. Requires version 1.6 or newer and an advanced system.
+-- @function [parent=#shell] openTab
+-- @param #string command 
+-- @param #string args1 optional
+-- @param #string args2 optional
+-- @param #... args 
+-- @return #number tabID
+ 
+-------------------------------------------------------------------------------
+-- Switches the multishell tab to tab with the given ID. Requires version 1.6 or newer and an advanced system. 
+-- @function [parent=#shell] switchTab
+-- @param #number tabID 
+
+-------------------------------------------------------------------------------
+-- Given a partial command line, returns a list of suffixes that could potentially be used to complete it. Requires version 1.74 or newer.
+-- @function [parent=#shell] complete
+-- @param #string prefix
+-- @return #table completionList
+ 
+-------------------------------------------------------------------------------
+-- Given a partial script / directory path, returns a list of suffixes that could potentially be used to complete it, including alias and path matches. Requires version 1.74 or newer. 
+-- @function [parent=#shell] completeProgram
+-- @param #string prefix
+-- @return #table completionList
+ 
+-------------------------------------------------------------------------------
+-- Registers a function that determines how shell.complete() handles completion behavior for a given script. Requires version 1.74 or newer.
+-- @function [parent=#shell] setCompletionFunction
+-- @param #string path
+-- @param #function completionFunction 
+
+-------------------------------------------------------------------------------
+-- Returns a pointer to the table containing functions registered by shell.setCompletionFunction() for use with shell.complete(). Requires version 1.74 or newer. 
+-- @function [parent=#shell] getCompletionInfo
+-- @return #table completionFunctions 
+
+return nil

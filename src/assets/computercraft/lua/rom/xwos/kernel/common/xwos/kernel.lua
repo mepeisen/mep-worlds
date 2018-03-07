@@ -27,76 +27,6 @@ local origtostring = tostring
 
 local origTable = table
 
-table = {}
-for k,v in origpairs(origTable) do
-    table[k] = v
-end -- for table
-
--------------------------------------
--- Creates a new clone; only first level of table will be cloned, no deep clone; no metadata clone
--- @function [parent=#table] clone
--- @param #table src
--- @return #table new copy
-table.clone = function(src)
-    local r = {}
-    for k, v in origpairs(src) do
-        r[k] = v
-    end -- for src
-    return r
-end -- function table.clone
-
--------------------------------------
--- @function [parent=#table] contains
--- @param #table haystack
--- @param #any needle
--- @return #boolean success
-table.contains = function(haystack, needle)
-    for k, v in origpairs(haystack) do
-        if (v == needle) then
-            return true
-        end -- if equals
-    end -- for haystack
-    return false
-end -- function table.contains
-
--------------------------------------
--- @function [parent=#table] indexOf
--- @param #table haystack
--- @param #any needle
--- @return #number index of given element or nil if not found
-table.indexOf = function(haystack, needle)
-    for k, v in origpairs(haystack) do
-        if (v == needle) then
-            return k
-        end -- if equals
-    end -- for haystack
-    return nil
-end -- function table.indexOf
-
--------------------------------------
--- @function [parent=#table] removeValue
--- @param #table haystack
--- @param #any needle
--- @return #boolean true if element was found and removed
-table.removeValue = function(haystack, needle)
-    for k, v in origpairs(haystack) do
-        if (v == needle) then
-            haystack[k] = nil
-            return true
-        end -- if equals
-    end -- for haystack
-    return false
-end -- function table.removeValue
-
--------------------------------------
--- @function [parent=#table] containsKey
--- @param #table haystack
--- @param #any needle
--- @return #boolean success
-table.containsKey = function(haystack, needle)
-    return haystack[needle] ~= nil
-end -- function table.containsKey
-
 --------------------------------
 -- local kernel
 -- @type xwos.kernel
@@ -122,8 +52,11 @@ local bootSequence = {
 -- @param #function krequire require function to include kernel files
 -- @param global#global args the command line arguments
 M.boot = function(ver, kernelpaths, krequire, oldGlob, args)
-    local moses = krequire('xwos/extensions/moses/moses_min.lua')
+    local moses = krequire('/xwos/extensions/moses/moses_min')
     table = {}
+    -- TODO moses "functions" function maybe a security hole if invoked with nil (returning moses library functions with broken fenv???)
+    -- TODO moses contains some local functions, may be a security hole because of broken fenv???
+    -- TODO support moses aliases
     for k,v in origpairs(origTable) do
         table[k] = v
     end -- for table
@@ -158,7 +91,7 @@ M.boot = function(ver, kernelpaths, krequire, oldGlob, args)
     table.groupBy = moses.groupBy
     table.countBy = moses.countBy
     table.size = moses.size
-    table.containsKey = moses.containsKey
+    table.containsKeys = moses.containsKeys
     table.sameKeys = moses.sameKeys
     table.sample = moses.sample
     table.sampleProb = moses.sampleProb
@@ -205,12 +138,83 @@ M.boot = function(ver, kernelpaths, krequire, oldGlob, args)
     table.permutation = moses.permutation
     table.invert = moses.invert
     table.concat = moses.concat
-    -- TODO functions: noop, identity, constant, memoize, once, before, after, compose, pipe, complement, juxtapose,
-    -- TODO wrap, times, bind, bind2, bindn, bindAll, uniqueId, iterator, array, flip, over, overEvery, overSome,
-    -- TODO overArgs, partial, partialRight, curry, time, keys, values, kvpairs, toObj, property, propertyOf,
-    -- TODO toBoolean, extend, functions, clone, tap, has, pick, omit, template, isEqual, result, isTable, isCallable,
-    -- TODO isArray, isIterable, isEmpty, isString, isFunction, isNil, isNumber, isNaN, isFinite, isBoolean, isInteger,
+    table.clone = moses.clone
+    
+    functions={}
+    functions.noop = moses.noop
+    functions.identity = moses.identity
+    functions.constant = moses.constant
+    functions.memoize = moses.memoize
+    functions.constant = moses.constant
+    functions.once = moses.once
+    functions.before = moses.before
+    functions.after = moses.after
+    functions.compose = moses.compose
+    functions.pipe = moses.pipe
+    functions.complement = moses.complement
+    functions.juxtapose = moses.juxtapose
+    functions.wrap = moses.wrap
+    functions.times = moses.times
+    functions.bind = moses.bind
+    functions.bind2 = moses.bind2
+    functions.bindn = moses.bindn
+    functions.bindAll = moses.bindAll
+    functions.uniqueId = moses.uniqueId
+    functions.iterator = moses.iterator
+    functions.array = moses.array
+    functions.flip = moses.flip
+    functions.over = moses.over
+    functions.overEvery = moses.overEvery
+    functions.overSome = moses.overSome
+    functions.overArgs = moses.overArgs
+    functions.partial = moses.partial
+    functions.partialRight = moses.partialRight
+    functions.curry = moses.curry
+    functions.time = moses.time
+    
+    objects = {}
+    objects.keys = moses.keys
+    objects.values = moses.values
+    objects.kvpairs = moses.kvpairs
+    objects.toObj = moses.toObj
+    objects.property = moses.property
+    objects.propertyOf = moses.propertyOf
+    objects.functions = moses.functions
+    objects.toBoolean = moses.toBoolean
+    objects.extend = moses.extend
+    objects.functions = moses.functions
+    objects.clone = moses.clone
+    objects.tap = moses.tap
+    objects.has = moses.has
+    objects.pick = moses.pick
+    objects.omit = moses.omit
+    objects.template = moses.template
+    objects.isEqual = moses.isEqual
+    objects.result = moses.result
+    objects.isTable = moses.isTable
+    objects.isCallable = moses.isCallable
+    objects.isTable = moses.isTable
+    objects.isArray = moses.isArray
+    objects.isIterable = moses.isIterable
+    objects.isEmpty = moses.isEmpty
+    objects.isString = moses.isString
+    objects.isFunction = moses.isFunction
+    objects.isNil = moses.isNil
+    objects.isNumber = moses.isNumber
+    objects.isNaN = moses.isNaN
+    objects.isFinite = moses.isFinite
+    objects.isBoolean = moses.isBoolean
+    objects.isInteger = moses.isInteger
     -- TODO chain, obj:value, import
+    
+    table.contains = function(haystack, needle)
+        for k, v in origpairs(haystack) do
+            if (v == needle) then
+                return true
+            end -- if equals
+        end -- for haystack
+        return false
+    end -- function table.contains
     
     --------------------------------
     -- @field [parent=#xwos.kernel] #table kernelpaths the paths for including kernel
@@ -223,12 +227,15 @@ M.boot = function(ver, kernelpaths, krequire, oldGlob, args)
     M.envFactories = {}
     --------------------------------
     -- @field [parent=#xwos.kernel] global#global oldGlob the old globals
-    M.oldGlob = oldGlob -- TODO type (global#global) does not work?
+    M.oldGlob = oldGlob -- TODO type (global#global) does not work in eclipse?
     M.oldGlob._ENV = nil
     --M.oldGlob.package = nil
     M.oldGlob._G = nil
     M.oldGlob.shell = nil
     M.oldGlob.multishell = nil
+    M.oldGlob.table = table
+    M.oldGlob.functions = functions
+    M.oldGlob.objects = objects
     --------------------------------
     -- @field [parent=#xwos.kernel] #table args the command line args invoking the kernel
     M.args = args or {}
@@ -352,7 +359,10 @@ M.startup = function()
     end -- function unwrapfenv
     unwrapfenv(M.oldGlob, M.oldfenv)
     
+    -- uninstall moses
     table = origTable
+    functions = nil
+    objects = nil
     
     M.debug("last actions before shutdown")
     if proc.result[1] then

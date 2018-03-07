@@ -1,0 +1,110 @@
+-------------------------------------------------------------------------------
+-- The FS API allows you to manipulate files and the filesystem.   
+-- @module fs
+
+-------------------------------------------------------------------------------
+-- Returns a list of all the files (including subdirectories but not their contents) contained in a directory, as a numerically indexed table. 
+-- @function [parent=#fs] list
+-- @param #string path
+-- @return #table files 
+
+-------------------------------------------------------------------------------
+-- Checks if a path refers to an existing file or directory.
+-- @function [parent=#fs] exists
+-- @param #string path
+-- @return #boolean exists 
+
+-------------------------------------------------------------------------------
+-- Checks if a path refers to an existing directory. 
+-- @function [parent=#fs] isDir
+-- @param #string path
+-- @return #boolean isDirectory 
+
+-------------------------------------------------------------------------------
+-- Checks if a path is read-only (i.e. cannot be modified).
+-- @function [parent=#fs] isReadOnly
+-- @param #string path 
+-- @return #boolean readonly 
+
+-------------------------------------------------------------------------------
+-- Gets the final component of a pathname. 
+-- @function [parent=#fs] getName
+-- @param #string path 
+-- @return #string name 
+
+-------------------------------------------------------------------------------
+-- Gets the storage medium holding a path, or nil if the path does not exist.
+-- @function [parent=#fs] getDrive
+-- @param #string path 
+-- @return #string drive 
+
+-------------------------------------------------------------------------------
+-- Gets the size of a file in bytes. 
+-- @function [parent=#fs] getSize
+-- @param #string path 
+-- @return #number size 
+
+-------------------------------------------------------------------------------
+-- Gets the remaining space on the drive containing the given directory.
+-- @function [parent=#fs] getFreeSpace
+-- @param #string path
+-- @return #number space 
+
+-------------------------------------------------------------------------------
+-- Makes a directory. 
+-- @function [parent=#fs] makeDir
+-- @param #string path 
+
+-------------------------------------------------------------------------------
+-- Moves a file or directory to a new location.
+-- @function [parent=#fs] move
+-- @param #string fromPath
+-- @param #string toPath
+
+-------------------------------------------------------------------------------
+-- Copies a file or directory to a new location. 
+-- @function [parent=#fs] copy
+-- @param #string fromPath
+-- @param #string toPath
+
+-------------------------------------------------------------------------------
+-- Deletes a file or directory.
+-- @function [parent=#fs] delete
+-- @param #string path
+
+-------------------------------------------------------------------------------
+-- Combines two path components, returning a path consisting of the local path nested inside the base path. 
+-- @function [parent=#fs] combine
+-- @param #string basePath
+-- @param #string localPath
+-- @return #string path 
+
+-------------------------------------------------------------------------------
+-- Opens a file so it can be read or written.
+-- @function [parent=#fs] open
+-- @param #string path
+-- @param #string mode 
+-- @return #table handle 
+
+-------------------------------------------------------------------------------
+-- Searches the computer's files using wildcards. Requires version 1.6 or later. 
+-- @function [parent=#fs] find
+-- @param #string wildcard 
+-- @return #table files 
+
+-------------------------------------------------------------------------------
+-- Returns the parent directory of path. Requires version 1.63 or later.
+-- @function [parent=#fs] getDir
+-- @param #string path 
+-- @return #string parentDirectory 
+
+-------------------------------------------------------------------------------
+-- Returns a list of strings that could be combined with the provided name to produce valid entries in the specified folder. Requires version 1.74 or later. 
+-- @function [parent=#fs] complete
+-- @param #string partial name
+-- @param #string path
+-- @param #boolean includeFiles (optional)
+-- @param #boolean includeSlashes (optional)
+-- @return #table matches 
+
+return nil

@@ -1,0 +1,44 @@
+-------------------------------------------------------------------------------
+-- The settings API allows to store values and save them to a file for persistent configurations for your and CraftOS programs. The default file for saving settings is .settings sitting in the root of the computer. Settings can also be changed and added to all computers through ComputerCraft.cfg's S:default_computer_settings value. It became available as of ComputerCraft 1.77, the first build for Minecraft 1.8.9.  
+-- @module settings
+
+-------------------------------------------------------------------------------
+-- Sets the setting name to value. 
+-- @function [parent=#settings] set
+-- @param #string name
+-- @param #any value 
+
+-------------------------------------------------------------------------------
+-- Returns the setting's name value, or default if the setting does not exist.
+-- @function [parent=#settings] get
+-- @param #string name
+-- @param #any default optional
+-- @return #any value 
+
+-------------------------------------------------------------------------------
+-- Removes the setting name. 
+-- @function [parent=#settings] unset
+-- @param #string name
+ 
+-------------------------------------------------------------------------------
+-- Removes all settings
+-- @function [parent=#settings] clear 
+
+-------------------------------------------------------------------------------
+-- Returns a numerically-indexed table of all the setting's names. 
+-- @function [parent=#settings] getNames
+-- @return #table settingNames 
+
+-------------------------------------------------------------------------------
+-- Loads settings from a file.
+-- @function [parent=#settings] load
+-- @param #string path
+-- @return #boolean loaded
+ 
+-------------------------------------------------------------------------------
+-- Saves current settings to a file. 
+-- @function [parent=#settings] save
+-- @param #string path
+-- @return #boolean saved 
+ 
+return nil

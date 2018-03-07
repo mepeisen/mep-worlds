@@ -1,0 +1,93 @@
+-------------------------------------------------------------------------------
+-- The Colors API allows you to manipulate sets of colors. This is useful in conjunction with Bundled Cables from the RedPower mod, RedNet Cables from the MineFactory Reloaded mod, and colors on Advanced Computers and Advanced Monitors. 
+-- For the non-American English version just replace 'colors' with 'colours' and it will use the other API, colours—which is exactly the same, except in non-American English (e.g. gray is spelt grey and lightGray is spelt lightGrey). 
+-- @module colors
+
+-------------------------------------------------------------------------------
+-- Combines one or more colors (or sets of colors) into a larger set. 
+-- @function [parent=#colors] combine
+-- @param #number color1
+-- @param #number color2
+-- @param ... colors
+-- @return #number value
+
+-------------------------------------------------------------------------------
+-- Removes one or more colors (or sets of colors) from an initial set. 
+-- @function [parent=#colors] subtract
+-- @param #number color1
+-- @param #number color2
+-- @param ... colors
+-- @return #number value
+
+-------------------------------------------------------------------------------
+-- Tests whether color is contained within colors. 
+-- @function [parent=#colors] test
+-- @param #number colors
+-- @param #number color
+-- @return #boolean contained
+
+-------------------------------------------------------------------------------
+-- #F0F0F0
+-- @field [parent=#colors] #number white
+
+-------------------------------------------------------------------------------
+-- #F2B233
+-- @field [parent=#colors] #number orange
+
+-------------------------------------------------------------------------------
+-- #E57FD8
+-- @field [parent=#colors] #number magenta
+
+-------------------------------------------------------------------------------
+-- #99B2F2
+-- @field [parent=#colors] #number lightBlue
+
+-------------------------------------------------------------------------------
+-- #DEDE6C
+-- @field [parent=#colors] #number yellow
+
+-------------------------------------------------------------------------------
+-- #7FCC19
+-- @field [parent=#colors] #number lime
+
+-------------------------------------------------------------------------------
+-- #F2B2CC
+-- @field [parent=#colors] #number pink
+
+-------------------------------------------------------------------------------
+-- #4C4C4C 
+-- @field [parent=#colors] #number gray
+
+-------------------------------------------------------------------------------
+-- #999999 
+-- @field [parent=#colors] #number lightGray
+
+-------------------------------------------------------------------------------
+-- #4C99B2
+-- @field [parent=#colors] #number cyan
+
+-------------------------------------------------------------------------------
+-- #B266E5
+-- @field [parent=#colors] #number purple
+
+-------------------------------------------------------------------------------
+-- #3366CC
+-- @field [parent=#colors] #number blue
+
+-------------------------------------------------------------------------------
+-- #7F664C
+-- @field [parent=#colors] #number brown
+
+-------------------------------------------------------------------------------
+-- #57A64E
+-- @field [parent=#colors] #number green
+
+-------------------------------------------------------------------------------
+-- #CC4C4C
+-- @field [parent=#colors] #number red
+
+-------------------------------------------------------------------------------
+-- #191919  
+-- @field [parent=#colors] #number black
+
+return nil

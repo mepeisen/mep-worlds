@@ -1,0 +1,95 @@
+-------------------------------------------------------------------------------
+-- The Terminal API provides functions for writing text to the terminal and monitors, and drawing ASCII graphics.
+-- Functions in italics are only available to Monitors. Functions in bold are available only to Windows.    
+-- @module term
+
+-------------------------------------------------------------------------------
+-- Writes text to the screen, using the current text and background colors.
+-- @function [parent=#term] write
+-- @param #string text
+ 
+-------------------------------------------------------------------------------
+-- Writes text to the screen using the specified text and background colors. Requires version 1.74 or newer.
+-- @function [parent=#term] blit
+-- @param #string text
+-- @param #string textColors
+-- @param #string backgroundColors
+
+-------------------------------------------------------------------------------
+-- Clears the entire screen.
+-- @function [parent=#term] clear
+
+-------------------------------------------------------------------------------
+-- Clears the line the cursor is on.
+-- @function [parent=#term] clearLine
+
+-------------------------------------------------------------------------------
+-- Returns two arguments containing the x and the y position of the cursor.
+-- @function [parent=#term] getCursorPos
+-- @return #number x
+-- @return #number y
+ 
+-------------------------------------------------------------------------------
+-- Sets the cursor's position.
+-- @function [parent=#term] setCursorPos
+-- @param #number x
+-- @param #number y
+
+-------------------------------------------------------------------------------
+-- Disables the blinking or turns it on.
+-- @function [parent=#term] setCursorBlink
+-- @param #boolean bool
+
+-------------------------------------------------------------------------------
+-- Returns whether the terminal supports color.
+-- @function [parent=#term] isColor
+-- @return #boolean
+
+-------------------------------------------------------------------------------
+-- Returns two arguments containing the x and the y values stating the size of the screen. (Good for if you're making something to be compatible with both Turtles and Computers.)
+-- @function [parent=#term] getSize
+-- @return #number x
+-- @return #number y
+ 
+-------------------------------------------------------------------------------
+-- Scrolls the terminal n lines.
+-- @function [parent=#term] scroll
+-- @param #number n
+
+-------------------------------------------------------------------------------
+-- Redirects terminal output to another terminal object (such as a window or wrapped monitor). Available only to the base term object.
+-- @function [parent=#term] redirect
+-- @param #table target
+-- @return #table previous terminal object 
+
+-------------------------------------------------------------------------------
+-- Returns the current terminal object. Requires version 1.6 or newer, available only to the base term object.
+-- @function [parent=#term] current
+-- @return #table terminal object 
+
+-------------------------------------------------------------------------------
+-- Returns the original terminal object. Requires version 1.6 or newer, available only to the base term object.
+-- @function [parent=#term] native
+-- @return #table terminal object 
+
+-------------------------------------------------------------------------------
+-- Sets the text color of the terminal. Limited functionality without an Advanced Computer / Turtle / Monitor.
+-- @function [parent=#term] setTextColor
+-- @param #number color
+
+-------------------------------------------------------------------------------
+-- Returns the current text color of the terminal. Requires version 1.74 or newer.
+-- @function [parent=#term] getTextColor
+-- @return #number color 
+
+-------------------------------------------------------------------------------
+-- Sets the background color of the terminal. Limited functionality without an Advanced Computer / Turtle / Monitor.
+-- @function [parent=#term] setBackgroundColor
+-- @param #number color
+
+-------------------------------------------------------------------------------
+-- Returns the current background color of the terminal. Requires version 1.74 or newer.
+-- @function [parent=#term] getBackgroundColor
+-- @return #number color
+
+return nil

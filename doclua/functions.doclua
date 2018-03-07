@@ -1,0 +1,225 @@
+-------------------------------------------------------------------------------
+-- Moses functions
+-- @module functions
+
+-------------------------------------------------------------------------------
+-- The no-operation function.
+-- @function [parent=#functions] noop
+
+-------------------------------------------------------------------------------
+-- Returns the passed-in value. This function is used internally
+-- as a default iterator.
+-- @function [parent=#functions] identity
+-- @param #any value a value
+-- @return #any the passed-in value
+
+-------------------------------------------------------------------------------
+-- Creates a constant function which returns the same output on every call.
+-- @function [parent=#functions] constant
+-- @param #any value a constant value
+-- @return #function a constant function
+
+-------------------------------------------------------------------------------
+-- Memoizes a given function by caching the computed result.
+-- Useful for speeding-up slow-running functions. If a `hash` function is passed,
+-- it will be used to compute hash keys for a set of input values for caching.
+-- <br/><em>Aliased as `cache`</em>
+-- @function [parent=#functions] memoize
+-- @param #function f a function
+-- @param #function hash a hash function, defaults to @{identity}
+-- @return #function a new function
+
+-------------------------------------------------------------------------------
+-- Returns a version of `f` that runs only once. Successive calls to `f`
+-- will keep yielding the same output, no matter what the passed-in arguments are. 
+-- It can be used to initialize variables.
+-- @function [parent=#functions] once
+-- @param #function f a function
+-- @return #function a new function
+
+-------------------------------------------------------------------------------
+-- Returns a version of `f` that will run no more than `count` times. Next calls will
+-- keep yielding the results of the count-th call.
+-- @function [parent=#functions] before
+-- @param #function f a function
+-- @param #number count a count
+-- @return #function a new function
+
+-------------------------------------------------------------------------------
+-- Returns a version of `f` that runs on the `count-th` call.
+-- Useful when dealing with asynchronous tasks.
+-- @function [parent=#functions] after
+-- @param #function f a function
+-- @param #number count the number of calls before `f` will start running.
+-- @return #function a new function
+
+-------------------------------------------------------------------------------
+-- Composes functions. Each passed-in function consumes the return value of the function that follows.
+-- In math terms, composing the functions `f`, `g`, and `h` produces the function `f(g(h(...)))`.
+-- @function [parent=#functions] compose
+-- @param ... a variable number of functions
+-- @return #function a new function
+
+-------------------------------------------------------------------------------
+-- Pipes a value through a series of functions. In math terms, 
+-- given some functions `f`, `g`, and `h` in that order, it returns `f(g(h(value)))`.
+-- @function [parent=#functions] pipe
+-- @param #any value a value
+-- @param ... a variable number of functions
+-- @return #any the result of the composition of function calls.
+
+-------------------------------------------------------------------------------
+-- Returns the logical complement of a given function. For a given input, the returned 
+-- function will output `false` if the original function would have returned `true`, 
+-- and vice-versa.
+-- @function [parent=#functions] complement
+-- @param #function f a function
+-- @return #boolean the logical complement of the given function `f`.
+
+-------------------------------------------------------------------------------
+-- Calls a sequence of passed-in functions with the same argument.
+-- Returns a sequence of results. 
+-- <br/><em>Aliased as `juxt`</em>
+-- @function [parent=#functions] juxtapose
+-- @param #any value a value
+-- @param ... a variable number of functions
+-- @return ... a list of results
+
+-------------------------------------------------------------------------------
+-- Wraps `f` inside of the `wrapper` function. It passes `f` as the first argument to `wrapper`.
+-- This allows the wrapper to execute code before and after `f` runs,
+-- adjust the arguments, and execute it conditionally.
+-- @function [parent=#functions] wrap
+-- @param #function f a function to be wrapped, prototyped as `f (...)`
+-- @param #function wrapper a wrapper function, prototyped as `wrapper (f, ...)`
+-- @return #function the results
+
+-------------------------------------------------------------------------------
+-- Runs `iter` function `n` times. Collects the results of each run and returns them in an array.
+-- @function [parent=#functions] times
+-- @param #number n the number of times `iter` should be called
+-- @param  #function iter an iterator function, prototyped as `iter (i, ...)`
+-- @param ... args to be passed to `iter` function
+-- @return #table table an array of results
+
+-------------------------------------------------------------------------------
+-- Binds `v` to be the first argument to `f`. Calling `f (...)` will result to `f (v, ...)`.
+-- @function [parent=#functions] bind
+-- @param #function f a function
+-- @param #any v a value
+-- @return #function a function
+
+-------------------------------------------------------------------------------
+-- Binds `v` to be the second argument to `f`. Calling `f (a, ...)` will result to `f (a, v, ...)`.
+-- @function [parent=#functions] bind2
+-- @param #function f a function
+-- @param #any v a value
+-- @return #function a function
+
+-------------------------------------------------------------------------------
+-- Binds `...` to be the N-first arguments to function `f`. 
+-- Calling `f (a1, a2, ..., aN)` will result to `f (..., a1, a2, ...,aN)`.
+-- @function [parent=#functions] bindn
+-- @param #function f a function
+-- @param ... a variable number of arguments
+-- @return #function a function
+
+-------------------------------------------------------------------------------
+-- Binds methods to object. As such, whenever any of these methods is invoked, it 
+-- always receives the object as its first argument.
+-- @function [parent=#functions] bindAll
+-- @param #table obj an abject
+-- @param ... a variable number of method names
+-- @return #table the passed-in object with all methods bound to the object itself.
+
+-------------------------------------------------------------------------------
+-- Generates an unique ID for the current session. If given a string `template`, it
+-- will use this template for output formatting. Otherwise, if `template` is a function, it
+-- will evaluate `template (id, ...)`.
+-- <br/><em>Aliased as `uid`</em>.
+-- @function [parent=#functions] uniqueId
+-- @param #string template either a string or a function template to format the ID
+-- @param ... a variable number of arguments to be passed to `template`, in case it is a function.
+-- @return #any value an ID
+
+-------------------------------------------------------------------------------
+-- Produces an iterator which repeatedly apply a function `f` onto an input. 
+-- Yields x, then f(x), then f(f(x)), continuously.
+-- @function [parent=#functions] iterator
+-- @param #function f a function 
+-- @param #any x an initial input to `f`
+-- @return #function an iterator fnction
+
+-------------------------------------------------------------------------------
+-- Iterates an iterator and returns its values in an array.
+-- @function [parent=#functions] array
+-- @param ... an iterator (a function, a table and a value)
+-- @return #table an array of results
+
+-------------------------------------------------------------------------------
+-- Creates a function of `f` with arguments flipped in reverse order.
+-- @function [parent=#functions] flip
+-- @param #function f a function 
+-- @return #function a function
+
+-------------------------------------------------------------------------------
+-- Creates a function that runs transforms on all arguments it receives.
+-- @function [parent=#functions] over
+-- @param ... a set of functions which will receive all arguments to the returned function
+-- @return #function a function
+
+-------------------------------------------------------------------------------
+-- Creates a validation function. The returned function checks if *all* of the given predicates return 
+-- truthy when invoked with the arguments it receives.
+-- @function [parent=#functions] overEvery
+-- @param ... a list of predicate functions
+-- @return #function a new function
+
+-------------------------------------------------------------------------------
+-- Creates a validation function. The return function checks if *any* of a given predicates return 
+-- truthy when invoked with the arguments it receives.
+-- @function [parent=#functions] overSome
+-- @param ... a list of predicate functions
+-- @return #function a new function
+
+-------------------------------------------------------------------------------
+-- Creates a function that invokes `f` with its arguments transformed. 1rst arguments will be passed to 
+-- the 1rst transform, 2nd arg to the 2nd transform, etc. Remaining arguments will not be transformed.
+-- @function [parent=#functions] overArgs
+-- @param #function f a function
+-- @param ... a list of transforms funcs prototyped as `f (v)`
+-- @return #any the result of running `f` with its transformed arguments
+
+-------------------------------------------------------------------------------
+-- Partially apply a function by filling in any number of its arguments. 
+-- One may pass a string `'_'` as a placeholder in the list of arguments to specify an argument 
+-- that should not be pre-filled, but left open to be supplied at call-time. 
+-- @function [parent=#functions] partial
+-- @param #function f a function
+-- @param ... a list of partial arguments to `f`
+-- @return #function a new version of function f having some of it original arguments filled
+
+-------------------------------------------------------------------------------
+-- Similar to @{partial}, but from the right.
+-- @function [parent=#functions] partialRight
+-- @param #function f a function
+-- @param ... a list of partial arguments to `f`
+-- @return #function a new version of function f having some of it original arguments filled
+
+-------------------------------------------------------------------------------
+-- Curries a function. If the given function `f` takes multiple arguments, it returns another version of 
+-- `f` that takes a single argument (the first of the arguments to the original function) and returns a new 
+-- function that takes the remainder of the arguments and returns the result. 
+-- @function [parent=#functions] curry
+-- @param #function f a function
+-- @param #number n_args the number of arguments expected for `f`. Defaults to 2.
+-- @return #function a curried version of `f`
+
+-------------------------------------------------------------------------------
+-- Returns the execution time of `f (...)` and its returned values.
+-- @function [parent=#functions] time
+-- @param #function f a function
+-- @param ... optional args to `f`
+-- @return ... the execution time and the results of `f (...)`
+
+return nil

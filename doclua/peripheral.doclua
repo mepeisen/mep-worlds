@@ -1,0 +1,53 @@
+-------------------------------------------------------------------------------
+-- The Peripheral API is for interacting with peripherals connected to the computer, such as the Disk Drive, the Advanced Monitor and Monitor. (More peripherals can be found under here).
+-- Each peripheral block has a name, or side. Although peripherals can now be attached to a computer using networking cables, the word side is a holdover from when peripherals needed to be directly next to the computer.
+-- If the peripheral is next to the computer, its side is either "front", "back", "left", "right", "top" or "bottom". If the peripheral is attached by a cable, its side will follow the format "type_id", for example "printer_0".
+-- Peripheral functions are called methods, a term borrowed from Java.  
+-- @module peripheral
+
+-------------------------------------------------------------------------------
+-- Returns true if a peripheral is connected on side. 
+-- @function [parent=#peripheral] isPresent
+-- @param #string side
+-- @return #boolean
+
+-------------------------------------------------------------------------------
+-- Returns the type of peripheral connected on side, as a string. If no peripheral is connected, returns nil. 
+-- @function [parent=#peripheral] getType
+-- @param #string side
+-- @return #string
+
+-------------------------------------------------------------------------------
+-- Returns a list of the names of all the methods of the peripheral connected on side. If no peripheral is connected, returns nil. 
+-- @function [parent=#peripheral] getMethods
+-- @param #string side
+-- @return #table
+
+-------------------------------------------------------------------------------
+-- Calls a method on a -- @function [parent=#peripheral]  The arguments (apart from side and method) and the return values depend on the method being called. If no peripheral is connected, returns nil. 
+-- @function [parent=#peripheral] call
+-- @param #string side
+-- @param #string method
+-- @param ... args
+-- @return #any
+
+-------------------------------------------------------------------------------
+-- Returns a table of functions, allowing you to call peripheral methods as if they were normal Lua functions. If no peripheral is connected, returns nil. 
+-- @function [parent=#peripheral] wrap
+-- @param #string side
+-- @return #table peripheral
+
+-------------------------------------------------------------------------------
+-- Finds an attached peripheral of the given type and if found returns a table of functions, similar to -- @function [parent=#peripheral] wrap, allowing you to call peripheral methods as if they were normal Lua functions. If no peripheral of the given type is connected, it returns nil. Requires ComputerCraft 1.6 or later. 
+-- @function [parent=#peripheral] find
+-- @param #string type 
+-- @param #function fnFilter optional. signature: (name, object)
+-- @return #table peripheral
+
+-------------------------------------------------------------------------------
+-- This function returns a table of all the sides that have a peripheral present. If the present peripheral is a wired modem any names of the peripherals that is on the network are also added to the table. 
+-- @function [parent=#peripheral] getNames
+-- @return #table
+ 
+ return nil
+ 

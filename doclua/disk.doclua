@@ -1,0 +1,69 @@
+-------------------------------------------------------------------------------
+-- The Disk API allows you to interact with disk drives. These functions can operate on locally attached or remote disk drives. To use a locally attached drive, specify “side” as one of the six sides (e.g. “left”); to use a remote disk drive, specify its name as printed when enabling its modem (e.g. “drive_0”).
+-- Note: as of ComputerCraft 1.77, all computers (except command computers) can be placed within a disk drive to access it's internal storage like a disk.  
+-- @module disk
+
+-------------------------------------------------------------------------------
+-- Checks whether any item is in a disk drive.
+-- @function [parent=#disk] isPresent
+-- @param #string side
+-- @return #boolean present
+
+-------------------------------------------------------------------------------
+-- Checks whether a Floppy Disk is in a disk drive.
+-- @function [parent=#disk] hasData
+-- @param #string side
+-- @return #boolean hasData
+
+-------------------------------------------------------------------------------
+-- Gets the directory name where the contents of the floppy disk can be accessed.
+-- @function [parent=#disk] getMountPath
+-- @param #string side
+-- @return #string path
+
+-------------------------------------------------------------------------------
+-- Sets the floppy disk's label.
+-- @function [parent=#disk] setLabel
+-- @param #string side
+-- @param #string label
+
+-------------------------------------------------------------------------------
+-- Gets the floppy disk's label.
+-- @function [parent=#disk] getLabel
+-- @param #string side
+-- @return #string label
+
+-------------------------------------------------------------------------------
+-- Gets the floppy disk's unique ID number.
+-- @function [parent=#disk] getID
+-- @param #string side
+-- @return #number id
+
+-------------------------------------------------------------------------------
+-- Checks whether a music disk is in the drive.
+-- @function [parent=#disk] hasAudio
+-- @param #string side
+-- @return #boolean hasAudio
+
+-------------------------------------------------------------------------------
+-- Gets the title of the music disc in the drive.
+-- @function [parent=#disk] getAudioTitle
+-- @param #string side
+-- @return #string title
+
+-------------------------------------------------------------------------------
+-- Starts playing the music disc in the drive.
+-- @function [parent=#disk] playAudio
+-- @param #string side
+
+-------------------------------------------------------------------------------
+-- Stops playing the music disc in the drive..
+-- @function [parent=#disk] stopAudio
+-- @param #string side
+
+-------------------------------------------------------------------------------
+-- Ejects any item currently in the drive, spilling it into the world as a loose item.
+-- @function [parent=#disk] eject
+-- @param #string side
+
+return nil

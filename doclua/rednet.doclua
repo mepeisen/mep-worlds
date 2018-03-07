@@ -1,0 +1,70 @@
+-------------------------------------------------------------------------------
+-- The Rednet API allows systems to communicate between each other without using redstone. It serves as a wrapper for the modem API, offering ease of functionality (particularly in regards to repeating signals) with some expense of fine control.
+-- In order to send and receive data, a modem (either wired, wireless, or ender) is required. The data reaches any possible destinations immediately after sending it, but is range limited. 
+-- @module rednet
+
+-------------------------------------------------------------------------------
+-- Tells the computer that the side can be used for networking.
+-- @function [parent=#rednet] open
+-- @param #string side
+ 
+-------------------------------------------------------------------------------
+-- Tells the computer that the side can no longer be used for networking. 
+-- @function [parent=#rednet] close
+-- @param #string side
+ 
+-------------------------------------------------------------------------------
+-- Sends a message "intended" for another system with a specific ID, using the currently opened sides. The receiverID is the ID number (note - not a string) of the computer you're sending the message to. The types that can be sent as the message vary depending on the version of ComputerCraft in use.
+-- @function [parent=#rednet] send
+-- @param #number receiverID
+-- @param #any message
+-- @param #string protocol optional
+ 
+-------------------------------------------------------------------------------
+-- Sends the message to all connected and open computers. 
+-- @function [parent=#rednet] broadcast
+-- @param #any message
+-- @param #string protocol optional
+ 
+-------------------------------------------------------------------------------
+-- Waits until a rednet message of the specified protocol has been received, or until timeout seconds have passed. Leave all arguments empty to wait for any message indefinitely. If only a single, numerical argument is passed, will wait that many seconds for a message of any protocol. Versions of ComputerCraft prior to 1.6 may return the distance to the transmitting computer - 1.6 or later returns message protocols instead, though distance can still be obtained via direct use of the Modem API.
+-- @function [parent=#rednet] receive
+-- @param #string protocolFilter optional
+-- @param #number timeout optional 
+-- @return #number senderID
+-- @return #any message
+-- @return #number distance
+-- @return #string protocol
+ 
+-------------------------------------------------------------------------------
+-- Returns true if the wireless modem is open. 
+-- @function [parent=#rednet] isOpen
+-- @param #string side
+-- @return #boolean isOpen 
+
+-------------------------------------------------------------------------------
+-- Registers hostname against protocol for the purposes of rednet.lookup(). Only available in ComputerCraft 1.6 and above.
+-- @function [parent=#rednet] host
+-- @param #string protocol
+-- @param #string hostname
+ 
+-------------------------------------------------------------------------------
+-- Unregisters hostname from protocol. Only available in ComputerCraft 1.6 and above. 
+-- @function [parent=#rednet] unhost
+-- @param #string protocol
+-- @param #string hostname
+ 
+-------------------------------------------------------------------------------
+-- Searches the local network for systems registered with a matching hostname and/or protocol, and returns matching IDs found. Only available in ComputerCraft 1.6 and above. 
+-- @function [parent=#rednet] lookup
+-- @param #string protocol
+-- @param #string hostname
+-- @return #number ID1
+-- @return #number ID2
+-- @return #... IDs
+ 
+-------------------------------------------------------------------------------
+-- Internal use function - runs automatically and does not need to be called directly. Waits for modem_message events to appear within the event queue and generates corresponding rednet_message events for use with this API. Also responds to -- @function [parent=#rednet] lookup() requests. 
+-- @function [parent=#rednet] run
+ 
+return nil

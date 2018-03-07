@@ -1,0 +1,127 @@
+-------------------------------------------------------------------------------
+-- Operating System Facilities.
+-- This library is implemented through table os. 
+-- @module os
+
+-------------------------------------------------------------------------------
+-- Returns the version of the OS the computer is running, which (for CraftOS) also contains the version of ComputerCraft. 
+-- @function [parent=#os] version
+-- @return #string the version number
+
+-------------------------------------------------------------------------------
+-- Returns the unique ID of this computer. os.computerID() also behaves exactly the same as os.getComputerID(). 
+-- @function [parent=#os] getComputerID
+-- @return #number the computer id
+
+-------------------------------------------------------------------------------
+-- Returns the unique ID of this computer. os.computerID() also behaves exactly the same as os.getComputerID(). 
+-- @function [parent=#os] computerID
+-- @return #number the computer id
+
+-------------------------------------------------------------------------------
+-- Returns the label of this computer. os.computerLabel() also behaves exactly the same as os.getComputerLabel(). 
+-- @function [parent=#os] getComputerLabel
+-- @return #string the computer label
+
+-------------------------------------------------------------------------------
+-- Returns the label of this computer. os.computerLabel() also behaves exactly the same as os.getComputerLabel(). 
+-- @function [parent=#os] computerLabel
+-- @return #string the computer label
+
+-------------------------------------------------------------------------------
+-- Set the label of this computer. 
+-- @function [parent=#os] setComputerLabel
+-- @param #string label 
+
+-------------------------------------------------------------------------------
+-- Returns an approximation of the amount in seconds of CPU time used by
+-- the program.
+-- @function [parent=#os] clock
+-- @return #number the amount in seconds of CPU time used by
+-- the program.
+
+-------------------------------------------------------------------------------
+-- An advanced way of starting programs. A started program will have a given environment table which determines what functions it has available, as well as any variables it will be able to access by default. You may prefer to use the Shell (API) unless you need to do something special. 
+-- @function [parent=#os] run
+-- @param #table env
+-- @param #string programPath
+-- @param #string arguments optional
+-- @return #boolean success
+
+-------------------------------------------------------------------------------
+-- Loads a Lua script as an API in its own namespace. It will be available to all programs that run on the terminal.
+-- @function [parent=#os] loadAPI
+-- @param #string path
+-- @return #boolean success
+
+-------------------------------------------------------------------------------
+-- Loads a Lua script as an API in its own namespace. It will be available to all programs that run on the terminal.
+-- @function [parent=#os] unloadAPI
+-- @param name String
+
+-------------------------------------------------------------------------------
+-- Blocks until the computer receives an event, or if target-event is specified, will block until an instance of target-event occurs. os.pullEvent(target-event) returns the event and any parameters the event may have. If a target-event is specified, the computer will not break for any other events (except termination). 
+-- @function [parent=#os] pullEvent
+-- @param #string targetEvent
+-- @return #string event
+-- @return #string param
+
+-------------------------------------------------------------------------------
+-- Advanced version of pullEvent(). Blocks until the computer receives an event, or if target-event is specified, will block until an instance of target-event occurs. os.pullEventRaw(target-event) returns the event and any parameters the event may have. Unlike os.pullEvent(target-event), this function will not raise an error if a 'terminate' event is received.  
+-- @function [parent=#os] pullEventRaw
+-- @param #string targetEvent
+-- @return #string event
+-- @return #string param
+
+-------------------------------------------------------------------------------
+-- Adds an event to the event queue with the name event and the given parameters.   
+-- @function [parent=#os] queueEvent
+-- @param #string event
+-- @param ... parameters
+
+-------------------------------------------------------------------------------
+-- Queues an event to be triggered after a number of seconds (timeout). The ID of the timer is returned from this function to differentiate multiple timers. Timers are one-shot; once they have fired an event you will need to start another one if you need a recurring timer. 
+-- @function [parent=#os] startTimer
+-- @param #number timeout
+-- @return #number timer id
+
+-------------------------------------------------------------------------------
+-- Cancels a running timer, to prevent it throwing an event.  
+-- @function [parent=#os] cancelTimer
+-- @param #number timerid
+
+-------------------------------------------------------------------------------
+-- Returns the current in-game time.
+-- @function [parent=#os] time
+-- @return #number time
+
+-------------------------------------------------------------------------------
+-- Return the current in-game day (the number of in-game days since the world was created). 
+-- @function [parent=#os] day
+-- @return #number day
+
+-------------------------------------------------------------------------------
+-- Makes the system wait a number of seconds before continuing in the program. os.sleep(time) may also be used as simply "sleep(time)". 
+-- @function [parent=#os] sleep
+-- @param #number time
+
+-------------------------------------------------------------------------------
+-- Queues an event to be triggered at the specified in-game time. 
+-- @function [parent=#os] setAlarm
+-- @param #number time
+-- @return #number alarm id
+
+-------------------------------------------------------------------------------
+-- Cancels a pending alarm, to prevent it throwing an event. 
+-- @function [parent=#os] cancelAlarm
+-- @param #number timerid
+
+-------------------------------------------------------------------------------
+-- Turns off the computer. 
+-- @function [parent=#os] shutdown
+
+-------------------------------------------------------------------------------
+-- Reboots the computer. 
+-- @function [parent=#os] reboot
+
+return nil

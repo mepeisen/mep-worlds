@@ -1,0 +1,49 @@
+-------------------------------------------------------------------------------
+-- Added by ComputerCraft 1.6, the Multishell API is used to manipulate tabs.
+-- On boot, advanced systems will automatically launch the multishell script, which by default loads only a single tab running a standard shell (CraftOS or TurtleOS). Said script also loads a number of functions into memory to be used as an API by other scripts and/or functions, allowing them to add, switch between, or rename tabs.
+-- Note that two related, higher-level commands are also available via the shell API - shell.openTab() and shell.switchTab().
+-- Although this API isn't visible to the "apis" shell command, its existence (or lack thereof) provides an easy method to determine if a system has access to the multishell system (eg "if multishell then ..."). 
+-- @module multishell
+ 
+-------------------------------------------------------------------------------
+-- Returns the ID of the currently running tab. 
+-- @function [parent=#multishell] getCurrent
+-- @return #number tabID 
+
+-------------------------------------------------------------------------------
+-- Returns the number of tabs currently being handled by the multishell system. 
+-- @function [parent=#multishell] getCount
+-- @return #number tabCount 
+
+-------------------------------------------------------------------------------
+-- Launches the specified script in a new tab. 
+-- @function [parent=#multishell] launch
+-- @param #table environment
+-- @param #string program path
+-- @param #string arguments optional
+-- @return #number newTabID 
+
+-------------------------------------------------------------------------------
+-- Switches focus to the specified tab. 
+-- @function [parent=#multishell] setFocus
+-- @param #number tabID 
+-- @return #boolean success 
+
+-------------------------------------------------------------------------------
+-- Relabels the specified tab to use the specified title. 
+-- @function [parent=#multishell] setTitle
+-- @param #number tabID
+-- @param #string title 
+
+-------------------------------------------------------------------------------
+-- Returns the title of the specified tab. 
+-- @function [parent=#multishell] getTitle
+-- @param #number tabID 
+-- @return #string title 
+
+-------------------------------------------------------------------------------
+-- Returns the ID of the currently focused tab. 
+-- @function [parent=#multishell] getFocus
+-- @return #number tabID 
+
+return nil
