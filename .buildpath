@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <buildpath>
 	<buildpathentry kind="src" path="src/assets/computercraft/lua/rom/programs"/>
+	<buildpathentry kind="src" path="src/assets/computercraft/lua/rom/xwos/kernel/1/7"/>
 	<buildpathentry kind="src" path="src/assets/computercraft/lua/rom/xwos/kernel/1/8"/>
 	<buildpathentry kind="src" path="src/assets/computercraft/lua/rom/xwos/kernel/common"/>
 	<buildpathentry kind="con" path="org.eclipse.dltk.USER_LIBRARY/ccraft"/>

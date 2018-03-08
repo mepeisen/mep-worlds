@@ -52,7 +52,7 @@ M.preboot = function(k)
             for i, v in kernel.oldGlob.pairs(kernel.oldGlob.fs.list(path)) do
                 print("installing module "..v.."...")
                 kernel.debug("loading kernel module from " .. path .. "/" .. v)
-                M.instances[v] = kernel.oldGlob.require(path .. "/" .. v)
+                M.instances[v] = kernel.oldGlob.require(path .. "/" .. v .. "/init")
             end -- for list
         end -- if isdir
     end --  function loadKernelModules

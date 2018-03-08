@@ -71,7 +71,7 @@ local luaTokens = {
 -- Arithmetic metamethods/Indexing features for strings
 ------------------------------------------------------------------
 
-local mtstr = getmetatable('')
+local mtstr = {} -- getmetatable('') Notice: Not allowed in CCraft
 function mtstr.__add(a,b) return a .. b end
 function mtstr.__mul(a,b) return type(a) == 'string' and a:rep(b) or b:rep(a) end
 function mtstr.__pow(a,b) return a:rep(b) end

@@ -24,10 +24,13 @@ local origload = load
 local origpcall = pcall
 local origprint = print
 local origtostring = tostring
+local origyield = coroutine.yield
 
 local origTable = table
 local origString = string
-local origStringMeta = getmetatable("")
+
+-- TODO currently not allowed in ccraft :-(
+-- local origStringMeta = getmetatable("")
 
 --------------------------------
 -- local kernel
@@ -51,9 +54,28 @@ local bootSequence = {
 -- @function [parent=#xwos.kernel] boot
 -- @param #string ver kernel version number
 -- @param #table kernelpaths the paths to look for kernel files
+-- @param #string kernelRoot root path to kernel
 -- @param #function krequire require function to include kernel files
 -- @param global#global args the command line arguments
-M.boot = function(ver, kernelpaths, krequire, oldGlob, args)
+M.boot = function(ver, kernelpaths, kernelRoot, krequire, oldGlob, args)
+    -------------------------------
+    -- @field [parent=#xwos.kernel] #string kernelRoot the root path to kernel
+    M.kernelRoot = kernelRoot
+
+    -------------------------------
+    -- @field [parent=#xwos.kernel] #boolean kernelDebug true for kernel debugging; activated through script invocation/argument ("xwos debug")
+    M.kernelDebug = false
+
+    -------------------------------
+    -- @field [parent=#xwos.kernel] #boolean eventLog true for event logging; activated through script invocation/argument ("xwos eventLog")
+    M.eventLog = false
+    
+    --------------------------------
+    -- Require for kernel scripts
+    -- @function [parent=#xwos.kernel] require
+    -- @param #string path the path
+    M.require = krequire
+    
     print("installing extension moses...")
     table = {}
     -- TODO moses "functions" function maybe a security hole if invoked with nil (returning moses library functions with broken fenv???)
@@ -218,6 +240,7 @@ M.boot = function(ver, kernelpaths, krequire, oldGlob, args)
         end -- for haystack
         return false
     end -- function table.contains
+    origyield()
     
     print("installing extension allen...")
     string = {}
@@ -227,10 +250,10 @@ M.boot = function(ver, kernelpaths, krequire, oldGlob, args)
         string[k] = v
     end -- for string
     local stringMeta = {}
-    for k,v in origpairs(origStringMeta) do
-        stringMeta[k] = v
-    end -- for string
-    origsetmeta("", stringMeta)
+--    for k,v in origpairs(origStringMeta) do
+--        stringMeta[k] = v
+--    end -- for string
+--    origsetmeta("", stringMeta)
     local allen = krequire('/xwos/extensions/allen/allen')
     string.capitalizeFirst = allen.capitalizeFirst
     string.capitalizesEach = allen.capitalizesEach
@@ -289,6 +312,7 @@ M.boot = function(ver, kernelpaths, krequire, oldGlob, args)
     string.isIdentifier = allen.isIdentifier
     string.is = allen.is
     string.statistics = allen.statistics
+    origyield()
     
     --------------------------------
     -- @field [parent=#xwos.kernel] #table kernelpaths the paths for including kernel
@@ -313,14 +337,6 @@ M.boot = function(ver, kernelpaths, krequire, oldGlob, args)
     --------------------------------
     -- @field [parent=#xwos.kernel] #table args the command line args invoking the kernel
     M.args = args or {}
-
-    -------------------------------
-    -- @field [parent=#xwos.kernel] #boolean kernelDebug true for kernel debugging; activated through script invocation/argument ("xwos debug")
-    M.kernelDebug = false
-
-    -------------------------------
-    -- @field [parent=#xwos.kernel] #boolean eventLog true for event logging; activated through script invocation/argument ("xwos eventLog")
-    M.eventLog = false
     
     -- parse arguments
     for i, v in origpairs(M.args) do
@@ -330,12 +346,6 @@ M.boot = function(ver, kernelpaths, krequire, oldGlob, args)
             M.print("Ignoring unknown argument " .. v)
         end -- not exists
     end -- for arg
-    
-    --------------------------------
-    -- Require for kernel scripts
-    -- @function [parent=#xwos.kernel] require
-    -- @param #string path the path
-    M.require = krequire
     
     M.debug("loading process management")
     --------------------------------
@@ -362,11 +372,15 @@ M.boot = function(ver, kernelpaths, krequire, oldGlob, args)
             return e[key]
         end -- function __index
     }
+    M.debug("sandbox: set meta")
     origsetmeta(M.nenv, nenvmt)
+    M.debug("sandbox: set fenv")
     origSetfenv(nenvmt.__index, M.nenv)
+    origyield()
     local function wrapfenv(table, env, blacklist)
         local R = {}
         for k,v in origpairs(table) do
+            M.debug("sandbox: wrapfenv for", k, v)
             local t = origtype(v)
             if t == "function" then
                 if blacklist[k] == nil then
@@ -382,9 +396,11 @@ M.boot = function(ver, kernelpaths, krequire, oldGlob, args)
         end -- for table
         return R
     end -- function wrapfenv
+    M.debug("sandbox: wrapfenv(oldGlob)")
     --------------------------------
     -- @field [parent=#xwos.kernel] #table oldfenv the old fenv for global functions
     M.oldfenv = wrapfenv(oldGlob, M.nenv, {
+        tostring=true, -- TODO problem for ccraft 1.7 or for cclite?
         getfenv=true,
         setfenv=true,
         shell={run=true, clearAlias=true, dir=true, getRunningProgram=true},
@@ -392,6 +408,7 @@ M.boot = function(ver, kernelpaths, krequire, oldGlob, args)
         bit32={bxor=true},
         redstone={getBundledOutput=true}
     })
+    origyield()
     M.debug("boot finished")
 end -- function boot
 
@@ -442,7 +459,7 @@ M.startup = function()
     
     -- uninstall allen
     string = origString
-    origsetmeta("", origStringMeta)
+--    origsetmeta("", origStringMeta)
     
     M.debug("last actions before shutdown")
     if proc.result[1] then

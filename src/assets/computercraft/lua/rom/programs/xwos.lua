@@ -25,15 +25,25 @@ local osvIter = string.gmatch(osvs, "%S+")
 local osn = osvIter()
 local osv = osvIter()
 
-local kernelpaths = { "", "/rom/xwos/kernel/common" }
-local kernels = {}
-kernels["CraftOS"] = {}
-kernels["CraftOS"]["1.8"] = "/rom/xwos/kernel/1/8"
-
 print("** booting XW-OS........")
 print("** XW-OS version " .. myver)
 print("** Copyright © 2018 by xworlds.eu.")
 print("** All rights reserved.")
+
+local arg0 = shell.getRunningProgram()
+local kernelRoot = "/rom/xwos"
+if arg0:sub(0, 4) ~= "rom/" then
+    print()
+    print("WARNING! Unsecure invocation detected. Read manual for installing xwos into ROM.")
+    sleep(5) -- TODO config option to remove sleep
+    kernelRoot = "/xwos" -- TODO get path from arg0, relative to start script
+end -- if not rom
+
+local kernelpaths = { "", kernelRoot.."/kernel/common" }
+local kernels = {}
+kernels["CraftOS"] = {}
+kernels["CraftOS"]["1.8"] = kernelRoot.."/kernel/1/8"
+kernels["CraftOS"]["1.7"] = kernelRoot.."/kernel/1/7"
 
 -- check if already booted
 if xwos then
@@ -57,7 +67,7 @@ kernelpaths[1] = kernels[osn][osv]
 -- prepare first sandboxing for kernel
 local old2 = getfenv(2)
 local old1 = getfenv(1)
-if old2 ~= _G or old1.require == nil then
+if old2 ~= _G then -- or old1.require == nil then
     print()
     print("FAILED... please run XW-OS in startup script or on root console...")
     print("Running inside other operating systems may not be supported...")
@@ -80,6 +90,22 @@ for k, v in oldGlob.pairs(oldGlob) do
     newGlob[k] = v
 end -- for _G
 
+-- TODO CCLite does not have require??? Or is it a 1.7 ccraft problem?
+if oldGlob.require == nil then
+    local oldload = loadfile
+    local olderror = error
+    oldGlob.require = function(path)
+        -- print("require "..path)
+        local res, err = oldload(path..".lua")
+        if res then
+            return res()
+        else -- if res
+            olderror(err)
+        end -- if not res
+    end -- function require
+    newGlob.require = oldGlob.require
+end -- if not require
+
 -- redirect require for kernel loading
 -- using functions from oldGlob for security reasons
 local function krequire(path)
@@ -87,9 +113,7 @@ local function krequire(path)
         local target = v .. "/" .. oldGlob.string.gsub(path, "%.", "/")
         local targetFile = target .. ".lua"
         if oldGlob.fs.exists(targetFile) then
-            local res = oldGlob.require(target)
-            -- print("loaded file "..target)
-            return res
+            return newGlob.require(target)
         end -- if file exists
     end -- for kernelpaths
     return nil
@@ -99,7 +123,7 @@ setfenv(1, newGlob)
 local state, err = pcall(function()
         local kernel = krequire('xwos.kernel') -- xwos.kernel#xwos.kernel
         
-        kernel.boot(myver, kernelpaths, krequire, oldGlob, tArgs)
+        kernel.boot(myver, kernelpaths, kernelRoot, krequire, oldGlob, tArgs)
         kernel.startup()
     end -- function ex
 )
