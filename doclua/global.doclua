@@ -26,7 +26,7 @@
 
 ------------------------------------------------------------------------------
 -- pre loaded module
--- @field[parent = #global] functions#functions moses functions
+-- @field[parent = #global] functions#functions functions moses functions
 
 ------------------------------------------------------------------------------
 -- pre loaded module
@@ -66,7 +66,7 @@
 
 ------------------------------------------------------------------------------
 -- pre loaded module
--- @field[parent = #global] objects#objects moses object functions
+-- @field[parent = #global] objects#objects objects moses object functions
 
 ------------------------------------------------------------------------------
 -- pre loaded module
