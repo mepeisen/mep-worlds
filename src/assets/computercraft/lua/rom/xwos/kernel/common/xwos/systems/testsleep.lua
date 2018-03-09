@@ -15,24 +15,24 @@
 --    You should have received a copy of the GNU General Public License
 --    along with xwos.  If not, see <http://www.gnu.org/licenses/>.
 
-    local function func1()
-        print("[1]pid=",pid)
-        print("[1]Hello World!")
-        sleep(5)
-        print("[1]Hello again");
-    end
-    local function func2()
-        print("[2]pid=",pid)
-        sleep(5)
-        print("[2]Hello World!")
-        sleep(5)
-        print("[2]Hello again");
-    end
-    print("[0]pid=",pid)
-    local proc1 = xwos.pmr.createThread()
-    local proc2 = xwos.pmr.createThread()
-    proc1.spawn(func1)
-    proc2.spawn(func2)
-    proc1.join()
-    proc2.join()
-    print("Ending")
+local function func1()
+    print("[1]pid=",pid)
+    print("[1]Hello World!")
+    sleep(5)
+    print("[1]Hello again");
+end
+local function func2()
+    print("[2]pid=",pid)
+    sleep(5)
+    print("[2]Hello World!")
+    sleep(5)
+    print("[2]Hello again");
+end
+print("[0]pid=",pid)
+local proc1 = xwos.pmr.createThread()
+local proc2 = xwos.pmr.createThread()
+proc1.spawn(func1)
+proc2.spawn(func2)
+proc1.join()
+proc2.join()
+print("Ending")

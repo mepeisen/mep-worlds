@@ -15,5 +15,4 @@
 --    You should have received a copy of the GNU General Public License
 --    along with xwos.  If not, see <http://www.gnu.org/licenses/>.
 
-require('/rom/xwos/kernel/common/xwos/test2')
-        print("foo")
+print("BOOT MANAGER (in a real sense...)")

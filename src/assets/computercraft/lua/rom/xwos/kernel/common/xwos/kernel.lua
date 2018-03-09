@@ -346,6 +346,7 @@ M.boot = function(ver, kernelpaths, kernelRoot, krequire, oldGlob, args)
             M.print("Ignoring unknown argument " .. v)
         end -- not exists
     end -- for arg
+    origyield()
     
     M.debug("loading process management")
     --------------------------------
@@ -358,8 +359,11 @@ M.boot = function(ver, kernelpaths, kernelRoot, krequire, oldGlob, args)
     M.modules = M.require('xwos/modulesmgr')
     
     M.debug("booting modules")
+    origyield()
     M.modules.preboot(M)
+    origyield()
     M.modules.boot(M)
+    origyield()
     
     --------------------------------
     -- @field [parent=#xwos.kernel] #global nenv the new environment for processes
@@ -377,9 +381,14 @@ M.boot = function(ver, kernelpaths, kernelRoot, krequire, oldGlob, args)
     M.debug("sandbox: set fenv")
     origSetfenv(nenvmt.__index, M.nenv)
     origyield()
+    local num = 0
     local function wrapfenv(table, env, blacklist)
         local R = {}
         for k,v in origpairs(table) do
+            num = num + 1
+            if num == 100 then
+                origyield()
+            end -- if num
             M.debug("sandbox: wrapfenv for", k, v)
             local t = origtype(v)
             if t == "function" then
@@ -400,7 +409,7 @@ M.boot = function(ver, kernelpaths, kernelRoot, krequire, oldGlob, args)
     --------------------------------
     -- @field [parent=#xwos.kernel] #table oldfenv the old fenv for global functions
     M.oldfenv = wrapfenv(oldGlob, M.nenv, {
-        tostring=true, -- TODO problem for ccraft 1.7 or for cclite?
+        tostring=true, -- TODO problem for ccraft 1.7 or for cclite? in ccraft 1.8 this works...
         getfenv=true,
         setfenv=true,
         shell={run=true, clearAlias=true, dir=true, getRunningProgram=true},
@@ -421,13 +430,10 @@ M.startup = function()
     for k,v in origpairs(M.oldGlob) do
         nenv[k] = v
     end -- for oldGlob
-    nenv.print = function(...) -- TODO remove
-        M.oldGlob.print("->", ...)
-    end -- function print
     
     M.debug("creating root process")
     local proc = M.processes.new(nil, M, nenv, M.envFactories) -- TODO factories from root profile (per profile factories)
-    local startupData = M.readSecureData('core/startup.dat', "/rom/xwos/kernel/common/xwos/testsleep.lua") -- TODO startup script
+    local startupData = M.readSecureData('core/startup.dat', M.kernelRoot.."/kernel/common/xwos/bootmgr.lua")
     M.debug("spawning thread with startup script " .. startupData)
     proc.spawn(startupData)
     proc.join(nil)
