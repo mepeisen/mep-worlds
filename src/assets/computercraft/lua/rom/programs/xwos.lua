@@ -120,26 +120,13 @@ local function krequire(path)
 end -- function require
 
 setfenv(1, newGlob)
-
-local bootend = false
-local cocreate = coroutine.create
-local coyield = coroutine.yield
--- coroutine for yield ping pong for slow computers (or during activated debug), the boot process may take a while
--- we don't like to be interrupted by system because this may leave some global tables corrupt...
-local co = cocreate(function()
-    while not bootend do
-        coyield()
-    end -- while not bootend
-end) -- function co
 local state, err = pcall(function()
         local kernel = krequire('xwos.kernel') -- xwos.kernel#xwos.kernel
         
         kernel.boot(myver, kernelpaths, kernelRoot, krequire, oldGlob, tArgs)
-        bootend = true
         kernel.startup()
     end -- function ex
 )
-bootend = true -- set to true even if errors are catched
 setfenv(1, old1)
 
 if not state then

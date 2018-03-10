@@ -17,7 +17,6 @@
 
 local kernel -- xwos.kernel#xwos.kernel
 local moduleOrder = {}
-local origyield = coroutine.yield
 
 --------------------------------
 -- local kernel modules
@@ -54,7 +53,6 @@ M.preboot = function(k)
                 print("installing module "..v.."...")
                 kernel.debug("loading kernel module from " .. path .. "/" .. v)
                 M.instances[v] = kernel.oldGlob.require(path .. "/" .. v .. "/init")
-                origyield()
             end -- for list
         end -- if isdir
     end --  function loadKernelModules
@@ -68,14 +66,12 @@ M.preboot = function(k)
         if M.instances[v] ~= nil then
             kernel.debug("preboot kernel module",v)
             M.instances[v].preboot(kernel)
-            origyield()
         end -- if exists
     end -- for moduleOrder
     for i, v in pairs(M.instances) do
         if not table.contains(moduleOrder, i) then
             kernel.debug("preboot kernel module",v)
             v.preboot(kernel)
-            origyield()
         end -- if not contains
     end -- for modules
 end -- function preboot
@@ -88,14 +84,12 @@ M.boot = function(k)
         if M.instances[v] ~= nil then
             kernel.debug("boot kernel module",v)
             M.instances[v].boot(kernel)
-            origyield()
         end -- if exists
     end -- for moduleOrder
     for i, v in pairs(M.instances) do
         if not table.contains(moduleOrder, i) then
             kernel.debug("boot kernel module",v)
             v.boot(kernel)
-            origyield()
         end -- if not contains
     end -- for modules
 end -- function preboot

@@ -7,6 +7,11 @@
 -- @module window
 
 -------------------------------------------------------------------------------
+-- window object
+-- @type windowObject
+-- @extends term#term
+
+-------------------------------------------------------------------------------
 -- Creates and returns a new window object, similar to a wrapped monitor. Refer to the term API for a list of functions attached to it. 
 -- @function [parent=#window] create
 -- @param #table parentTerm

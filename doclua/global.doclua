@@ -128,4 +128,8 @@
 -- pre loaded module
 -- @field[parent = #global] window#window window preloaded module
 
+------------------------------------------------------------------------------
+-- pre loaded module
+-- @field[parent = #global] xwos#xwos xwos pre loaded module
+
 return nil

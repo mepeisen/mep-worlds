@@ -24,10 +24,12 @@ local origload = load
 local origpcall = pcall
 local origprint = print
 local origtostring = tostring
-local origyield = coroutine.yield
 
 local origTable = table
 local origString = string
+
+local coFake -- a fake process during kernels boot 
+local coKernel -- the kernels boot process
 
 -- TODO currently not allowed in ccraft :-(
 -- local origStringMeta = getmetatable("")
@@ -77,6 +79,7 @@ M.boot = function(ver, kernelpaths, kernelRoot, krequire, oldGlob, args)
     M.require = krequire
     
     print("installing extension moses...")
+    -- TODO check security
     table = {}
     -- TODO moses "functions" function maybe a security hole if invoked with nil (returning moses library functions with broken fenv???)
     -- TODO moses contains some local functions, may be a security hole because of broken fenv???
@@ -240,9 +243,9 @@ M.boot = function(ver, kernelpaths, kernelRoot, krequire, oldGlob, args)
         end -- for haystack
         return false
     end -- function table.contains
-    origyield()
     
     print("installing extension allen...")
+    -- TODO check security
     string = {}
     -- TODO allen contains some local functions, may be a security hole because of broken fenv???
     -- TODO support allen aliases
@@ -312,7 +315,6 @@ M.boot = function(ver, kernelpaths, kernelRoot, krequire, oldGlob, args)
     string.isIdentifier = allen.isIdentifier
     string.is = allen.is
     string.statistics = allen.statistics
-    origyield()
     
     --------------------------------
     -- @field [parent=#xwos.kernel] #table kernelpaths the paths for including kernel
@@ -334,6 +336,7 @@ M.boot = function(ver, kernelpaths, kernelRoot, krequire, oldGlob, args)
     M.oldGlob.table = table
     M.oldGlob.functions = functions
     M.oldGlob.objects = objects
+    
     --------------------------------
     -- @field [parent=#xwos.kernel] #table args the command line args invoking the kernel
     M.args = args or {}
@@ -346,7 +349,6 @@ M.boot = function(ver, kernelpaths, kernelRoot, krequire, oldGlob, args)
             M.print("Ignoring unknown argument " .. v)
         end -- not exists
     end -- for arg
-    origyield()
     
     M.debug("loading process management")
     --------------------------------
@@ -359,11 +361,8 @@ M.boot = function(ver, kernelpaths, kernelRoot, krequire, oldGlob, args)
     M.modules = M.require('xwos/modulesmgr')
     
     M.debug("booting modules")
-    origyield()
     M.modules.preboot(M)
-    origyield()
     M.modules.boot(M)
-    origyield()
     
     --------------------------------
     -- @field [parent=#xwos.kernel] #global nenv the new environment for processes
@@ -380,16 +379,10 @@ M.boot = function(ver, kernelpaths, kernelRoot, krequire, oldGlob, args)
     origsetmeta(M.nenv, nenvmt)
     M.debug("sandbox: set fenv")
     origSetfenv(nenvmt.__index, M.nenv)
-    origyield()
-    local num = 0
     local function wrapfenv(table, env, blacklist)
         local R = {}
         for k,v in origpairs(table) do
-            num = num + 1
-            if num == 100 then
-                origyield()
-            end -- if num
-            M.debug("sandbox: wrapfenv for", k, v)
+            -- M.debug("sandbox: wrapfenv for", k, v)
             local t = origtype(v)
             if t == "function" then
                 if blacklist[k] == nil then
@@ -417,7 +410,18 @@ M.boot = function(ver, kernelpaths, kernelRoot, krequire, oldGlob, args)
         bit32={bxor=true},
         redstone={getBundledOutput=true}
     })
-    origyield()
+    
+    print("installing kernel classes...")
+    -- TODO check security
+    xwos = {}
+    xwos.xwlist = krequire("xwos/xwlist")
+    xwos.xwgui = krequire("xwos/xwgui")
+    xwos.xwgui.component = krequire("xwos/xwgui/component")
+    xwos.xwgui.container = krequire("xwos/xwgui/container")
+    xwos.xwgui.stage = krequire("xwos/xwgui/stage")
+    xwos.xwgui.text = krequire("xwos/xwgui/text")
+    M.oldGlob.xwos = xwos
+    
     M.debug("boot finished")
 end -- function boot
 
