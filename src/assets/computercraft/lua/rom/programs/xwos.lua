@@ -441,8 +441,8 @@ setfenv(1, newGlob)
 local state, err = pcall(function()
         local kernel = cmr.new('xwos.kernel') -- xwos.kernel#xwos.kernel
         
-        kernel.boot(myver, kernelpaths, kernelRoot, cpfactory, oldGlob, tArgs)
-        kernel.startup()
+        kernel:boot(myver, kernelpaths, kernelRoot, cpfactory, oldGlob, tArgs)
+        kernel:startup()
     end -- function ex
 )
 setfenv(1, old1)

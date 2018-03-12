@@ -37,46 +37,70 @@ local coKernel -- the kernels boot process
 --------------------------------
 -- local kernel
 -- @type xwos.kernel
-local M = {}
+_CMR.class("xwos.kernel")
 
-local bootSequence = {
-    debug = function()
-        M.kernelDebug = true
-        M.print("activating kernel debug mode...")
-    end, -- function debug
-    
-    eventLog = function()
-        M.eventLog = true
-        M.print("activating kernel event log...")
-    end -- function eventLog
-}
+------------------------
+-- the object privates
+-- @type xwkernelprivates
+
+------------------------
+-- the internal class
+-- @type xwkernelintern
+-- @extends #xwos.kernel 
 
 --------------------------------
 -- Boot kernel
 -- @function [parent=#xwos.kernel] boot
+-- @param #xwos.kernel self the kernel object
+-- @param #string ver kernel version number
+-- @param #table kernelpaths the paths to look for kernel files
+-- @param #string kernelRoot root path to kernel
+-- @param #function cpfactory factory to create a class manager
+-- @param #table args the command line arguments
+
+.func("boot",
+--------------------------------
+-- Boot kernel
+-- @function [parent=#xwkernelintern] boot
+-- @param #xwos.kernel self the kernel object
+-- @param classmanager#clazz clazz kernel class
+-- @param #xwkernelprivates privates
 -- @param #string ver kernel version number
 -- @param #table kernelpaths the paths to look for kernel files
 -- @param #string kernelRoot root path to kernel
 -- @param #function cpfactory factory to create a class manager
 -- @param global#global args the command line arguments
-M.boot = function(ver, kernelpaths, kernelRoot, cpfactory, oldGlob, args)
+function(self, clazz, privates, ver, kernelpaths, kernelRoot, cpfactory, oldGlob, args)
+    local bootSequence = {
+        debug = function()
+            self.kernelDebug = true
+            self:print("activating kernel debug mode...")
+        end, -- function debug
+        
+        eventLog = function()
+            self.eventLog = true
+            self:print("activating kernel event log...")
+        end -- function eventLog
+    }
+
     -------------------------------
-    -- @field [parent=#xwos.kernel] #string kernelRoot the root path to kernel
-    M.kernelRoot = kernelRoot
+    -- the root path to kernel
+    -- @field [parent=#xwos.kernel] #string kernelRoot
+    self.kernelRoot = kernelRoot
 
     -------------------------------
     -- @field [parent=#xwos.kernel] #boolean kernelDebug true for kernel debugging; activated through script invocation/argument ("xwos debug")
-    M.kernelDebug = false
+    self.kernelDebug = false
 
     -------------------------------
     -- @field [parent=#xwos.kernel] #boolean eventLog true for event logging; activated through script invocation/argument ("xwos eventLog")
-    M.eventLog = false
+    self.eventLog = false
     
     --------------------------------
     -- Require for kernel scripts
     -- @function [parent=#xwos.kernel] cpfactory
     -- @param table env the environment to use
-    M.cpfactory = cpfactory
+    self.cpfactory = cpfactory
     
     print("installing extension moses...")
     -- TODO check security
@@ -318,71 +342,71 @@ M.boot = function(ver, kernelpaths, kernelRoot, cpfactory, oldGlob, args)
     
     --------------------------------
     -- @field [parent=#xwos.kernel] #table kernelpaths the paths for including kernel
-    M.kernelpaths = kernelpaths
+    self.kernelpaths = kernelpaths
     --------------------------------
     -- @field [parent=#xwos.kernel] #string version the kernel version
-    M.version = ver
+    self.version = ver
     --------------------------------
-    -- @field [parent=#xwos.kernel] #table the built in environment factories (installed from modules)
-    M.envFactories = {}
+    -- @field [parent=#xwos.kernel] #table envFactories the built in environment factories (installed from modules)
+    self.envFactories = {}
     --------------------------------
     -- @field [parent=#xwos.kernel] global#global oldGlob the old globals
-    M.oldGlob = oldGlob -- TODO type (global#global) does not work in eclipse?
-    M.oldGlob._ENV = nil
-    --M.oldGlob.package = nil
-    M.oldGlob._G = nil
-    M.oldGlob.shell = nil
-    M.oldGlob.multishell = nil
-    M.oldGlob.table = table
-    M.oldGlob.functions = functions
-    M.oldGlob.objects = objects
+    self.oldGlob = oldGlob -- TODO type (global#global) does not work in eclipse?
+    self.oldGlob._ENV = nil
+    --self.oldGlob.package = nil
+    self.oldGlob._G = nil
+    self.oldGlob.shell = nil
+    self.oldGlob.multishell = nil
+    self.oldGlob.table = table
+    self.oldGlob.functions = functions
+    self.oldGlob.objects = objects
     
     --------------------------------
     -- @field [parent=#xwos.kernel] #table args the command line args invoking the kernel
-    M.args = args or {}
+    self.args = args or {}
     
     -- parse arguments
-    for i, v in origpairs(M.args) do
+    for i, v in origpairs(self.args) do
         if bootSequence[v] ~= nil then
             bootSequence[v]()
         else -- exists
-            M.print("Ignoring unknown argument " .. v)
+            self:print("Ignoring unknown argument " .. v)
         end -- not exists
     end -- for arg
     
-    M.debug("loading process management")
+    self:debug("loading process management")
     --------------------------------
-    -- @field [parent=#xwos.kernel] xwos.processes#xwos.processes processes the known xwos processes
-    M.processes = M.require('xwos/processes')
+    -- @field [parent=#xwos.kernel] xwos.kernel.processes#xwos.kernel.processes processes the known xwos processes
+    self.processes = _CMR.new('xwos.kernel.processes')
     
-    M.debug("loading module management")
+    self:debug("loading module management")
     --------------------------------
     -- @field [parent=#xwos.kernel] xwos.modulesmgr#xwos.modulesmgr modules the kernel modules
-    M.modules = M.require('xwos/modulesmgr')
+    self.modules = _CMR.new('xwos.kernel.modulesmgr')
     
-    M.debug("booting modules")
-    M.modules.preboot(M)
-    M.modules.boot(M)
+    self:debug("booting modules")
+    self.modules:preboot(self)
+    self.modules:boot(self)
     
     --------------------------------
     -- @field [parent=#xwos.kernel] #global nenv the new environment for processes
-    M.nenv = {}
-    M.debug("preparing sandbox for root process", M.nenv)
+    self.nenv = {}
+    self:debug("preparing sandbox for root process", self.nenv)
     local nenvmt = {
         __index = function(table, key)
             local e = origGetfenv(0)
-            if (e == M.nenv) then return nil end
+            if (e == self.nenv) then return nil end
             return e[key]
         end -- function __index
     }
-    M.debug("sandbox: set meta")
-    origsetmeta(M.nenv, nenvmt)
-    M.debug("sandbox: set fenv")
-    origSetfenv(nenvmt.__index, M.nenv)
+    self:debug("sandbox: set meta")
+    origsetmeta(self.nenv, nenvmt)
+    self:debug("sandbox: set fenv")
+    origSetfenv(nenvmt.__index, self.nenv)
     local function wrapfenv(table, env, blacklist)
         local R = {}
         for k,v in origpairs(table) do
-            -- M.debug("sandbox: wrapfenv for", k, v)
+            -- self:debug("sandbox: wrapfenv for", k, v)
             local t = origtype(v)
             if t == "function" then
                 if blacklist[k] == nil then
@@ -398,10 +422,10 @@ M.boot = function(ver, kernelpaths, kernelRoot, cpfactory, oldGlob, args)
         end -- for table
         return R
     end -- function wrapfenv
-    M.debug("sandbox: wrapfenv(oldGlob)")
+    self:debug("sandbox: wrapfenv(oldGlob)")
     --------------------------------
     -- @field [parent=#xwos.kernel] #table oldfenv the old fenv for global functions
-    M.oldfenv = wrapfenv(oldGlob, M.nenv, {
+    self.oldfenv = wrapfenv(oldGlob, self.nenv, {
         tostring=true, -- TODO problem for ccraft 1.7 or for cclite? in ccraft 1.8 this works...
         getfenv=true,
         setfenv=true,
@@ -411,42 +435,52 @@ M.boot = function(ver, kernelpaths, kernelRoot, cpfactory, oldGlob, args)
         redstone={getBundledOutput=true}
     })
     
-    print("installing kernel classes...")
-    -- TODO check security
-    xwlist = krequire("xwos/xwlist")
-    xwgui = krequire("xwos/xwgui")
-    xwgcomponent = krequire("xwos/xwgui/component")
-    xwgcontainer = krequire("xwos/xwgui/container")
-    xwgstage = krequire("xwos/xwgui/stage")
-    xwgtext = krequire("xwos/xwgui/text")
-    M.oldGlob.xwlist = xwlist
-    M.oldGlob.xwgui = xwgui
-    M.oldGlob.xwgcomponent = xwgcomponent
-    M.oldGlob.xwgcontainer = xwgcontainer
-    M.oldGlob.xwgstage = xwgstage
-    M.oldGlob.xwgtext = xwgtext
+--    print("installing kernel classes...")
+-- TODO
+--    -- TODO check security
+--    xwlist = krequire("xwos/xwlist")
+--    xwgui = krequire("xwos/xwgui")
+--    xwgcomponent = krequire("xwos/xwgui/component")
+--    xwgcontainer = krequire("xwos/xwgui/container")
+--    xwgstage = krequire("xwos/xwgui/stage")
+--    xwgtext = krequire("xwos/xwgui/text")
+--    self.oldGlob.xwlist = xwlist
+--    self.oldGlob.xwgui = xwgui
+--    self.oldGlob.xwgcomponent = xwgcomponent
+--    self.oldGlob.xwgcontainer = xwgcontainer
+--    self.oldGlob.xwgstage = xwgstage
+--    self.oldGlob.xwgtext = xwgtext
     
-    M.debug("boot finished")
-end -- function boot
+    self:debug("boot finished")
+end) -- function boot
 
 --------------------------------
 -- Startup xwos
 -- @function [parent=#xwos.kernel] startup
-M.startup = function()
+-- @param #xwos.kernel self the kernel object
+
+.func("startup",
+--------------------------------
+-- Startup xwos
+-- @function [parent=#xwkernelintern] startup
+-- @param #xwos.kernel self the kernel object
+-- @param classmanager#clazz clazz kernel class
+-- @param #xwkernelprivates privates
+function(self, clazz, privates)
     local nenv = {}
-    M.debug("preparing new environment for root process", nenv)
-    for k,v in origpairs(M.oldGlob) do
+    self:debug("preparing new environment for root process", nenv)
+    for k,v in origpairs(self.oldGlob) do
         nenv[k] = v
     end -- for oldGlob
     
-    M.debug("creating root process")
-    local proc = M.processes.new(nil, M, nenv, M.envFactories) -- TODO factories from root profile (per profile factories)
-    local startupData = M.readSecureData('core/startup.dat', M.kernelRoot.."/kernel/common/xwos/bootmgr.lua")
-    M.debug("spawning thread with startup script " .. startupData)
-    proc.spawn(startupData)
-    proc.join(nil)
+    self:debug("creating root process")
+    local proc = self.processes:new(nil, self, nenv, self.envFactories) -- TODO factories from root profile (per profile factories)
+    local startupData = self:readSecureData('core/startup.dat', "xwos.bootmgr")
+    self:debug("spawning thread with startup script " .. startupData)
+    proc:spawnClass(startupData)
+    proc:join(nil)
     
-    M.debug("cleanup root process sandbox")
+    self:debug("cleanup root process sandbox")
     -- cleanup
     local function unwrapfenv(table, old)
         for k,v in origpairs(table) do
@@ -462,7 +496,7 @@ M.startup = function()
             end -- if old
         end -- for table
     end -- function unwrapfenv
-    unwrapfenv(M.oldGlob, M.oldfenv)
+    unwrapfenv(self.oldGlob, self.oldfenv)
     
     -- TODO xwos startup script changed environment already...
     -- out cleanup may not work (or is not needed). Review this
@@ -475,68 +509,112 @@ M.startup = function()
     string = origString
 --    origsetmeta("", origStringMeta)
     
-    M.debug("last actions before shutdown")
+    self:debug("last actions before shutdown")
     if proc.result[1] then
         origprint("Good bye...")
     else -- if result
         origprint("ERR: ", proc.result[2])
     end -- if result
-end -- function startup
+end) -- function startup
 
 -------------------------------
 -- debug log message
 -- @function [parent=#xwos.kernel] debug
+-- @param #xwos.kernel self the kernel object
 -- @param ... print message arguments
-M.debug = function(...)
-    if M.kernelDebug then
-        M.print(...)
+
+.func("debug",
+-------------------------------
+-- debug log message
+-- @function [parent=#xwkernelintern] debug
+-- @param #xwos.kernel self the kernel object
+-- @param classmanager#clazz clazz kernel class
+-- @param #xwkernelprivates privates
+-- @param ... print message arguments
+function(self, clazz, privates, ...)
+    if self.kernelDebug then
+        self:print(...)
     end -- if kernelDebug
-end -- function debug
+end) -- function debug
 
 -------------------------------
 -- print info message
 -- @function [parent=#xwos.kernel] print
+-- @param #xwos.kernel self the kernel object
 -- @param ... print message arguments
-M.print = function(...)
-    M.oldGlob.print(...) -- TODO wrap to kernel display
-    if (M.kernelDebug) then
-        local f = M.oldGlob.fs.open("/core/log/debug-log.txt", M.oldGlob.fs.exists("/core/log/debug-log.txt") and "a" or "w")
-        local str = M.oldGlob.os.day().."-"..M.oldGlob.os.time().." "
+
+.func("print",
+-------------------------------
+-- print info message
+-- @function [parent=#xwkernelintern] print
+-- @param #xwos.kernel self the kernel object
+-- @param classmanager#clazz clazz kernel class
+-- @param #xwkernelprivates privates
+-- @param ... print message arguments
+function(self, clazz, privates, ...)
+    self.oldGlob.print(...) -- TODO wrap to kernel display
+    if (self.kernelDebug) then
+        local f = self.oldGlob.fs.open("/core/log/debug-log.txt", self.oldGlob.fs.exists("/core/log/debug-log.txt") and "a" or "w")
+        local str = self.oldGlob.os.day().."-"..self.oldGlob.os.time().." "
         for k, v in origpairs({...}) do
             str = str .. origtostring(v) .. " "
         end -- for ...
         f.writeLine(str)
         f.close()
     end -- if kernelDebug
-end -- function print
+end) -- function print
 
 -------------------------------
 -- read data file from secured kernel storage
 -- @function [parent=#xwos.kernel] readSecureData
+-- @param #xwos.kernel self the kernel object
 -- @param #string path the file to read
 -- @param #string def optional default data
 -- @return #string the file content or nil if file does not exist
-M.readSecureData = function(path, def)
+
+.func("readSecureData",
+-------------------------------
+-- read data file from secured kernel storage
+-- @function [parent=#xwkernelintern] readSecureData
+-- @param #xwos.kernel self the kernel object
+-- @param classmanager#clazz clazz kernel class
+-- @param #xwkernelprivates privates
+-- @param #string path the file to read
+-- @param #string def optional default data
+-- @return #string the file content or nil if file does not exist
+function(self, clazz, privates, path, def)
     local f = "/xwos/private/" .. path
-    if not M.oldGlob.fs.exists(f) then
+    if not self.oldGlob.fs.exists(f) then
         return def
     end -- if not exists
-    local h = M.oldGlob.fs.open(f, "r")
+    local h = self.oldGlob.fs.open(f, "r")
     local res = h.readall()
     h.close()
     return res
-end -- function readSecureData
+end) -- function readSecureData
 
 -------------------------------
 -- write data file to secured kernel storage
 -- @function [parent=#xwos.kernel] writeSecureData
+-- @param #xwos.kernel self the kernel object
 -- @param #string path the file to write
 -- @param #string data new data
-M.writeSecureData = function(path, data)
+
+.func("writeSecureData",
+-------------------------------
+-- write data file to secured kernel storage
+-- @function [parent=#xwkernelintern] writeSecureData
+-- @param #xwos.kernel self the kernel object
+-- @param classmanager#clazz clazz kernel class
+-- @param #xwkernelprivates privates
+-- @param #string path the file to write
+-- @param #string data new data
+function(path, data)
     local f = "/xwos/private/" .. path
-    local h = M.oldGlob.fs.open(f, "w")
+    local h = self.oldGlob.fs.open(f, "w")
     h.write(data)
     h.close()
 end -- function readSecureData
+)
 
-return M
+return nil

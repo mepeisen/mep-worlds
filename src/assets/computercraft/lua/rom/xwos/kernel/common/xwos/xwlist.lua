@@ -17,15 +17,16 @@
 
 -------------------------------------------
 -- @module xwos.xwlist
-_CMR.class("xwlist")
+_CMR.class("xwos.xwlist")
 
 ------------------------
--- the variable privates
+-- the object privates
 -- @type xwlistprivates
 
 ------------------------
 -- the internal class
 -- @type xwlistintern
+-- @extends #xwos.xwlist 
 
 ------------------------
 -- number of elements in list
