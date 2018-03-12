@@ -32,6 +32,12 @@
 -- @return #classmanager self for chaining
 
 ---------------
+-- Retrieves singleton instance
+-- @function [parent=#classmanager] get
+-- @param #string name the class name
+-- @return #table the object instance
+
+---------------
 -- create new class instance
 -- @function [parent=#classmanager] new
 -- @param #string name the class name
@@ -74,12 +80,28 @@
 -- @field [parent=#clazz] #table _statics
             
 ---------------
+-- the private instance functions inside class
+-- @field [parent=#clazz] #table _privates
+            
+---------------
 -- the constructor function
 -- @field [parent=#clazz] #function _ctor
             
 ---------------
 -- the class name
 -- @field [parent=#clazz] #string _name
+            
+---------------
+-- the singleton flag
+-- @field [parent=#clazz] #boolean _singleton
+
+---------------
+-- true if singleton is private (non-visible through api)
+-- @field [parent=#clazz] #boolean _privateSingleton
+
+---------------
+-- the singleton instance
+-- @field [parent=#clazz] #table _singletonInstance
             
 ---------------
 -- the super constructor from base class
@@ -92,7 +114,13 @@
 ---------------
 -- the super class name (unresolved)
 -- @field [parent=#clazz] #string _supername
-                  
+
+---------------
+-- declare a singleton
+-- @function [parent=#clazz] singleton
+-- @param #boolean private true for non-visible singletons; defaults to false
+-- @return #clazz self for chaining
+
 ---------------
 -- declare constructor
 -- @function [parent=#clazz] ctor
@@ -102,6 +130,13 @@
 ---------------
 -- declare function
 -- @function [parent=#clazz] func
+-- @param #string name
+-- @param #function func
+-- @return #clazz self for chaining
+        
+---------------
+-- declare private function located inside object privates
+-- @function [parent=#clazz] pfunc
 -- @param #string name
 -- @param #function func
 -- @return #clazz self for chaining

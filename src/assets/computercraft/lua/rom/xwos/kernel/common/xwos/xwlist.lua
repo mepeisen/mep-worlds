@@ -42,15 +42,14 @@ _CMR.class("xwos.xwlist")
 
 ------------------------
 -- create new list
--- @function [parent=#xwos.xwlist] new
+-- @function [parent=#xwos.xwlist] create
 -- @param ... initial objects
 -- @return #xwos.xwlist list
 -- 
 ------------------------
--- create new list
--- @function [parent=#xwlistintern] new
--- @param ... initial objects
--- @return #xwos.xwlist list
+-- @function [parent=#xwlistintern] create
+-- @param ...
+-- @return #xwos.xwlist
 .sfunc("create", function(...)
     return _CMR.new("xwlist", ...)
 end) -- function create
@@ -58,12 +57,11 @@ end) -- function create
 .ctor(
 ------------------------
 -- create new list
--- @function [parent=#xwlistintern] create
+-- @function [parent=#xwlistintern] __ctor
 -- @param #xwos.xwlist self self
 -- @param classmanager#clazz clazz xwlist class
 -- @param #xwlistprivates privates
 -- @param ... initial objects
--- @return #xwos.xwlist list
 function (self, clazz, privates, ...)
     privates._length = 0
     for _, v in ipairs{...} do self:push(v) end
@@ -78,13 +76,12 @@ end) -- ctor
 
 .func("push",
 ------------------------
--- add new entry to list end
 -- @function [parent=#xwlistintern] push
--- @param #xwos.xwlist self self
--- @param classmanager#clazz clazz xwlist class
--- @param #xwlistprivates privates
--- @param #xwoslistitem t object to push
--- @return #xwoslistitem given object (t)
+-- @param #xwos.xwlist self
+-- @param classmanager#clazz clazz
+-- @param #xwlistprivates
+-- @param #xwoslistitem t
+-- @return #xwoslistitem
 function (self, clazz, privates, t)
     -- TODO t privates
     if privates._last then
@@ -109,13 +106,12 @@ end) -- function push
 
 .func("unshift",
 ------------------------
--- add new entry to list beginning
 -- @function [parent=#xwlistintern] unshift
--- @param #xwos.xwlist self self
--- @param classmanager#clazz clazz xwlist class
+-- @param #xwos.xwlist self
+-- @param classmanager#clazz clazz
 -- @param #xwlistprivates privates
--- @param #xwoslistitem t object to unshift
--- @return #xwoslistitem given object (t)
+-- @param #xwoslistitem t
+-- @return #xwoslistitem
 function (self, clazz, privates, t)
     if privates._first then
         privates._first._prev = t
@@ -140,14 +136,13 @@ end) -- function unshift
 
 .func("insert",
 ------------------------
--- insert a new entry after an element
 -- @function [parent=#xwlistintern] insert
--- @param #xwos.xwlist self self
--- @param classmanager#clazz clazz xwlist class
+-- @param #xwos.xwlist self
+-- @param classmanager#clazz clazz
 -- @param #xwlistprivates privates
--- @param #xwoslistitem t new entry
--- @param #xwoslistitem after element before new entry
--- @return #xwoslistitem given object (t)
+-- @param #xwoslistitem t
+-- @param #xwoslistitem after
+-- @return #xwoslistitem
 function (self, clazz, privates, t, after)
     if after then
         if after._next then
@@ -175,12 +170,11 @@ end) -- function insert
 
 .func("pop",
 ------------------------
--- pop element from end
 -- @function [parent=#xwlistintern] pop
--- @param #xwos.xwlist self self
--- @param classmanager#clazz clazz xwlist class
+-- @param #xwos.xwlist self
+-- @param classmanager#clazz clazz
 -- @param #xwlistprivates privates
--- @return #xwoslistitem entry
+-- @return #xwoslistitem
 function (self, clazz, privates)
     if not privates._last then return end -- if not last
     
@@ -208,10 +202,10 @@ end) -- function pop
 ------------------------
 -- pop element from beginning
 -- @function [parent=#xwlistintern] shift
--- @param #xwos.xwlist self self
--- @param classmanager#clazz clazz xwlist class
--- @param #xwlistprivates privates
--- @return #xwoslistitem entry
+-- @param #xwos.xwlist self
+-- @param classmanager#clazz clazz
+-- @param #xwlistprivates
+-- @return #xwoslistitem
 function (self, clazz, privates)
     if not privates._first then return end -- if not first
     
@@ -237,12 +231,11 @@ end) -- function shift
 
 .func("remove",
 ------------------------
--- remove given element from list
 -- @function [parent=#xwlistintern] remove
--- @param #xwos.xwlist self self
--- @param classmanager#clazz clazz xwlist class
+-- @param #xwos.xwlist self
+-- @param classmanager#clazz clazz
 -- @param #xwlistprivates privates
--- @param #xwoslistitem t element to remove
+-- @param #xwoslistitem t
 function (self, class, privates, t)
     if t._next then
         if t._prev then
@@ -273,12 +266,11 @@ end) -- function remove
 
 .func("iterate",
 ------------------------
--- iterator for elements
 -- @function [parent=#xwlistintern] iterate
--- @param #xwos.xwlist self self
--- @param classmanager#clazz clazz xwlist class
+-- @param #xwos.xwlist self
+-- @param classmanager#clazz clazz
 -- @param #xwlistprivates privates
--- @return #function iterator function
+-- @return #function
 function (self, class, privates)
     ------------------------
     -- iterator function

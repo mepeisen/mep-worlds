@@ -15,83 +15,112 @@
 --    You should have received a copy of the GNU General Public License
 --    along with xwos.  If not, see <http://www.gnu.org/licenses/>.
 
-local kernel -- xwos.kernel#xwos.kernel
-local moduleOrder = {}
+local pairs = pairs
+local tcontains = table.contains
 
 --------------------------------
--- local kernel modules
--- @type xwos.modulesmgr
-local M = {}
+-- local process environments
+-- @module xwos.kernel.modulesmgr
+_CMR.class("xwos.kernel.modulesmgr")
 
--------------------------------
--- the module instances
--- @type xwos.modulesmgr.instances
--- @field [parent=#xwos.modulesmgr] #xwos.modulesmgr.instances instances
-M.instances = {}
+------------------------
+-- the object privates
+-- @type xwmodsprivates
 
--------------------------------
--- sandbox kernel module
--- @field [parent=#xwos.modulesmgr.instances] xwos.modulesmgr.sandbox#xwos.modulesmgr.sandbox sandbox
+------------------------
+-- the internal class
+-- @type xwmodsintern
+-- @extends #xwos.kernel.modulesmgr 
 
--------------------------------
--- security kernel module
--- @field [parent=#xwos.modulesmgr.instances] xwos.modulesmgr.security#xwos.modulesmgr.security security
+.ctor(
+------------------------
+-- create new modules manager
+-- @function [parent=#xwprocsintern] __ctor
+-- @param #xwos.kernel.modulesmgr self self
+-- @param classmanager#clazz clazz proc class
+-- @param #xwprocsprivates privates
+-- @param xwos.kernel#xwos.kernel kernel
+function(self, clazz, privates, kernel)
+    --------------------------------
+    -- the kernel reference
+    -- @field [parent=#xwmodsprivates] xwos.kernel#xwos.kernel kernel
+    privates.kernel = kernel
+    
+    --------------------------------
+    -- the ordering for loading kernel modules
+    -- @field [parent=#xwmodsprivates] #list<#string> moduleOrder
+    privates.moduleOrder = _CMR.require("moduleOrder")
+    
+    -------------------------------
+    -- the module instances
+    -- @type mminstances
+    -- @field [parent=#xwos.kernel.modulesmgr] #mminstances instances
+    self.instances = {}
+
+    -------------------------------
+    -- sandbox kernel module
+    -- @field [parent=#mminstances] xwos.modules.sandbox#xwos.modules.sandbox sandbox
+    
+    -------------------------------
+    -- security kernel module
+    -- @field [parent=#mminstances] xwos.modules.security#xwos.modules.security security
+end) -- ctor
 
 --------------------------------
--- @function [parent=#xwos.modulesmgr] preboot
--- @param xwos.kernel#xwos.kernel k the kernel
-M.preboot = function(k)
-    kernel = k
-    -- load settings with kernel module boot order
-    moduleOrder = kernel.require("moduleOrder")
-    -- helper to load kernel modules from given directory
-    local loadKernelModules = function(dir)
-        local path = dir .. "/xwos/modules"
-        kernel.debug("loading kernel modules from " .. path)
-        if kernel.oldGlob.fs.isDir(path) then
-            for i, v in kernel.oldGlob.pairs(kernel.oldGlob.fs.list(path)) do
-                print("installing module "..v.."...")
-                kernel.debug("loading kernel module from " .. path .. "/" .. v)
-                M.instances[v] = kernel.oldGlob.require(path .. "/" .. v .. "/init")
-            end -- for list
-        end -- if isdir
-    end --  function loadKernelModules
+-- Pre-boot the kernel modules in corresponding order
+-- @function [parent=#xwos.kernel.modulesmgr] preboot
+-- @param #xwos.kernel.modulesmgr self self
+
+.func("preboot",
+--------------------------------
+-- @function [parent=#xwos.kernel.modulesmgr] preboot
+-- @param #xwos.kernel.modulesmgr self
+-- @param classmanager#clazz clazz
+-- @param #xwmodsprivates privates
+function(self, clazz, privates)
+    for k,v in pairs(_CMR.findPackages("xwos.modules")) do
+        privates.kernel:debug("load kernel module", v, "/ class", k)
+        self.instances[v] = _CMR.new(k, privates.kernel)
+    end -- for modules
   
-    -- load kernel modules
-    for k, v in kernel.oldGlob.pairs(kernel.kernelpaths) do
-        loadKernelModules(v)
-    end -- for kernelpaths
-
-    for i, v in pairs(moduleOrder) do
-        if M.instances[v] ~= nil then
-            kernel.debug("preboot kernel module",v)
-            M.instances[v].preboot(kernel)
+    for i, v in pairs(privates.moduleOrder) do
+        if self.instances[v] ~= nil then
+            privates.kernel.debug("preboot kernel module",v)
+            self.instances[v].preboot()
         end -- if exists
     end -- for moduleOrder
-    for i, v in pairs(M.instances) do
-        if not table.contains(moduleOrder, i) then
-            kernel.debug("preboot kernel module",v)
-            v.preboot(kernel)
+    for i, v in pairs(self.instances) do
+        if not tcontains(privates.moduleOrder, i) then
+            privates.kernel.debug("preboot kernel module",v)
+            v.preboot()
         end -- if not contains
     end -- for modules
-end -- function preboot
+end) -- function preboot
 
 --------------------------------
--- @function [parent=#xwos.modulesmgr] boot
--- @param xwos.kernel#xwos.kernel k the kernel
-M.boot = function(k)
-    for i, v in pairs(moduleOrder) do
-        if M.instances[v] ~= nil then
-            kernel.debug("boot kernel module",v)
-            M.instances[v].boot(kernel)
+-- boot the kernel modules in corresponding order
+-- @function [parent=#xwos.kernel.modulesmgr] boot
+-- @param #xwos.kernel.modulesmgr self self
+
+.func("boot",
+--------------------------------
+-- @function [parent=#xwos.kernel.modulesmgr] boot
+-- @param #xwos.kernel.modulesmgr self
+-- @param classmanager#clazz clazz
+-- @param #xwmodsprivates privates
+function(self, clazz, privates)
+    for i, v in pairs(privates.moduleOrder) do
+        if self.instances[v] ~= nil then
+            privates.kernel.debug("boot kernel module",v)
+            self.instances[v].boot()
         end -- if exists
     end -- for moduleOrder
-    for i, v in pairs(M.instances) do
-        if not table.contains(moduleOrder, i) then
-            kernel.debug("boot kernel module",v)
-            v.boot(kernel)
+    for i, v in pairs(self.instances) do
+        if not tcontains(privates.moduleOrder, i) then
+            privates.kernel.debug("boot kernel module",v)
+            v.boot()
         end -- if not contains
     end -- for modules
-end -- function preboot
+end) -- function preboot
 
-return M
+return nil

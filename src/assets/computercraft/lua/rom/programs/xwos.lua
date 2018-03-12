@@ -138,7 +138,9 @@ local cpfactory = function(env)
     local classmanager = {}
     local classpath = {}
     env = env or _G
-    local classes = {}
+    local classes = {} -- #map<#string,#clazz>
+    
+     -- TODO security: the local functions may have from env...
     
     ---------------
     -- plain require a file
@@ -180,24 +182,31 @@ local cpfactory = function(env)
         classmanager.class(name).ctor(errfunc)
     end -- error class
     
+    local function loadClassFile(name, file, path)
+        local res, err = loadfile(path)
+        if res then
+            res()
+            if classes[name] == nil then
+                err = file.." did not declare class "..name
+                errClass(name, err)
+                error(err)
+            end -- if not class
+        else -- if res
+            err = "loading "..name.." throws error: "..err
+            errClass(name, err)
+            error(err)
+        end -- if not res
+    end -- function loadClassFile
+    
     local function loadClass(name)
         local file = name:gsub("%.", "/")
         for k,v in pairs(classpath) do
-            local path = v.."/"..file..".lua"
-            if fsexists(path) and not fsisdir(path) then
-                local res, err = loadfile(path)
-                if res then
-                    res()
-                    if classes[name] == nil then
-                        err = file.." did not declare class "..name
-                        errClass(name, err)
-                        error(err)
-                    end -- if not class
-                else -- if res
-                    err = "loading "..name.." throws error: "..err
-                    errClass(name, err)
-                    error(err)
-                end -- if not res
+            local path1 = v.."/"..file..".lua"
+            local path2 = v.."/"..file.."/init.lua"
+            if fsexists(path1) and not fsisdir(path1) then
+                loadClassFile(name, file, path1)
+            elseif fsexists(path2) and not fsisdir(path2) then
+                loadClassFile(name, file, path2)
             end -- if isfile
         end -- for cp
         local err = "class "..name.." not found"
@@ -217,6 +226,19 @@ local cpfactory = function(env)
             end -- if super
         end -- for funcs
     end -- function addObjMethods
+    
+    local function addPrivateMethods(self, privates, index, objclazz, clazz)
+        for k,v in pairs(clazz._privates) do
+            index[k] = function(self, ...)
+                clazz._privates[k](self, clazz, privates, ...)
+            end -- function
+            setfenv(index[k], env)
+            if clazz._super ~= nil then
+                index.__index = {}
+                addPrivateMethods(self, privates, index.__index, clazz, clazz._super)
+            end -- if super
+        end -- for funcs
+    end -- function addPrivateMethods
     
     local function invokeCtor(self, privates, objclazz, clazz, ...)
         if clazz._ctor == nil then
@@ -256,6 +278,38 @@ local cpfactory = function(env)
         end -- if not super
     end -- function loadClass
     
+    local function construct(name, clazz)
+        local obj = {}
+        local privates = {}
+        obj.class = name
+        obj.__index = {}
+        privates.__index = {}
+        addObjMethods(obj, privates, obj.__index, clazz, clazz)
+        addPrivateMethods(obj, privates, privates.__index, clazz, clazz)
+        invokeCtor(obj, privates, clazz, clazz)
+        return obj
+    end -- function construct
+    
+    ---------------
+    -- Retrieves singleton instance
+    -- @function [parent=#classmanager] get
+    -- @param #string name the class name
+    -- @return #table the object instance
+    function classmanager.get(name)
+        loadAndDefineClass(name)
+        
+        local clazz = classes[name]
+        if not clazz._singleton then
+            error("Cannot retrieve non-singleton "..name)
+        end -- if not singleton
+        
+        if clazz._singletonInstance == nil then
+            clazz._singletonInstance = construct(name, clazz)
+        end -- if not singletonInstance
+        
+        return clazz._singletonInstance
+    end -- function new
+    
     ---------------
     -- create new class instance
     -- @function [parent=#classmanager] new
@@ -265,14 +319,12 @@ local cpfactory = function(env)
     function classmanager.new(name, ...)
         loadAndDefineClass(name)
         
-        local obj = {}
-        local privates = {}
         local clazz = classes[name]
-        obj.class = name
-        obj.__index = {}
-        addObjMethods(obj, privates, obj.__index, clazz, clazz)
-        invokeCtor(obj, privates, clazz, clazz, ...)
-        return obj
+        if clazz._singleton then
+            error("Cannot create new instance of singleton "..name)
+        end -- if singleton
+        
+        return construct(name, clazz)
     end -- function new
     
     ---------------
@@ -295,7 +347,7 @@ local cpfactory = function(env)
             local path = v.."/"..file
             for _, f in pairs(fslist(path)) do
                 if fsisdir(path.."/"..f) then
-                    res[prefix.."."..f] = true
+                    res[prefix.."."..f] = f
                 end -- if fs.isdir
             end -- for fs.list
         end -- for co
@@ -341,10 +393,16 @@ local cpfactory = function(env)
             -- the instance functions inside class
             -- @field [parent=#clazz] #table _funcs
             _funcs = {},
+            
             ---------------
             -- the static functions
             -- @field [parent=#clazz] #table _statics
             _statics = {},
+            
+            ---------------
+            -- the private instance functions inside class
+            -- @field [parent=#clazz] #table _privates
+            _privates = {},
             
             ---------------
             -- the constructor function
@@ -355,6 +413,21 @@ local cpfactory = function(env)
             -- the class name
             -- @field [parent=#clazz] #string _name
             _name = name,
+            
+            ---------------
+            -- the singleton flag
+            -- @field [parent=#clazz] #boolean _singleton
+            _singleton = false,
+            
+            ---------------
+            -- true if singleton is private (non-visible through api)
+            -- @field [parent=#clazz] #boolean _privateSingleton
+            _privateSingleton = false,
+            
+            ---------------
+            -- the singleton instance
+            -- @field [parent=#clazz] #table _singletonInstance
+            _singletonInstance = nil,
             
             ---------------
             -- the super constructor from base class
@@ -372,6 +445,19 @@ local cpfactory = function(env)
             _supername = nil
         }
         classes[name] = clazz
+        
+        ---------------
+        -- declare a singleton
+        -- @function [parent=#clazz] singleton
+        -- @param #boolean private true for non-visible singletons; defaults to false
+        -- @return #clazz self for chaining
+        function clazz.singleton(private)
+            clazz._singleton = true
+            if private ~= nil then
+                clazz._privateSingleton = private
+            end -- if private
+            return clazz
+        end -- function ctor
         
         ---------------
         -- declare constructor
@@ -398,6 +484,21 @@ local cpfactory = function(env)
                 error("Duplicate function declaration: "..name)
             end -- if func
             clazz._funcs[name] = func
+            setfenv(func, env)
+            return clazz
+        end -- function func
+        
+        ---------------
+        -- declare private function located inside object privates
+        -- @function [parent=#clazz] pfunc
+        -- @param #string name
+        -- @param #function func
+        -- @return #clazz self for chaining
+        function clazz.pfunc(name, func)
+            if clazz._privates[name] ~= nil then
+                error("Duplicate function declaration: "..name)
+            end -- if func
+            clazz._privates[name] = func
             setfenv(func, env)
             return clazz
         end -- function func
@@ -439,7 +540,7 @@ cmr.addcp(table.unpack(kernelpaths))
 
 setfenv(1, newGlob)
 local state, err = pcall(function()
-        local kernel = cmr.new('xwos.kernel') -- xwos.kernel#xwos.kernel
+        local kernel = cmr.get('xwos.kernel') -- xwos.kernel#xwos.kernel
         
         kernel:boot(myver, kernelpaths, kernelRoot, cpfactory, oldGlob, tArgs)
         kernel:startup()

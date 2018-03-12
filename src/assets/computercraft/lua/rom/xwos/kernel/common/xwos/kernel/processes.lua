@@ -17,352 +17,546 @@
 
 local cocreate = coroutine.create
 local coresume = coroutine.resume
-local origGetfenv = getfenv
-local origSetfenv = setfenv
-local origsetmeta = setmetatable
-local origtype = type
-local origdofile = dofile
-local origloadfile = loadfile
-local origpcall = pcall
+local getfenv = getfenv
+local setfenv = setfenv
+local setmetatable = setmetatable
+local type = type
+local dofile = dofile
+local loadfile = loadfile
+local pcall = pcall
 local origpackage = package
-local origprint = print
-local origerror = error
+local print = print
+local error = error
 local origser = textutils.serialize
-local origpairs = pairs
+local pairs = pairs
 local origyield = coroutine.yield
 local originsert = table.insert
-
-local kernel -- xwos.kernel#xwos.kernel
+local origqueue = os.queueEvent
 
 --------------------------------
 -- local process environments
--- @type xwos.processes
-local processes = {}
+-- @module xwos.kernel.processes
+_CMR.class("xwos.kernel.processes")
 
---------------------------------
--- next pid to use for new processes
-local nextPid = 0
+-- TODO iterator function etc.
+
+------------------------
+-- the object privates
+-- @type xwprocsprivates
+
+------------------------
+-- the internal class
+-- @type xwprocsintern
+-- @extends #xwos.kernel.processes 
+
+.ctor(
+------------------------
+-- create new process manager
+-- @function [parent=#xwprocsintern] __ctor
+-- @param #xwos.kernel.processes self self
+-- @param classmanager#clazz clazz proc class
+-- @param #xwprocsprivates privates
+function(self, clazz, privates)
+    --------------------------------
+    -- next pid to use for new processes
+    -- @field [parent=#xwprocsprivates] #number nextPid
+    privates.nextPid = 0
+
+    --------------------------------
+    -- the known processes
+    -- @field [parent=#xwprocsprivates] xwos.xwlist#xwos.xwlist list
+    privates.list = _CMR.new("xwos.xwlist")
+
+    --------------------------------
+    -- thw processes by id
+    -- @field [parent=#xwprocsprivates] #map<#number,#process> procs
+    privates.procs = {}
+end) -- ctor
 
 --------------------------------
 -- creates a new process
--- @function [parent=#xwos.processes] new
--- @param p the parent process
+-- @function [parent=#xwos.kernel.processes] create
+-- @param #xwos.kernel.processes self self
+-- @param #process p the parent process
 -- @param xwos.kernel#xwos.kernel k the kernel table
--- @param #global env the global process environment
+-- @param global#global env the global process environment
 -- @param #table factories functions with signature (proc, env) to initialize the new process or environment
--- @return #xwos.process
-processes.new = function(p, k, env, factories)
-    kernel = k
+-- @return #process
+
+.func("create",
+--------------------------------
+-- @function [parent=#xwprocsintern] create
+-- @param #xwos.kernel.processes self
+-- @param classmanager#clazz clazz
+-- @param #xwprocsprivates privates
+-- @param #process p
+-- @param xwos.kernel#xwos.kernel k
+-- @param global#global env
+-- @param #table factories
+-- @return #process
+function(self, clazz, privates, p, k, env, factories)
     --------------------------------
-    -- process type
-    -- @type xwos.process
-    local R = {}
+    -- kernel reference
+    -- @field [parent=#xwprocsprivates] xwos.kernel#xwos.kernel kernel
+    privates.kernel = k
+    
+    local newPid = privates.nextPid
+    privates.nextPid = privates.nextPid + 1
+    
+    local proc = _CMR.new("xwos.kernel.process", privates, p, k, newPid, env, factories)
+    privates.list:push(proc)
+    privates.procs[newPid] = proc
+    return proc
+end) -- function new
+
+-- TODO hide xwos.kernel.process constructor (only allow instantiation from xwos.kernel.processes functions) 
+
+--------------------------------
+-- local process environments
+-- @type process
+_CMR.class("xwos.kernel.process")
+
+------------------------
+-- the object privates
+-- @type procprivates
+
+------------------------
+-- the internal class
+-- @type procintern
+-- @extends #process
+
+.ctor(
+------------------------
+-- create new process
+-- @function [parent=#procintern] __ctor
+-- @param #xwos.kernel.processes self self
+-- @param classmanager#clazz clazz proc class
+-- @param #procprivates privates
+-- @param #xwprocsprivates pprivates
+-- @param #process p the parent process
+-- @param xwos.kernel#xwos.kernel k the kernel table
+-- @param #number newPid the new pid to be used by this process
+-- @param global#global env the global process environment
+-- @param #table factories functions with signature (proc, env) to initialize the new process or environment
+function(self, clazz, privates, pprivates, p, k, newPid, env, factories)
+    --------------------------------
+    -- the debug string for prefixing debug messages
+    -- @field [parent=#procprivates] #string dstr
+    privates.dstr = "[PID"..newPid.."]"
     
     --------------------------------
-    -- @field [parent=#xwos.process] #number pid the process id
-    R.pid = nextPid
-    nextPid = nextPid + 1
-        
+    -- the process id
+    -- @field [parent=#procprivates] #number pid
+    privates.pid = newPid
+    
+    --------------------------------
+    -- the process table
+    -- @field [parent=#procprivates] #xwprocsprivates processes
+    privates.processes = pprivates
+    
     --------------------------------------
-    -- @field [parent=#xwos.process] #table evqueue the process local event queue
-    R.evqueue = {}
+    -- the process local event queue
+    -- @field [parent=#procprivates] #table evqueue
+    privates.evqueue = {}
     
     ------------------------------------------
-    -- @field [parent=#xwos.process] #number joined number of processes having called method join
-    R.joined = 0
+    -- number of processes having called method join
+    -- @field [parent=#procprivates] #number joined 
+    privates.joined = 0
     
     --------------------------------
-    -- @field [parent=#xwos.process] #string procstate the process state; "initializing", "running" or "terminated"
-    R.procstate = "initializing"
-    kernel.debug("[PID"..R.pid.."] pocstate = initializing")
+    -- the parent process
+    -- @field [parent=#procprivates] #process parent
+    privates.parent = p
     
     --------------------------------
-    -- @field [parent=#xwos.process] #xwos.process parent the parent process
-    R.parent = p
+    -- the kernel reference
+    -- @field [parent=#procprivates] xwos.kernel#xwos.kernel kernel
+    privates.kernel = k
     
     --------------------------------
-    -- @field [parent=#xwos.process] #global env the process environment
-    R.env = { pid = R.pid }
-    kernel.debug("[PID"..R.pid.."] environments", env)
+    -- the original process environment given to create function
+    -- @field [parent=#procprivates] #global origenv
+    privates.origenv = env
+    
+    --------------------------------
+    -- functions with signature (proc, env) to initialize the new process or environment
+    -- @field [parent=#procprivates] #table factories
+    privates.factories = factories
+    
+    --------------------------------
+    -- the process state; "initializing", "running" or "terminated"
+    -- @field [parent=#procprivates] #string procstate 
+    privates.procstate = "initializing"
+    privates:debug("pocstate =", privates.procstate)
+    
+    --------------------------------
+    -- the process environment used globally in this process
+    -- @field [parent=#procprivates] global#global env
+    privates.env = { pid = privates.pid }
+    privates:debug("env =", privates.env)
+    
     local nenvmt = {
         __index = function(table, key)
-            local res = env[key]
+            local res = privates.origenv[key]
             if res == nil then
-                if R.parent ~= nil then
+                if privates.parent ~= nil then
                     -- parent should at least lead to PID 0. PID 0 already should contain all the visible and public globals all processes are allowed to use
-                    res = R.parent.env[key]
+                    res = privates.parent.env[key]
                 end -- if parent
             end -- if not res (env)
             return res
         end -- function __index
     }
-    origsetmeta(R.env, nenvmt)
-    origSetfenv(nenvmt.__index, R.env)
-        
-    --------------------------------------
-    -- acquire input (front process)
-    -- @function [parent=#xwos.process] acquireInput
-    R.acquireInput = function()
-        -- TODO is a stack always good?
-        -- switching between processes (alt+tab in windows) is not meant to build a stack of input
-        -- a stack of input will represent some kind of modal dialog over other modal dialog where closing one will pop up the previous one
-        -- think about it...
-        kernel.modules.instances.sandbox.procinput.acquire(R)
-    end -- function acquireInput
-        
-    ------------------------------------------
-    -- joins process and awaits it termination
-    -- @function [parent=#process] join
-    -- @param #xwos.process cproc calling process
-    R.join = function(cproc)
-        local cpid = "*"
-        if cproc ~= nil then
-            cpid = cproc.pid
-        end -- if cproc
-        kernel.debug("[PID"..cpid.."] joining")
-        R.joined = R.joined + 1
-        while R.procstate ~= "finished" do
-            kernel.debug("[PID"..cpid.."] waiting for finished of "..R.pid.." (state="..R.procstate..")")
-            local event = kernel.modules.instances.sandbox.evqueue.processEvt(cpid, cproc, {origyield()}, "xwos_terminated")
-            if event ~= nil and event[2] ~= R.pid then
-                for k, v in kernel.oldGlob.pairs(processes) do
-                    if kernel.oldGlob.type(v)=="table" and v.pid == event[2] and v.joined > 0 then
-                        kernel.debug("[PID"..cpid.."] redistributing to all other processes because at least one process called join of "..R.pid)
-                        
-                        for k2, v2 in kernel.oldGlob.pairs(kernel.processes) do
-                            if kernel.oldGlob.type(v2) == "table" and v2 ~= cproc and v2.procstate~= "finished" then
-                                kernel.debug("[PID"..cpid.."] redistributing because at least one process called join of "..R.pid)
-                                originsert(v2.evqueue, event)
-                                v2.wakeup()
-                            end --
-                        end -- for processes
-                    end --
-                end -- for processes
-            end -- if pid
-        end
-        kernel.debug("[PID"..cpid.."] received finish notification or "..R.pid)
-        R.joined = R.joined - 1
-    end -- function join
-        
-    --------------------------------------
-    -- release input (front process)
-    -- @function [parent=#xwos.process] releaseInput
-    R.releaseInput = function()
-        kernel.modules.instances.sandbox.procinput.current.release(R)
-    end -- function acquireInput
-        
-    --------------------------------------
-    -- wakeup process in reaction to events on local event queue
-    -- @function [parent=#xwos.process] wakeup
-    R.wakeup = function()
-        if R.co ~= nil and R.procstate ~= "finished" then
-            kernel.debug("[PID"..R.pid.."] wakeup requested")
-            kernel.oldGlob.coroutine.resume(R.co)
-        end -- if proc
-    end -- function wakeup
-        
-    --------------------------------------
-    -- request process to terminate
-    -- @function [parent=#xwos.process] terminate
-    R.terminate = function()
-        kernel.oldGlob.os.queueEvent("xwos_terminate", R.pid)
-    end -- function wakeup
+    setmetatable(privates.env, nenvmt)
+    setfenv(nenvmt.__index, privates.env)
     
-    --------------------------------
-    -- Remove the process from process table
-    -- @function [parent=#xwos.process] remove
-    R.remove = function()
-        kernel.debug("[PID"..R.pid.."] removing from process table")
-        processes[R.pid] = nil
-    end -- function remove
-    
-    --------------------------------
-    -- Spawn the process (invoke function)
-    -- @function [parent=#xwos.process] spawn
-    -- @param #function func the function to invoke
-    -- @param ... the arguments for given function
-    R.spawn = function(func, ...)
-        local env0 = kernel.nenv
-        kernel.debug("[PID"..R.pid.."] prepare spawn")
-        -- TODO ... may contain functions and objects with metatables; this may cause problems by mxing environments
-        -- establish an alternative for IPC (inter process communication)
-        local res = {origpcall(origser, {...})}-- this will cause an error if serializing forbidden types (functions etc.)
-        if not res[1] then
-            kernel.debug("[PID"..R.pid.."] ERR:", res[2])
-            kernel.debug("[PID"..R.pid.."] pocstate = finished")
-            R.result = res
-            R.procstate = "finished"
-            kernel.oldGlob.os.queueEvent("xwos_terminated", R.pid)
-            return
-        end -- if not res
-        
-        local spawn0 = function(...)
-            kernel.debug("[PID"..R.pid.."] pocstate = running")
-            R.procstate = "running"
-            kernel.debug("[PID"..R.pid.."] using env", R.env, env0)
-            origSetfenv(0, R.env)
-            for k, v in origpairs(factories) do
-                kernel.debug("[PID"..R.pid.."] invoke factory", k, v)
-                v(R, R.env)
-            end -- for factories
-            if origtype(func) == "string" then
-                local func2 = function(...)
-                    kernel.debug("[PID"..R.pid.."] doFile", func)
-                    local fnFile, e = origloadfile(func, kernel.nenv)
-                    if fnFile then
-                        return fnFile()
-                    else -- if res
-                        origerror( e, 2 )
-                    end -- if not res
-                    return origdofile(func, ...)
-                end -- function func2
-                origSetfenv(func2, kernel.nenv)
-                --------------------------------
-                -- @field [parent=#xwos.process] #table result the return state from process function
-                R.result = {origpcall(func2, ...)}
-            else -- if string
-                kernel.debug("[PID"..R.pid.."] invoke function", func)
-                R.result = {origpcall(func, ...)}
-            end -- if string
-            kernel.debug("[PID"..R.pid.."] pocstate = finished")
-            if not R.result[1] then
-                kernel.debug("[PID"..R.pid.."] ERR:", R.result[2])
-            end -- if not res
-            R.procstate = "finished"
-            kernel.oldGlob.os.queueEvent("xwos_terminated", R.pid)
-        end -- function spawn0
-        R.env.getfenv = function(n)
-            -- TODO: Hide kernel.nenv because one may decide to manipulate it to inject variables into other threads :-(
-            local t = origtype(n)
-            if t == "number" then
-                if n == 0 then
-                    return kernel.nenv
-                end -- if 0
-            end -- if number
-            return origGetfenv(n)
-        end -- function get
-        R.env.setfenv = function(n, v)
-            -- TODO maybe we can compare current fenv with THIS nenv and nenv from kernel;
-            -- if matches we deny changing the fenv
-            -- if not matches we allow changing because it was loaded inside process
-            
-            -- do not allow changing fenv at all
-            -- simply return current one
-            return R.env.getfenv(n, v)
-        end -- function setfenv
-        kernel.debug("[PID"..R.pid.."] prepare package")
-        R.env.package = {}
-        -- taken from bios.lua; must be overriden because of env
-        -- TODO maybe we find a better solution than copying all the stuff
-        R.env.package.loaded = {
-            -- _G = _G,
-            bit32 = bit32,
-            coroutine = coroutine, -- TODO wrap
-            math = math,
-            package = R.env.package,
-            string = string,
-            table = table,
-        }
-        -- TODO paths
-        R.env.package.path = "?;?.lua;?/init.lua;/rom/modules/main/?;/rom/modules/main/?.lua;/rom/modules/main/?/init.lua"
-        if turtle then
-            R.env.package.path = R.env.package.path..";/rom/modules/turtle/?;/rom/modules/turtle/?.lua;/rom/modules/turtle/?/init.lua"
-        elseif command then
-            R.env.package.path = R.env.package.path..";/rom/modules/command/?;/rom/modules/command/?.lua;/rom/modules/command/?/init.lua"
-        end
-        R.env.package.config = "/\n;\n?\n!\n-"
-        R.env.package.preload = {}
-        local loader1 =  function( name )
-            if package.preload[name] then
-                return package.preload[name]
-            else
-                return nil, "no field package.preload['" .. name .. "']"
-            end
-        end -- function loader1
-        local loader2 =  function( name )
-            local fname = string.gsub(name, "%.", "/")
-            local sError = ""
-            for pattern in string.gmatch(package.path, "[^;]+") do
-                local sPath = string.gsub(pattern, "%?", fname)
-                if sPath:sub(1,1) ~= "/" then
-                    sPath = fs.combine(sDir, sPath)
-                end
-                if fs.exists(sPath) and not fs.isDir(sPath) then
-                    local fnFile, sError = loadfile( sPath, nenv ) -- inject our new env
-                    if fnFile then
-                        return fnFile, sPath
-                    else
-                        return nil, sError
-                    end
-                else
-                    if #sError > 0 then
-                        sError = sError .. "\n"
-                    end
-                    sError = sError .. "no file '" .. sPath .. "'"
-                end
-            end
-            return nil, sError
-        end -- function loader2
-        R.env.package.loaders = {
-            loader1,
-            loader2
-        }
-  
-        local sentinel = {}
-        R.env.require = function( name )
-            if type( name ) ~= "string" then
-                error( "bad argument #1 (expected string, got " .. type( name ) .. ")", 2 )
-            end
-            if package.loaded[name] == sentinel then
-                error("Loop detected requiring '" .. name .. "'", 0)
-            end
-            if package.loaded[name] then
-                return package.loaded[name]
-            end
-      
-            local sError = "Error loading module '" .. name .. "':"
-            for n,searcher in ipairs(package.loaders) do
-                local loader, err = searcher(name)
-                if loader then
-                    package.loaded[name] = sentinel
-                    local result = loader( err )
-                    if result ~= nil then
-                        package.loaded[name] = result
-                        return result
-                    else
-                        package.loaded[name] = true
-                        return true
-                    end
-                else
-                    sError = sError .. "\n" .. err
-                end
-            end
-            error(sError, 2)
-        end -- function require
-        
-        kernel.debug("[PID"..R.pid.."] setting new env", env0)
-        origSetfenv(spawn0, env0)
-        origSetfenv(loader1, env0)
-        origSetfenv(loader2, env0)
-        origSetfenv(R.env.require, env0)
-        origSetfenv(R.env.getfenv, env0)
-        origSetfenv(R.env.setfenv, env0)
-        --------------------------------
-        -- @field [parent=#xwos.process] coroutine#coroutine co the coroutine
-        R.co = cocreate(spawn0)
-        local res = {coresume(R.co, ...)}
-        if not res[1] then
-            kernel.debug("[PID"..R.pid.."] ERR:", res[2])
-            kernel.debug("[PID"..R.pid.."] pocstate = finished")
-            R.result = res
-            R.procstate = "finished"
-            kernel.oldGlob.os.queueEvent("xwos_terminated", R.pid)
-        end -- if not res
-    end -- function spawn
-    
-    processes[R.pid] = R
-    kernel.debug("[PID"..R.pid.."] returning new process")
-    return R
-end -- function new
+end) -- ctor
 
-return processes
+-------------------------------
+-- debug log message
+-- @function [parent=#process] debug
+-- @param #process self the process object
+-- @param ... print message arguments
+
+.func("debug",
+-------------------------------
+-- @function [parent=#procintern] debug
+-- @param #process self
+-- @param classmanager#clazz clazz
+-- @param #procprivates privates
+-- @param ...
+function(self, clazz, privates, ...)
+    privates.kernel:debug(privates.dstr, ...)
+end) -- function debug
+
+--------------------------------------
+-- acquire input (front process)
+-- @function [parent=#process] acquireInput
+-- @param #process self the process object
+
+.func("acquireInput",
+--------------------------------------
+-- @function [parent=#procintern] acquireInput
+-- @param #process self
+-- @param classmanager#clazz clazz
+-- @param #procprivates privates
+function(self, clazz, privates)
+    -- TODO is a stack always good?
+    -- switching between processes (alt+tab in windows) is not meant to build a stack of input
+    -- a stack of input will represent some kind of modal dialog over other modal dialog where closing one will pop up the previous one
+    -- think about it...
+    -- TODO REFACTOR (method invocation)
+    privates.kernel.modules.instances.sandbox.procinput.acquire(R)
+end) -- function acquireInput
+
+------------------------------------------
+-- joins process and awaits it termination
+-- @function [parent=#process] join
+-- @param #process self the process object
+-- @param #process cproc calling process
+
+.func("join",
+------------------------------------------
+-- @function [parent=#procintern] join
+-- @param #process self
+-- @param classmanager#clazz clazz
+-- @param #procprivates privates
+-- @param #process cproc
+function(self, clazz, privates, cproc)
+    local cpid = "*"
+    if cproc ~= nil then
+        cpid = cproc.pid
+    end -- if cproc
+    local sdbg = "[PID"..cpid.."]"
+    local dbg = function(...) privates.kernel:debug(sdbg, ...) end
+    dbg("joining", privates.pid)
+    privates.joined = privates.joined + 1
+    while privates.procstate ~= "finished" do
+        dbg("waiting for finished of ", privates.pid, " (state=", privates.procstate, ")")
+        -- TODO REFACTOR (method invocation)
+        local event = privates.kernel.modules.instances.sandbox.evqueue.processEvt(cpid, cproc, {origyield()}, "xwos_terminated")
+        if event ~= nil and event[2] ~= privates.pid then
+            for k, v in privates.processes.list:iterate() do
+                if type(v)=="table" and v.pid == event[2] and v.joined > 0 then
+                    dbg("redistributing to all other processes because at least one process called join of", privates.pid)
+                    
+                    for k2, v2 in privates.processes.list:iterate() do
+                        if type(v2) == "table" and v2 ~= cproc and v2.procstate~= "finished" then
+                            dbg("redistributing because at least one process called join of", privates.pid)
+                            originsert(v2.evqueue, event)
+                            v2.wakeup()
+                        end --
+                    end -- for processes
+                end --
+            end -- for processes
+        end -- if pid
+    end
+    dbg("received finish notification or", privates.pid)
+    privates.joined = privates.joined - 1
+end) -- function join
+        
+--------------------------------------
+-- release input (front process)
+-- @function [parent=#process] releaseInput
+-- @param #process self the process object
+
+.proc("releaseInput",
+--------------------------------------
+-- @function [parent=#procintern] releaseInput
+-- @param #process self
+-- @param classmanager#clazz clazz
+-- @param #procprivates privates
+function(self, clazz, privates)
+    -- TODO REFACTOR (method invocation)
+    kernel.modules.instances.sandbox.procinput.current.release(R)
+end) -- function acquireInput
+        
+--------------------------------------
+-- wakeup process in reaction to events on local event queue
+-- @function [parent=#process] wakeup
+-- @param #process self the process object
+
+.proc("wakeup",
+--------------------------------------
+-- @function [parent=#procintern] wakeup
+-- @param #process self
+-- @param classmanager#clazz clazz
+-- @param #procprivates privates
+function(self, clazz, privates)
+    if privates.co ~= nil and privates.procstate ~= "finished" then
+        self:debug("wakeup requested")
+        coresume(privates.co)
+    end -- if proc
+end) -- function wakeup
+        
+--------------------------------------
+-- request process to terminate
+-- @function [parent=#process] terminate
+-- @param #process self the process object
+
+.func("terminate",
+--------------------------------------
+-- @function [parent=#procintern] terminate
+-- @param #process self
+-- @param classmanager#clazz clazz
+-- @param #procprivates privates
+function(self, clazz, privates)
+    origqueue("xwos_terminate", privates.pid)
+end) -- function wakeup
+    
+--------------------------------
+-- Remove the process from process table
+-- @function [parent=#process] remove
+-- @param #process self the process object
+
+.func("remove",
+--------------------------------
+-- @function [parent=#procintern] remove
+-- @param #process self
+-- @param classmanager#clazz clazz
+-- @param #procprivates privates
+function(self, clazz, privates)
+    self:debug("removing from process table")
+    privates.processes.procs[privates.pid] = nil
+    privates.processes.list:remove(self)
+end) -- function remove
+    
+--------------------------------
+-- Spawn the process (invoke function)
+-- @function [parent=#process] spawn
+-- @param #process self the process object
+-- @param #function func the function to invoke
+-- @param ... the arguments for given function
+
+.func("spawn",
+--------------------------------
+-- @function [parent=#procintern] spawn
+-- @param #process self
+-- @param classmanager#clazz clazz
+-- @param #procprivates privates
+-- @param #function func the function to invoke
+-- @param ... the arguments for given function
+function(self, clazz, privates, func, ...)
+    local env0 = privates.kernel.nenv
+    self:debug("prepare spawn")
+    -- TODO ... may contain functions and objects with metatables; this may cause problems by mxing environments
+    -- establish an alternative for IPC (inter process communication)
+    local res = {pcall(origser, {...})}-- this will cause an error if serializing forbidden types (functions etc.)
+    if not res[1] then
+        self:debug("ERR:", res[2])
+        self.result = res
+        privates.procstate = "finished"
+        self:debug("pocstate", privates.procstate)
+        origqueue("xwos_terminated", privates.pid)
+        return
+    end -- if not res
+    
+    local spawn0 = function(...)
+        privates.procstate = "running"
+        self:debug("pocstate", privates.procstate)
+        self:debug("using env", privates.env, env0)
+        setfenv(0, privates.env)
+        for k, v in pairs(privates.factories) do
+            self:debug("invoke factory", k, v)
+            v(self, privates.env)
+        end -- for factories
+        if type(func) == "string" then
+            local func2 = function(...)
+                self:debug("doFile", func)
+                local fnFile, e = loadfile(func, privates.kernel.nenv)
+                if fnFile then
+                    return fnFile()
+                else -- if res
+                    error( e, 2 )
+                end -- if not res
+                return dofile(func, ...)
+            end -- function func2
+            setfenv(func2, privates.kernel.nenv)
+            --------------------------------
+            -- the return state from process function
+            -- @field [parent=#process] #table result
+            self.result = {pcall(func2, ...)}
+        else -- if string
+            self:debug("invoke function", func)
+            self.result = {pcall(func, ...)}
+        end -- if string
+        if not self.result[1] then
+            self:debug("ERR:", self.result[2])
+        end -- if not res
+        privates.procstate = "finished"
+        self:debug("pocstate", privates.procstate)
+        origqueue("xwos_terminated", privates.pid)
+    end -- function spawn0
+    privates.env.getfenv = function(n)
+        -- TODO: Hide kernel.nenv because one may decide to manipulate it to inject variables into other threads :-(
+        local t = type(n)
+        if t == "number" then
+            if n == 0 then
+                return privates.kernel.nenv
+            end -- if 0
+        end -- if number
+        return getfenv(n)
+    end -- function get
+    privates.env.setfenv = function(n, v)
+        -- TODO maybe we can compare current fenv with THIS nenv and nenv from kernel;
+        -- if matches we deny changing the fenv
+        -- if not matches we allow changing because it was loaded inside process
+        
+        -- for the moment: do not allow changing fenv at all
+        -- simply return current one
+        return privates.env.getfenv(n, v)
+    end -- function setfenv
+    
+    self:debug("prepare package")
+    privates.env.package = {}
+    -- taken from bios.lua; must be overriden because of env
+    -- TODO maybe we find a better solution than copying all the stuff
+    privates.env.package.loaded = {
+        -- _G = _G,
+        bit32 = bit32,
+        coroutine = coroutine, -- TODO wrap with out own process env
+        math = math,
+        package = privates.env.package,
+        string = string,
+        table = table,
+    }
+    -- TODO paths
+    privates.env.package.path = "?;?.lua;?/init.lua;/rom/modules/main/?;/rom/modules/main/?.lua;/rom/modules/main/?/init.lua"
+    if turtle then
+        privates.env.package.path = privates.env.package.path..";/rom/modules/turtle/?;/rom/modules/turtle/?.lua;/rom/modules/turtle/?/init.lua"
+    elseif command then
+        privates.env.package.path = privates.env.package.path..";/rom/modules/command/?;/rom/modules/command/?.lua;/rom/modules/command/?/init.lua"
+    end
+    privates.env.package.config = "/\n;\n?\n!\n-"
+    privates.env.package.preload = {}
+    local loader1 =  function( name )
+        if package.preload[name] then
+            return package.preload[name]
+        else
+            return nil, "no field package.preload['" .. name .. "']"
+        end
+    end -- function loader1
+    local loader2 =  function( name )
+        local fname = string.gsub(name, "%.", "/")
+        local sError = ""
+        for pattern in string.gmatch(package.path, "[^;]+") do
+            local sPath = string.gsub(pattern, "%?", fname)
+            if sPath:sub(1,1) ~= "/" then
+                sPath = fs.combine(sDir, sPath)
+            end
+            if fs.exists(sPath) and not fs.isDir(sPath) then
+                local fnFile, sError = loadfile( sPath, nenv ) -- inject our new env
+                if fnFile then
+                    return fnFile, sPath
+                else
+                    return nil, sError
+                end
+            else
+                if #sError > 0 then
+                    sError = sError .. "\n"
+                end
+                sError = sError .. "no file '" .. sPath .. "'"
+            end
+        end
+        return nil, sError
+    end -- function loader2
+    privates.env.package.loaders = {
+        loader1,
+        loader2
+    }
+
+    local sentinel = {}
+    privates.env.require = function( name )
+        if type( name ) ~= "string" then
+            error( "bad argument #1 (expected string, got " .. type( name ) .. ")", 2 )
+        end
+        if package.loaded[name] == sentinel then
+            error("Loop detected requiring '" .. name .. "'", 0)
+        end
+        if package.loaded[name] then
+            return package.loaded[name]
+        end
+  
+        local sError = "Error loading module '" .. name .. "':"
+        for n,searcher in ipairs(package.loaders) do
+            local loader, err = searcher(name)
+            if loader then
+                package.loaded[name] = sentinel
+                local result = loader( err )
+                if result ~= nil then
+                    package.loaded[name] = result
+                    return result
+                else
+                    package.loaded[name] = true
+                    return true
+                end
+            else
+                sError = sError .. "\n" .. err
+            end
+        end
+        error(sError, 2)
+    end -- function require
+    
+    self:debug("setting new env", env0)
+    setfenv(spawn0, env0)
+    setfenv(loader1, env0)
+    setfenv(loader2, env0)
+    setfenv(privates.env.require, env0)
+    setfenv(privates.env.getfenv, env0)
+    setfenv(privates.env.setfenv, env0)
+    --------------------------------
+    -- co the coroutine
+    -- @field [parent=#procprivates] coroutine#coroutine
+    privates.co = cocreate(spawn0)
+    local res = {coresume(privates.co, ...)}
+    if not res[1] then
+        self:debug("ERR:", res[2])
+        self.result = res
+        privates.procstate = "finished"
+        self:debug("pocstate", privates.procstate)
+        origqueue("xwos_terminated", privates.pid)
+    end -- if not res
+end) -- function spawn
+
+return nil
