@@ -57,9 +57,9 @@ local bootSequence = {
 -- @param #string ver kernel version number
 -- @param #table kernelpaths the paths to look for kernel files
 -- @param #string kernelRoot root path to kernel
--- @param #function krequire require function to include kernel files
+-- @param #function cpfactory factory to create a class manager
 -- @param global#global args the command line arguments
-M.boot = function(ver, kernelpaths, kernelRoot, krequire, oldGlob, args)
+M.boot = function(ver, kernelpaths, kernelRoot, cpfactory, oldGlob, args)
     -------------------------------
     -- @field [parent=#xwos.kernel] #string kernelRoot the root path to kernel
     M.kernelRoot = kernelRoot
@@ -74,9 +74,9 @@ M.boot = function(ver, kernelpaths, kernelRoot, krequire, oldGlob, args)
     
     --------------------------------
     -- Require for kernel scripts
-    -- @function [parent=#xwos.kernel] require
-    -- @param #string path the path
-    M.require = krequire
+    -- @function [parent=#xwos.kernel] cpfactory
+    -- @param table env the environment to use
+    M.cpfactory = cpfactory
     
     print("installing extension moses...")
     -- TODO check security
@@ -87,7 +87,7 @@ M.boot = function(ver, kernelpaths, kernelRoot, krequire, oldGlob, args)
     for k,v in origpairs(origTable) do
         table[k] = v
     end -- for table
-    local moses = krequire('/xwos/extensions/moses/moses_min')
+    local moses = _CMR.require('xwos.extensions.moses.moses_min')
     table.clear = moses.clear
     table.each = moses.each
     table.eachi = moses.eachi
@@ -257,7 +257,7 @@ M.boot = function(ver, kernelpaths, kernelRoot, krequire, oldGlob, args)
 --        stringMeta[k] = v
 --    end -- for string
 --    origsetmeta("", stringMeta)
-    local allen = krequire('/xwos/extensions/allen/allen')
+    local allen = _CMR.require('xwos.extensions.allen.allen')
     string.capitalizeFirst = allen.capitalizeFirst
     string.capitalizesEach = allen.capitalizesEach
     string.capitalize = allen.capitalize
@@ -413,14 +413,18 @@ M.boot = function(ver, kernelpaths, kernelRoot, krequire, oldGlob, args)
     
     print("installing kernel classes...")
     -- TODO check security
-    xwos = {}
-    xwos.xwlist = krequire("xwos/xwlist")
-    xwos.xwgui = krequire("xwos/xwgui")
-    xwos.xwgui.component = krequire("xwos/xwgui/component")
-    xwos.xwgui.container = krequire("xwos/xwgui/container")
-    xwos.xwgui.stage = krequire("xwos/xwgui/stage")
-    xwos.xwgui.text = krequire("xwos/xwgui/text")
-    M.oldGlob.xwos = xwos
+    xwlist = krequire("xwos/xwlist")
+    xwgui = krequire("xwos/xwgui")
+    xwgcomponent = krequire("xwos/xwgui/component")
+    xwgcontainer = krequire("xwos/xwgui/container")
+    xwgstage = krequire("xwos/xwgui/stage")
+    xwgtext = krequire("xwos/xwgui/text")
+    M.oldGlob.xwlist = xwlist
+    M.oldGlob.xwgui = xwgui
+    M.oldGlob.xwgcomponent = xwgcomponent
+    M.oldGlob.xwgcontainer = xwgcontainer
+    M.oldGlob.xwgstage = xwgstage
+    M.oldGlob.xwgtext = xwgtext
     
     M.debug("boot finished")
 end -- function boot

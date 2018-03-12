@@ -17,23 +17,23 @@
 
 ------------------------
 -- gui component base class
--- @module xwos.xwgui.component
+-- @module xwgcomponent
 -- @extends xwos.xwlist#xwoslistitem
 local component = {}
 component.__index = component
 
 ------------------------
--- @field [parent=#xwos.xwgui.component] xwos.xwgui.container#xwos.xwgui.container _container owning container
+-- @field [parent=#xwgcomponent] xwgcontainer#xwgcontainer _container owning container
 
 ------------------------
--- @field [parent=#xwos.xwgui.component] #number _visible visible flag; do not change manually, instead invoke show() or hide()
+-- @field [parent=#xwgcomponent] #number _visible visible flag; do not change manually, instead invoke show() or hide()
 
 ------------------------
 -- Creates a new component
--- @function [parent=#xwos.xwgui.component] new
--- @param #xwos.xwgui.component self self
+-- @function [parent=#xwgcomponent] new
+-- @param #xwgcomponent self self
 -- @param #table o (optional) object to initialize
--- @return #xwos.xwgui.component new object
+-- @return #xwgcomponent new object
 function component:new(o)
     o = xwos.xwlist:new(o)
     setmetatable(o, self)
@@ -45,8 +45,8 @@ end -- function new
 
 ------------------------
 -- Returns component width
--- @function [parent=#xwos.xwgui.component] width
--- @param #xwos.xwgui.component self self
+-- @function [parent=#xwgcomponent] width
+-- @param #xwgcomponent self self
 -- @return #number width
 function component:width()
     error("method not supported")
@@ -54,8 +54,8 @@ end -- function width
 
 ------------------------
 -- Returns component height
--- @function [parent=#xwos.xwgui.component] height
--- @param #xwos.xwgui.component self self
+-- @function [parent=#xwgcomponent] height
+-- @param #xwgcomponent self self
 -- @return #number height
 function component:height()
     error("method not supported")
@@ -63,19 +63,19 @@ end -- function height
 
 ------------------------
 -- Changes components size
--- @function [parent=#xwos.xwgui.component] setSize
--- @param #xwos.xwgui.component self self
+-- @function [parent=#xwgcomponent] setSize
+-- @param #xwgcomponent self self
 -- @param #number width
 -- @param #number height
--- @return #xwos.xwgui.component self for chaining
+-- @return #xwgcomponent self for chaining
 function component:setSize(width, height)
     error("method not supported")
 end -- function setSize
 
 ------------------------
 -- Returns component x position within parent
--- @function [parent=#xwos.xwgui.component] x
--- @param #xwos.xwgui.component self self
+-- @function [parent=#xwgcomponent] x
+-- @param #xwgcomponent self self
 -- @return #number x position within parent
 function component:x()
     error("method not supported")
@@ -83,8 +83,8 @@ end -- function x
 
 ------------------------
 -- Returns component y position within parent
--- @function [parent=#xwos.xwgui.component] y
--- @param #xwos.xwgui.component self self
+-- @function [parent=#xwgcomponent] y
+-- @param #xwgcomponent self self
 -- @return #number y position within parent
 function component:y()
     error("method not supported")
@@ -92,20 +92,20 @@ end -- function y
 
 ------------------------
 -- Changes components position within parent
--- @function [parent=#xwos.xwgui.component] setPos
--- @param #xwos.xwgui.component self self
+-- @function [parent=#xwgcomponent] setPos
+-- @param #xwgcomponent self self
 -- @param #number x
 -- @param #number y
--- @return #xwos.xwgui.component self for chaining
+-- @return #xwgcomponent self for chaining
 function component:setPos(x, y)
     error("method not supported")
 end -- function setPos
 
 ------------------------
 -- Redraw this single component; should not be invoked directly without care, instead call redraw on root stage
--- @function [parent=#xwos.xwgui.component] paint
--- @param #xwos.xwgui.component self self
--- @return #xwos.xwgui.component self for chaining
+-- @function [parent=#xwgcomponent] paint
+-- @param #xwgcomponent self self
+-- @return #xwgcomponent self for chaining
 function component:paint()
     error("method not supported")
 end -- function paint
@@ -114,8 +114,8 @@ end -- function paint
 
 ------------------------
 -- Returns component size
--- @function [parent=#xwos.xwgui.component] size
--- @param #xwos.xwgui.component self self
+-- @function [parent=#xwgcomponent] size
+-- @param #xwgcomponent self self
 -- @return #number size (width, height)
 function component:size()
     return self:width(), self:height()
@@ -123,8 +123,8 @@ end -- function size
 
 ------------------------
 -- Returns component position within parent
--- @function [parent=#xwos.xwgui.component] pos
--- @param #xwos.xwgui.component self self
+-- @function [parent=#xwgcomponent] pos
+-- @param #xwgcomponent self self
 -- @return #number position (x, y)
 function component:pos()
     return self:x(), self:y()
@@ -132,9 +132,9 @@ end -- function pos
 
 ------------------------
 -- show this component
--- @function [parent=#xwos.xwgui.component] show
--- @param #xwos.xwgui.component self self
--- @return #xwos.xwgui.component self for chaining
+-- @function [parent=#xwgcomponent] show
+-- @param #xwgcomponent self self
+-- @return #xwgcomponent self for chaining
 function component:show()
     if not self._visible then
         self._visible = true
@@ -144,9 +144,9 @@ end -- function show
 
 ------------------------
 -- hide this component
--- @function [parent=#xwos.xwgui.component] show
--- @param #xwos.xwgui.component self self
--- @return #xwos.xwgui.component self for chaining
+-- @function [parent=#xwgcomponent] show
+-- @param #xwgcomponent self self
+-- @return #xwgcomponent self for chaining
 function component:hide()
     if self._visible then
         self._visible = false
@@ -156,9 +156,9 @@ end -- function hide
 
 ------------------------
 -- Request a redraw on this component; will do nothing if no container is available
--- @function [parent=#xwos.xwgui.component] paint
--- @param #xwos.xwgui.component self self
--- @return #xwos.xwgui.component self for chaining
+-- @function [parent=#xwgcomponent] paint
+-- @param #xwgcomponent self self
+-- @return #xwgcomponent self for chaining
 function component:redraw()
     if self._container ~= nil and self._visible then
         self._container:redraw()

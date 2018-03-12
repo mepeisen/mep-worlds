@@ -17,27 +17,27 @@
 
 ------------------------
 -- gui utility
--- @module xwos.xwgui
+-- @type xwgui
 local xwgui = {}
 
 ------------------------
 -- create new gui
--- @function [parent=#xwos.xwgui] create
+-- @function [parent=#xwgui] create
 -- @param term#term term the underlying terminal
--- @return #xwos.xwgui gui tooling
+-- @return #xwgui gui tooling
 function xwgui.create(term)
     local R = {}
     setmetatable(R, {__index=xwgui})
     ------------------------
-    -- @field [parent=#xwos.xwgui] term#term term target terminal
+    -- @field [parent=#xwgui] term#term term target terminal
     R.term = term
     return R
 end -- function create
 
 ------------------------
 -- returns the terminal size
--- @function [parent=#xwos.xwgui] size
--- @param #xwos.xwgui self self
+-- @function [parent=#xwgui] size
+-- @param #xwgui self self
 -- @return #number width, height
 function xwgui:size()
     return self.term.getSize()
@@ -45,8 +45,8 @@ end -- function size
 
 ------------------------
 -- returns the terminal width
--- @function [parent=#xwos.xwgui] width
--- @param #xwos.xwgui self self
+-- @function [parent=#xwgui] width
+-- @param #xwgui self self
 -- @return #number width
 function xwgui:width()
     local x, y = self.term.getSize()
@@ -55,8 +55,8 @@ end -- function width
 
 ------------------------
 -- returns the terminal height
--- @function [parent=#xwos.xwgui] height
--- @param #xwos.xwgui self self
+-- @function [parent=#xwgui] height
+-- @param #xwgui self self
 -- @return #number height
 function xwgui:height()
     local x, y = self.term.getSize()
@@ -65,8 +65,8 @@ end -- function height
 
 ------------------------
 -- returns the position inside parent
--- @function [parent=#xwos.xwgui] pos
--- @param #xwos.xwgui self self
+-- @function [parent=#xwgui] pos
+-- @param #xwgui self self
 -- @return #number x, y
 function xwgui:pos()
     return 0, 0
@@ -74,8 +74,8 @@ end -- function pos
 
 ------------------------
 -- returns the x position inside parent
--- @function [parent=#xwos.xwgui] x
--- @param #xwos.xwgui self self
+-- @function [parent=#xwgui] x
+-- @param #xwgui self self
 -- @return #number x
 function xwgui:x()
     return 0
@@ -83,17 +83,8 @@ end -- function x
 
 ------------------------
 -- returns the y position inside parent
--- @function [parent=#xwos.xwgui] y
--- @param #xwos.xwgui self self
--- @return #number y
-function xwgui:y()
-    return 0
-end -- function y
-
-------------------------
--- redraws this component
--- @function [parent=#xwos.xwgui] y
--- @param #xwos.xwgui self self
+-- @function [parent=#xwgui] y
+-- @param #xwgui self self
 -- @return #number y
 function xwgui:y()
     return 0

@@ -129,7 +129,7 @@
 -- @field[parent = #global] window#window window preloaded module
 
 ------------------------------------------------------------------------------
--- pre loaded module
--- @field[parent = #global] xwos#xwos xwos pre loaded module
+-- class manager for local classes
+-- @field[parent = #global] classmanager#classmanager _CMR
 
 return nil

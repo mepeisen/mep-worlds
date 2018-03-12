@@ -17,36 +17,36 @@
 
 ------------------------
 -- gui component that works on a ccraft terminal window
--- @module xwos.xwgui.stage
--- @extends xwos.xwgui.container#xwos.xwgui.container
-local stage = xwos.xwgui.container:new()
-local super = xwos.xwgui.container
+-- @module xwgstage
+-- @extends xwgcontainer#xwgcontainer
+local stage = xwgcontainer:new()
+local super = xwgcontainer
 stage.__index = stage
 
 ------------------------
 -- the terminal window; do not manipulate directly without care
--- @field [parent=#xwos.xwgui.stage] window#windowObject _window the terminal window
+-- @field [parent=#xwgstage] window#windowObject _window the terminal window
 
 ------------------------
 -- create new stage
--- @function [parent=#xwos.xwgui.stage] create
+-- @function [parent=#xwgstage] create
 -- @param window#window window the terminal window
 -- @param ... initial children
--- @return #xwos.xwgui.stage stage
+-- @return #xwgstage stage
 function stage.create(window, ...)
     return stage:new({}, window, ...)
 end -- function create
 
 ------------------------
 -- Creates a new stage
--- @function [parent=#xwos.xwgui.stage] new
--- @param #xwos.xwgui.stage self self
+-- @function [parent=#xwgstage] new
+-- @param #xwgstage self self
 -- @param #table o (optional) object to initialize
 -- @param window#window window the terminal window
 -- @param ... optional children
--- @return #xwos.xwgui.stage new object
+-- @return #xwgstage new object
 function stage:new(o, window, ...)
-    o = xwos.xwgui.container:new(o, ...)
+    o = xwgcontainer:new(o, ...)
     setmetatable(o, self)
     o._window = window
     return o
@@ -58,8 +58,8 @@ end -- function new
 
 ------------------------
 -- Returns component width
--- @function [parent=#xwos.xwgui.stage] width
--- @param #xwos.xwgui.stage self self
+-- @function [parent=#xwgstage] width
+-- @param #xwgstage self self
 -- @return #number width
 function stage:width()
     local w, h = self._window.getSize()
@@ -68,8 +68,8 @@ end -- function width
 
 ------------------------
 -- Returns component height
--- @function [parent=#xwos.xwgui.stage] height
--- @param #xwos.xwgui.stage self self
+-- @function [parent=#xwgstage] height
+-- @param #xwgstage self self
 -- @return #number height
 function stage:height()
     local w, h = self._window.getSize()
@@ -78,16 +78,16 @@ end -- function height
 
 ------------------------
 -- Changes components size
--- @function [parent=#xwos.xwgui.stage] setSize
--- @param #xwos.xwgui.stage self self
+-- @function [parent=#xwgstage] setSize
+-- @param #xwgstage self self
 -- @param #number width
 -- @param #number height
--- @return #xwos.xwgui.stage self for chaining
+-- @return #xwgstage self for chaining
 
 ------------------------
 -- Returns component x position within parent
--- @function [parent=#xwos.xwgui.stage] x
--- @param #xwos.xwgui.stage self self
+-- @function [parent=#xwgstage] x
+-- @param #xwgstage self self
 -- @return #number x position within parent
 function stage:x()
     return self._x
@@ -95,8 +95,8 @@ end -- function x
 
 ------------------------
 -- Returns component x position within parent
--- @function [parent=#xwos.xwgui.stage] y
--- @param #xwos.xwgui.stage self self
+-- @function [parent=#xwgstage] y
+-- @param #xwgstage self self
 -- @return #number y position within parent
 function stage:y()
     return self._y
@@ -104,11 +104,11 @@ end -- function y
 
 ------------------------
 -- Changes components position within parent
--- @function [parent=#xwos.xwgui.stage] setPos
--- @param #xwos.xwgui.stage self self
+-- @function [parent=#xwgstage] setPos
+-- @param #xwgstage self self
 -- @param #number x
 -- @param #number y
--- @return #xwos.xwgui.stage self for chaining
+-- @return #xwgstage self for chaining
 function stage:setPos(x, y)
     self._x = x
     self._y = y
@@ -119,9 +119,9 @@ end -- function setPos
 
 ------------------------
 -- Redraw this single component; should not be invoked directly without care, instead call redraw on root stage
--- @function [parent=#xwos.xwgui.stage] paint
--- @param #xwos.xwgui.stage self self
--- @return #xwos.xwgui.stage self for chaining
+-- @function [parent=#xwgstage] paint
+-- @param #xwgstage self self
+-- @return #xwgstage self for chaining
 function stage:paint()
     self._window.clear()
     super.paint(self)
@@ -129,13 +129,13 @@ end -- function paint
 
 ------------------------
 -- Paint a string within this stage; do not invoke directly; this is meant to be invoked from components
--- @function [parent=#xwos.xwgui.stage] str
--- @param #xwos.xwgui.stage self self
+-- @function [parent=#xwgstage] str
+-- @param #xwgstage self self
 -- @param #number x the x position of the string
 -- @param #number y the y position of the string
 -- @param #number fg the foreground color
 -- @param #number bg the background color
--- @return #xwos.xwgui.stage self for chaining
+-- @return #xwgstage self for chaining
 function stage:str(x, y, str, fg, bg)
     if self._window ~= nil and self._visible then
         self._window.setCursorPos(x, y)

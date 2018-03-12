@@ -390,15 +390,7 @@ local envFactory = function(proc, env)
         end
         return kernel.oldGlob.unpack(eventData)
     end -- function os.pullEvent
-    ---------------------------------------
-    -- operating system access
-    -- @type xwos
-    -- @field [parent=#global] #xwos xwos predefined operating system accessor
     env.xwos = {}
-    ---------------------------------------
-    -- debugging output
-    -- @function [parent=#xwos] debug
-    -- @param #string msg
     env.xwos.debug = function(msg)
         -- TODO find a way to pass variables etc.
         -- check for possible sandbox breaks during tostring

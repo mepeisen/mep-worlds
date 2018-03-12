@@ -1,0 +1,122 @@
+--    Copyright Martin Eisengardt 2018 xworlds.eu
+--    
+--    This file is part of xwos.
+--
+--    xwos is free software: you can redistribute it and/or modify
+--    it under the terms of the GNU General Public License as published by
+--    the Free Software Foundation, either version 3 of the License, or
+--    (at your option) any later version.
+--
+--    xwos is distributed in the hope that it will be useful,
+--    but WITHOUT ANY WARRANTY; without even the implied warranty of
+--    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+--    GNU General Public License for more details.
+--
+--    You should have received a copy of the GNU General Public License
+--    along with xwos.  If not, see <http://www.gnu.org/licenses/>.
+
+---------------
+-- a class manager for loading classes
+-- @module classmanager
+
+---------------
+-- plain require a file
+-- @function [parent=#classmanager] require
+-- @param #string path the path to file
+-- @return #any the file result
+
+---------------
+-- adds a path to classpath
+-- @function [parent=#classmanager] addcp
+-- @param ... classpath elements to be added
+-- @return #classmanager self for chaining
+
+---------------
+-- create new class instance
+-- @function [parent=#classmanager] new
+-- @param #string name the class name
+-- @param ... optional constructor arguments
+-- @return #table the object instance
+
+---------------
+-- load class with given name
+-- @function [parent=#classmanager] load
+-- @param #string name the class name
+
+---------------
+-- find packages with given prefix
+-- @function [parent=#classmanager] findPackages
+-- @param #string prefix the package prefix
+-- @return #table the found packages (package names in keys)
+
+---------------
+-- find classes within package
+-- @function [parent=#classmanager] findClasses
+-- @param #string package the package name
+-- @return #table the found classes (class names in keys)
+
+---------------
+-- declares a new class
+-- @function [parent=#classmanager] class
+-- @param #string name the class name
+-- @return #clazz the class instance
+
+---------------
+-- a local class declaration
+-- @type clazz
+    
+---------------
+-- the instance functions inside class
+-- @field [parent=#clazz] #table _funcs
+    
+---------------
+-- the static functions
+-- @field [parent=#clazz] #table _statics
+            
+---------------
+-- the constructor function
+-- @field [parent=#clazz] #function _ctor
+            
+---------------
+-- the class name
+-- @field [parent=#clazz] #string _name
+            
+---------------
+-- the super constructor from base class
+-- @field [parent=#clazz] #function _superctor
+            
+---------------
+-- the super class (extends)
+-- @field [parent=#clazz] #clazz _super
+            
+---------------
+-- the super class name (unresolved)
+-- @field [parent=#clazz] #string _supername
+                  
+---------------
+-- declare constructor
+-- @function [parent=#clazz] ctor
+-- @param #function func
+-- @return #clazz self for chaining
+        
+---------------
+-- declare function
+-- @function [parent=#clazz] func
+-- @param #string name
+-- @param #function func
+-- @return #clazz self for chaining
+        
+---------------
+-- declare static function
+-- @function [parent=#clazz] sfunc
+-- @param #string name
+-- @param #function func
+-- @return #clazz self for chaining
+        
+---------------
+-- class inheritance
+-- @function [parent=#clazz] extends
+-- @param #string name the class to extend
+-- @return #clazz self for chaining
+
+return nil
