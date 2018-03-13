@@ -109,4 +109,21 @@ function(self, clazz, privates, p, k, env, factories)
     return proc
 end) -- function new
 
+--------------------------------
+-- iterator over all processes
+-- @function [parent=#xwos.kernel.processes] iterate
+-- @param #xwos.kernel.processes self self
+-- @return #function
+
+.func("iterate",
+--------------------------------
+-- @function [parent=#xwprocsintern] iterate
+-- @param #xwos.kernel.processes self
+-- @param classmanager#clazz clazz
+-- @param #xwprocsprivates privates
+-- @return #function
+function(self, clazz, privates)
+    return privates.list:iterate()
+end) -- function new
+
 return nil

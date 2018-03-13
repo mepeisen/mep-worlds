@@ -34,11 +34,27 @@ _CMR.class("xwos.xwlist")
 
 ------------------------
 -- first element
--- @field [parent=#xwlistprivates] #table _first
+-- @field [parent=#xwlistprivates] #xwoslistitem _first
    
 ------------------------
 -- last element
--- @field [parent=#xwlistprivates] #table _last
+-- @field [parent=#xwlistprivates] #xwoslistitem _last
+
+------------------------
+-- list item
+-- @type xwoslistitem
+
+------------------------
+-- next element
+-- @field [parent=#xwoslistitem] #xwoslistitem _next
+   
+------------------------
+-- prev element
+-- @field [parent=#xwoslistitem] #xwoslistitem _prev
+   
+------------------------
+-- container list
+-- @field [parent=#xwoslistitem] #xwos.xwlist _container
 
 ------------------------
 -- create new list
@@ -79,7 +95,7 @@ end) -- ctor
 -- @function [parent=#xwlistintern] push
 -- @param #xwos.xwlist self
 -- @param classmanager#clazz clazz
--- @param #xwlistprivates
+-- @param #xwlistprivates privates
 -- @param #xwoslistitem t
 -- @return #xwoslistitem
 function (self, clazz, privates, t)
@@ -96,6 +112,57 @@ function (self, clazz, privates, t)
     t._container = self
     return t
 end) -- function push
+
+------------------------
+-- returns list length
+-- @function [parent=#xwos.xwlist] length
+-- @param #xwos.xwlist self self
+-- @return #number length
+
+.func("length",
+------------------------
+-- @function [parent=#xwlistintern] length
+-- @param #xwos.xwlist self
+-- @param classmanager#clazz clazz
+-- @param #xwlistprivates privates
+-- @return #number
+function (self, clazz, privates)
+    return privates._length
+end) -- function first
+
+------------------------
+-- returns first entry
+-- @function [parent=#xwos.xwlist] first
+-- @param #xwos.xwlist self self
+-- @return #xwoslistitem first object
+
+.func("first",
+------------------------
+-- @function [parent=#xwlistintern] first
+-- @param #xwos.xwlist self
+-- @param classmanager#clazz clazz
+-- @param #xwlistprivates privates
+-- @return #xwoslistitem
+function (self, clazz, privates)
+    return privates._first
+end) -- function first
+
+------------------------
+-- returns last entry
+-- @function [parent=#xwos.xwlist] last
+-- @param #xwos.xwlist self self
+-- @return #xwoslistitem last object
+
+.func("last",
+------------------------
+-- @function [parent=#xwlistintern] last
+-- @param #xwos.xwlist self
+-- @param classmanager#clazz clazz
+-- @param #xwlistprivates privates
+-- @return #xwoslistitem
+function (self, clazz, privates)
+    return privates._last
+end) -- function first
 
 ------------------------
 -- add new entry to list beginning

@@ -13,40 +13,75 @@
 --    You should have received a copy of the GNU General Public License
 --    along with xwos.  If not, see <http://www.gnu.org/licenses/>.
 
+local originsert = table.insert
+local unpack = unpack
+local day = os.day
+local time = os.time
+local serialize = textutils.serialize
+local fsopen = fs.open
+local fsexists = fs.exists
+local queue = os.queueEvent
+local error = os.error
+
 -----------------------
 -- @module xwos.modules.sandbox.evqueue
-local M = {}
+_CMR.class("xwos.modules.sandbox.evqueue")
 
-local kernel -- xwos.kernel#xwos.kernel
+------------------------
+-- the object privates
+-- @type xwevqprivates
 
-local originsert = table.insert
+------------------------
+-- the internal class
+-- @type xwevqintern
+-- @extends #xwos.modules.sandbox.evqueue
 
------------------------
--- injects the kernel
--- @function [parent=#xwos.modules.sandbox.evqueue] setKernel
--- @param xwos.kernel#xwos.kernel k the kernel
-M.setKernel = function(k)
-    kernel = k
-end -- function setKernel
+.ctor(
+------------------------
+-- create new event queue helper
+-- @function [parent=#xwevqintern] __ctor
+-- @param #xwos.modules.sandbox.evqueue self self
+-- @param classmanager#clazz clazz event queue class
+-- @param #xwevqprivates privates
+-- @param xwos.kernel#xwos.kernel kernel
+function (self, clazz, privates, kernel)
+    ---------------
+    -- kernel reference
+    -- @field [parent=#xwevqprivates] xwos.kernel#xwos.kernel kernel
+    privates.kernel = kernel
+end) -- ctor
 
 -----------------------
 -- Process and distribute event from event queue (part of pullEvent etc.)
 -- @function [parent=#xwos.modules.sandbox.evqueue] processEvt
+-- @param #xwos.modules.sandbox.evqueue self
 -- @param #number lpid the local pid for logging
--- @param xwos.process#xwos.process proc the process invoking this method; may be nil for kernel process
+-- @param xwos.kernel.process#xwos.kernel.process proc the process invoking this method; may be nil for kernel process
 -- @param #table event the event to deliver
 -- @param #string filter optional filter passed to pullEvent
-M.processEvt = function(lpid, proc, event, filter)
+
+.func("processEvt",
+-----------------------
+-- @function [parent=#xwevqintern] processEvt
+-- @param #xwos.modules.sandbox.evqueue self
+-- @param classmanager#clazz clazz
+-- @param #xwevqprivates privates
+-- @param #number lpid
+-- @param xwos.kernel.process#xwos.kernel.process proc
+-- @param #table event
+-- @param #string filter
+function(self, clazz, privates, lpid, proc, event, filter)
     if event[1] == nil then
         return nil
     end -- if event
-    kernel.debug("[PID"..lpid.."] got event ", kernel.oldGlob.unpack(event))
+    local sdbg = "[PID"..lpid.."]"
+    privates.kernel:debug(sdbg, "got event ", unpack(event))
     
-    if kernel.eventLog then
+    if privates.kernel.eventLog then
         -- TODO are we able to pass non serializable data through events?
         -- this may cause problems at this point
-        local str = kernel.oldGlob.os.day() .. "-" .. kernel.oldGlob.os.time() " EVENT: ".. kernel.oldGlob.textutils.serialize(event)
-        local f = kernel.oldGlob.fs.open("/core/log/event-log.txt", kernel.oldGlob.fs.exists("/core/log/event-log.txt") and "a" or "w")
+        local str = day() .. "-" .. time() " EVENT: ".. serialize(event)
+        local f = fsopen("/core/log/event-log.txt", fsexists("/core/log/event-log.txt") and "a" or "w")
         f.writeLine(str)
         f.close()
     end -- if eventLog
@@ -54,20 +89,21 @@ M.processEvt = function(lpid, proc, event, filter)
     local consumed = false
     
     if event[1] == "timer" then
-        local timer = kernel.modules.instances.sandbox.timers[event[2]]
+        -- TODO Refactoring method invocation
+        local timer = privates.kernel.modules.instances.sandbox.timers:get(event[2])
         if timer ~= nil then
-            if timer.proc == proc then
+            if timer == proc then
                 if filter == nil or event[1]==filter then
-                    kernel.debug("[PID"..lpid.."] returning event ", kernel.oldGlob.unpack(event))
+                    privates.kernel:debug(sdbg, "returning event ", unpack(event))
                     return event
                 else -- if filter
-                    kernel.debug("[PID"..lpid.."] discard event because of filter", kernel.oldGlob.unpack(event))
+                    privates.kernel:debug(sdbg, "discard event because of filter", unpack(event))
                     consumed = true
                 end -- if filter
             else -- if proc
-                kernel.debug("[PID"..lpid.."] queue event for distribution to pid "..timer.proc.pid, kernel.oldGlob.unpack(event))
-                originsert(timer.proc.evqueue, event)
-                timer.proc.wakeup()
+                privates.kernel:debug(sdbg, "queue event for distribution to pid", timer:pid(), unpack(event))
+                timer:pushev(event)
+                timer:wakeup()
                 consumed = true
             end -- if not proc
         end -- if timer
@@ -76,40 +112,41 @@ M.processEvt = function(lpid, proc, event, filter)
     
     if event[1] == "xwos_wakeup" then
         consumed = true
-        kernel.debug("[PID"..lpid.."] wakeup received")
+        privates.kernel:debug(sdbg, "wakeup received")
         if event[2] ~= lpid then
-            kernel.debug("[PID"..lpid.."] wrong pid, redistribute")
-            kernel.oldGlob.os.queueEvent(kernel.oldGlob.unpack(event))
+            privates.kernel:debug(sdbg, "wrong pid, redistribute")
+            queue(unpack(event))
         end -- if pid
     end -- if xwos_wakeup
     
     if event[1] == "xwos_terminate" then
         consumed = true
-        kernel.debug("[PID"..lpid.."] terminate received")
+        privates.kernel:debug(sdbg, "terminate received")
         if event[2] ~= lpid then
-            kernel.debug("[PID"..lpid.."] wrong pid, redistribute")
-            kernel.oldGlob.os.queueEvent(kernel.oldGlob.unpack(event))
+            privates.kernel:debug(sdbg, "wrong pid, redistribute")
+            queue(unpack(event))
         else -- if pid
-            kernel.oldGlob.error('requesting process termination')
+            error('requesting process termination')
         end -- if pid
     end -- if xwos_terminate
     
     if event[1] == "xwos_terminated" then
         consumed = true
-        kernel.debug("[PID"..lpid.."] terminated received")
+        privates.kernel:debug(sdbg, "terminated received")
         if filter == "xwos_terminated" then
-            kernel.debug("[PID"..lpid.."] returning event ", kernel.oldGlob.unpack(event))
+            privates.kernel:debug(sdbg, "returning event ", unpack(event))
             return event
         end -- if filter
-        for k, v in kernel.oldGlob.pairs(kernel.processes) do
-            if kernel.oldGlob.type(v) == "table" and v.pid == event[2] and v.joined > 0 then
-                kernel.debug("[PID"..lpid.."] redistributing to all other processes because at least one process called join of "..v.pid)
+        -- TODO Refactoring method invocation
+        for k, v in privates.kernel.processes:iterate() do
+            if v:pid() == event[2] and v:hasJoined() > 0 then
+                privates.kernel:debug(sdbg, "redistributing to all other processes because at least one process called join of "..v.pid)
                         
-                for k2, v2 in kernel.oldGlob.pairs(kernel.processes) do
-                    if kernel.oldGlob.type(v2) == "table" and v2 ~= proc and v2.procstate~= "finished" then
-                        kernel.debug("[PID"..lpid.."] redistributing because at least one process called join of "..v2.pid)
-                        originsert(v2.evqueue, event)
-                        v2.wakeup()
+                for k2, v2 in privates.kernel.processes:iterate() do
+                    if v2 ~= proc and not v2:isFinished() then
+                        privates.kernel:debug(sdbg, "redistributing because at least one process called join of "..v2.pid)
+                        v2:pushev(event)
+                        v2:wakeup()
                     end --
                 end -- for processes
             end --
@@ -118,11 +155,12 @@ M.processEvt = function(lpid, proc, event, filter)
     
     if event[1] == "char" or event[1] == "key" or event[1] == "paste" or event[1] == "key_up" then
         consumed = true
-        kernel.debug("[PID"..lpid.."] user input received")
-        if kernel.modules.instances.sandbox.procinput.current.proc ~= nil then
-            kernel.debug("[PID"..lpid.."] queue event for distribution to user input pid "..kernel.modules.instances.sandbox.procinput.current.proc.pid)
-            originsert(kernel.modules.instances.sandbox.procinput.current.proc.evqueue, event)
-            kernel.modules.instances.sandbox.procinput.current.proc.wakeup()
+        privates.kernel:debug(sdbg, "user input received")
+        local tproc = privates.kernel.modules.instances.sandbox.procinput:current()
+        if tproc ~= nil then
+            privates.kernel:debug(sdbg, "queue event for distribution to user input pid "..tproc:pid())
+            tproc:pushev(event)
+            tproc:wakeup()
         else
             -- TODO what to do with input if no one likes it?
             -- think about special key bindings fetched from background processes
@@ -132,16 +170,16 @@ M.processEvt = function(lpid, proc, event, filter)
     
     -- distribute event to all processes
     if not consumed then
-        for k, v in kernel.oldGlob.pairs(kernel.processes) do
-            if kernel.oldGlob.type(v) == "table" and v.procstate ~= "finished" then
-                kernel.debug("[PID"..lpid.."] queue event for distribution to all pids "..v.pid, kernel.oldGlob.unpack(event))
-                originsert(v.evqueue, event)
-                v.wakeup()
+        for k, v in privates.kernel.processes:iterate() do
+            if not v:isFinished() then
+                privates.kernel:debug(sdbg, "queue event for distribution to all pids ", v:pid(), unpack(event))
+                v:pushev(event)
+                v:wakeup()
             end -- if not finished
         end -- for processes
     end -- if consumed
     
     return nil
-end -- function processEvt
+end) -- function processEvt
 
-return M
+return nil

@@ -17,51 +17,73 @@
 
 -----------------------
 -- @module xwos.modules.sandbox.timers
-local M = {}
+_CMR.class("xwos.modules.sandbox.timers")
 
-local kernel -- xwos.kernel#xwos.kernel
+------------------------
+-- the object privates
+-- @type xwtprivates
 
------------------------
--- injects the kernel
--- @function [parent=#xwos.modules.sandbox.timers] setKernel
--- @param xwos.kernel#xwos.kernel k the kernel
-M.setKernel = function(k)
-    kernel = k
-end -- function setKernel
+------------------------
+-- the internal class
+-- @type xwtintern
+-- @extends #xwos.modules.sandbox.timers
+
+.ctor(
+------------------------
+-- create new timer helper
+-- @function [parent=#xwtintern] __ctor
+-- @param #xwos.modules.sandbox.timers self self
+-- @param classmanager#clazz clazz event queue class
+-- @param #xwtprivates privates
+-- @param xwos.kernel#xwos.kernel kernel
+function (self, clazz, privates, kernel)
+    ---------------
+    -- kernel reference
+    -- @field [parent=#xwtprivates] xwos.kernel#xwos.kernel kernel
+    privates.kernel = kernel
+    
+    ---------------
+    -- known timers
+    -- @field [parent=#xwtprivates] #map<#number,xwos.kernel.process#xwos.kernel.process> list
+    privates.list = {}
+end) -- ctor
 
 -------------------------------
 -- creates a new timer
--- @function [parent=#xwos.modules.sandbox.timers] new
+-- @function [parent=#xwos.modules.sandbox.timers] create
+-- @param #xwos.modules.sandbox.timers self self
 -- @param #number id the timer number
 -- @param xwos.processes#xwos.process proc
--- @return #xwos.timer
-M.new = function(id, proc)
-    --------------------------------
-    -- timer type
-    -- @type xwos.timer
-    local R = {}
-    
-    --------------------------------
-    -- @field [parent=#xwos.timer] #number id the timer id
-    R.id = id
-    
-    --------------------------------
-    -- @field [parent=#xwos.timer] #number id the timer id
-    R.proc = proc
-    
-    --------------------------------
-    -- Remove the timer from timer table
-    -- @function [parent=#xwos.timer] remove
-    R.remove = function()
-        M[R.id] = nil
-    end -- function remove
-    
-    -- TODO remove discarded timers on process termination
-    
-    -- store timer
-    M[R.id] = R
-                    
-    return R
-end -- function new
 
-return M
+.func("create",
+-------------------------------
+-- @function [parent=#xwtintern] create
+-- @param #xwos.modules.sandbox.timers self self
+-- @param classmanager#clazz clazz event queue class
+-- @param #xwtprivates privates
+-- @param #number id
+-- @param xwos.processes#xwos.process proc
+function(self, clazz, privates, id, proc)
+    privates.list[id] = proc
+end) -- function create
+
+-------------------------------
+-- Returns an existing timer process
+-- @function [parent=#xwos.modules.sandbox.timers] get
+-- @param #xwos.modules.sandbox.timers self self
+-- @param #number id the timer number
+-- @return xwos.processes#xwos.process process or nil if timer with given id was not found
+
+.func("get",
+-------------------------------
+-- @function [parent=#xwtintern] get
+-- @param #xwos.modules.sandbox.timers self self
+-- @param classmanager#clazz clazz event queue class
+-- @param #xwtprivates privates
+-- @param #number id
+-- @return xwos.processes#xwos.process
+function(self, clazz, privates, id)
+    return privates.list[id]
+end) -- function create
+
+return nil

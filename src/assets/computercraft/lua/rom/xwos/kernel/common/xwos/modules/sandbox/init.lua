@@ -414,8 +414,7 @@ function(self, clazz, privates, proc, env)
     env.os.startTimer = function(s)
         proc:debug("os.startTimer", s)
         local timer = osstartTimer(s)
-        -- TODO REFACTORING method call
-        privates.kernel.modules.instances.sandbox.timers.new(timer, proc)
+        privates.kernel.modules.instances.sandbox.timers:create(timer, proc)
         return timer
     end -- function os.startTimer
     env.os.pullEventRaw = function(filter)

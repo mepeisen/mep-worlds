@@ -17,59 +17,112 @@
 
 -----------------------
 -- @module xwos.modules.sandbox.procinput
-local M = {}
+_CMR.class("xwos.modules.sandbox.procinput")
 
-local kernel -- xwos.kernel#xwos.kernel
+------------------------
+-- the object privates
+-- @type xwpiprivates
+-- 
+------------------------
+-- item in process input
+-- @type xwpiitem
+-- @extends xwos.xwlist#xwoslistitem 
 
--- TODO refactor following to some linked stack type
+------------------------
+-- associated process
+-- @field [parent=#xwpiitem] xwos.kernel.process#xwos.kernel.process proc
+
+------------------------
+-- the internal class
+-- @type xwpiintern
+-- @extends #xwos.modules.sandbox.procinput
+
+.ctor(
+------------------------
+-- create new process input helper
+-- @function [parent=#xwpiintern] __ctor
+-- @param #xwos.modules.sandbox.procinput self self
+-- @param classmanager#clazz clazz process input class
+-- @param #xwpiprivates privates
+-- @param xwos.kernel#xwos.kernel kernel
+function (self, clazz, privates, kernel)
+    ---------------
+    -- kernel reference
+    -- @field [parent=#xwpiprivates] xwos.kernel#xwos.kernel kernel
+    privates.kernel = kernel
+    
+    ---------------
+    -- list of process inputs
+    -- @field [parent=#xwpiprivates] xwos.xwlist#xwos.xwlist
+    privates.list = _CMR.new("xwos.xwlist")
+end) -- ctor
+
 -----------------------
--- @type pinput
+-- Returns the current process fetching input
+-- @function [parent=#xwos.modules.sandbox.procinput] current
+-- @param #xwos.modules.sandbox.procinput self
+-- @return xwos.kernel.process#xwos.kernel.process the current process or nil if no process ist set
 
-----------------------------------
--- @field [parent=#pinput] #pinput prev the previous input
-     
+.func("current",
 -----------------------
--- @field [parent=#pinput] xwos.processes#xwos.process proc the input process
+-- @function [parent=#xwpiintern] current
+-- @param #xwos.modules.sandbox.procinput self
+-- @param classmanager#clazz clazz
+-- @param #xwpiprivates privates
+-- @return xwos.kernel.process#xwos.kernel.process
+function(self, clazz, privates)
+    local res = privates.list:last() -- #xwpiitem
+    if res ~= nil then
+        return res.proc
+    end -- if res
+    return nil
+end) -- function current
 
 -----------------------
--- @field [parent=#xwos.modules.sandbox.procinput] #pinput current the current process input (front process)
-M.current = nil
+-- Aquires input for given process
+-- @function [parent=#xwos.modules.sandbox.procinput] acquire
+-- @param #xwos.modules.sandbox.procinput self
+-- @param xwos.kernel.process#xwos.kernel.process process the process to acquire the input
+
+.func("acquire",
+-----------------------
+-- @function [parent=#xwpiintern] acquire
+-- @param #xwos.modules.sandbox.procinput self
+-- @param classmanager#clazz clazz
+-- @param #xwpiprivates privates
+-- @param xwos.kernel.process#xwos.kernel.process process
+function(self, clazz, privates, process)
+    process:debug("fetching user input (front process)")
+    privates.list:push({proc = process})
+end) -- function acquire
 
 -----------------------
--- injects the kernel
--- @function [parent=#xwos.modules.sandbox.procinput] setKernel
--- @param xwos.kernel#xwos.kernel k the kernel
-M.setKernel = function(k)
-    kernel = k
-end -- function setKernel
+-- Release input for given process if it blocks the input (=is current)
+-- @function [parent=#xwos.modules.sandbox.procinput] release
+-- @param #xwos.modules.sandbox.procinput self
+-- @param xwos.kernel.process#xwos.kernel.process process the process to release the input
 
-M.acquire = function(proc)
-    -- first invocation has no kernel
-    if kernel ~= nil and proc ~= nil then
-        kernel.debug("[PID"..proc.pid.."] fetching user input (front process)")
-    end -- if kernel
-    local r = {}
-    ---------------------
-    -- release input if proc blocks it
-    -- @function [parent=#pinput] release
-    -- @param xwos.processes#xwos.process proc2 process to release the env
-    r.release = function(proc2)
-        if r.proc == proc2 then
-            kernel.debug("[PID"..proc2.pid.."] releasing user input (front process)")
-            M.current = r.prev
-            while M.current.proc ~= nil and M.current.proc.procstate == "finished" do
-                M.current = M.current.prev
-            end -- while finished
-            if M.current.proc ~= nil then
-                kernel.debug("[PID"..proc2.pid.."] switched user input to "..M.current.proc.pid.." (front process)")
-            end -- if proc
-        end -- if proc
-    end -- function release
-    r.prev = M.current
-    r.proc = proc
-    M.current = r
-end -- function acquire
+.func("release",
+-----------------------
+-- @function [parent=#xwpiintern] release
+-- @param #xwos.modules.sandbox.procinput self
+-- @param classmanager#clazz clazz
+-- @param #xwpiprivates privates
+-- @param xwos.kernel.process#xwos.kernel.process process
+function(self, clazz, privates, process)
+    local res = privates.list:last() -- #xwpiitem
+    if res ~= nil and res.proc == process then
+        process:debug("release user input (front process)")
+        repeat
+            privates.list:pop()
+            res = privates.list:last()
+        until res == nil or not res.proc:isFinished()
+        local npid = "none"
+        if res ~= nil then
+            npid = res.proc:pid()
+        end
+        process:debug("switched user input to",npid,"(front process)")
+    end -- if res.proc == process
+end) -- function acquire
 
-M.acquire(nil)
-
-return M
+return nil

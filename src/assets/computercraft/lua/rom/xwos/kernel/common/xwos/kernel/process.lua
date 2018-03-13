@@ -138,6 +138,40 @@ function(self, clazz, privates, pprivates, p, k, newPid, env, factories)
 end) -- ctor
 
 -------------------------------
+-- checks if process is finished
+-- @function [parent=#xwos.kernel.process] isFinished
+-- @param #xwos.kernel.process self the process object
+-- @return #boolean
+
+.func("isFinished",
+-------------------------------
+-- @function [parent=#procintern] isFinished
+-- @param #xwos.kernel.process self
+-- @param classmanager#clazz clazz
+-- @param #procprivates privates
+-- @return #boolean
+function(self, clazz, privates)
+    -- TODO
+end) -- function isFinished
+
+-------------------------------
+-- checks if process has some other processes waiting for termination (joined)
+-- @function [parent=#xwos.kernel.process] hasJoined
+-- @param #xwos.kernel.process self the process object
+-- @return #boolean
+
+.func("hasJoined",
+-------------------------------
+-- @function [parent=#procintern] hasJoined
+-- @param #xwos.kernel.process self
+-- @param classmanager#clazz clazz
+-- @param #procprivates privates
+-- @return #boolean
+function(self, clazz, privates)
+    -- TODO
+end) -- function hasJoined
+
+-------------------------------
 -- pop event from event queue
 -- @function [parent=#xwos.kernel.process] popev
 -- @param #xwos.kernel.process self the process object
@@ -152,7 +186,24 @@ end) -- ctor
 -- @return #table
 function(self, clazz, privates)
     -- TODO
-end) -- function debug
+end) -- function popev
+
+-------------------------------
+-- pop event from event queue
+-- @function [parent=#xwos.kernel.process] popev
+-- @param #xwos.kernel.process self the process object
+-- @param #table event
+
+.func("pushev",
+-------------------------------
+-- @function [parent=#procintern] pushev
+-- @param #xwos.kernel.process self
+-- @param classmanager#clazz clazz
+-- @param #procprivates privates
+-- @param #table
+function(self, clazz, privates, event)
+    -- TODO
+end) -- function pushev
 
 -------------------------------
 -- return process pid
@@ -204,8 +255,7 @@ function(self, clazz, privates)
     -- switching between processes (alt+tab in windows) is not meant to build a stack of input
     -- a stack of input will represent some kind of modal dialog over other modal dialog where closing one will pop up the previous one
     -- think about it...
-    -- TODO REFACTOR (method invocation)
-    privates.kernel.modules.instances.sandbox.procinput.acquire(R)
+    privates.kernel.modules.instances.sandbox.procinput:acquire(self)
 end) -- function acquireInput
 
 ------------------------------------------
@@ -232,8 +282,7 @@ function(self, clazz, privates, cproc)
     privates.joined = privates.joined + 1
     while privates.procstate ~= "finished" do
         dbg("waiting for finished of ", privates.pid, " (state=", privates.procstate, ")")
-        -- TODO REFACTOR (method invocation)
-        local event = privates.kernel.modules.instances.sandbox.evqueue.processEvt(cpid, cproc, {origyield()}, "xwos_terminated")
+        local event = privates.kernel.modules.instances.sandbox.evqueue:processEvt(cpid, cproc, {origyield()}, "xwos_terminated")
         if event ~= nil and event[2] ~= privates.pid then
             for k, v in privates.processes.list:iterate() do
                 if type(v)=="table" and v.pid == event[2] and v.joined > 0 then
@@ -242,8 +291,8 @@ function(self, clazz, privates, cproc)
                     for k2, v2 in privates.processes.list:iterate() do
                         if type(v2) == "table" and v2 ~= cproc and v2.procstate~= "finished" then
                             dbg("redistributing because at least one process called join of", privates.pid)
-                            originsert(v2.evqueue, event)
-                            v2.wakeup()
+                            v2:pushev(event)
+                            v2:wakeup()
                         end --
                     end -- for processes
                 end --
@@ -266,8 +315,7 @@ end) -- function join
 -- @param classmanager#clazz clazz
 -- @param #procprivates privates
 function(self, clazz, privates)
-    -- TODO REFACTOR (method invocation)
-    kernel.modules.instances.sandbox.procinput.current.release(R)
+    privates.kernel.modules.instances.sandbox.procinput:release(self)
 end) -- function acquireInput
         
 --------------------------------------
