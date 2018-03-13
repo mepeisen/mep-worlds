@@ -17,87 +17,132 @@
 
 -----------------------
 -- @module xwos.modules.security
-local M = {}
+_CMR.class("xwos.modules.security")
 
-local kernel -- xwos.kernel#xwos.kernel
+------------------------
+-- the object privates
+-- @type xwsecprivates
 
-local function crProfile(name)
-    -----------------------
-    -- Security profile
-    -- @type secprofile
-    local R = {}
-    
-    -----------------------
-    -- Returns the profile name
-    -- @function [parent=#secprofile] name
-    -- @return #string profile name
-    R.name = function()
-        return name
-    end -- function name
-    
-    -----------------------
-    -- Checks if access to given api method is granted
-    -- @function [parent=#secprofile] checkApi
-    -- @return #string api
-    -- @return #string method
-    R.checkApi = function(api, method)
-        return true -- TODO some meaningful implementation
-    end -- function checkApi
-    
-    -----------------------
-    -- Checks if access to given acl node is granted
-    -- @function [parent=#secprofile] checkAccess
-    -- @return #string aclKey
-    R.checkAccess = function(aclKey)
-        return true -- TODO some meaningful implementation
-    end -- function checkAccess
-    return R
-end -- function crProfile
+------------------------
+-- the internal class
+-- @type xwsecintern
+-- @extends #xwos.modules.security 
 
-local profiles = {
-    root = crProfile("root"),
-    admin = crProfile("admin"),
-    user = crProfile("user"),
-    guest = crProfile("guest")
-}
+.ctor(
+------------------------
+-- create new module security
+-- @function [parent=#xwsecintern] __ctor
+-- @param #xwos.modules.security self self
+-- @param classmanager#clazz clazz security class
+-- @param #xwsecprivates privates
+-- @param xwos.kernel#xwos.kernel kernel
+function (self, clazz, privates, kernel)
+    ---------------
+    -- kernel reference
+    -- @field [parent=#xwsecprivates] xwos.kernel#xwos.kernel kernel
+    privates.kernel = kernel
+    privates:createProfile("root")
+    privates:createProfile("admin")
+    privates:createProfile("user")
+    privates:createProfile("guest")
+end) -- ctor
 
----------------------------------
--- @function [parent=#xwos.modules.security] preboot
--- @param xwos.kernel#xwos.kernel k
-M.preboot = function(k)
-    k.debug("preboot security")
-    kernel = k
-end -- function preboot
-
----------------------------------
--- @function [parent=#xwos.modules.security] boot
--- @param xwos.kernel#xwos.kernel k
-M.boot = function(k)
-    k.debug("boot security")
-end -- function boot
-
----------------------------------
--- returns a security profile with given name
--- @function [parent=#xwos.modules.security] profile
+------------------------
+-- create new profile with given name
+-- @function [parent=#xwsecprivates] createProfile
+-- @param #xwos.modules.security self self
 -- @param #string name
--- @return #secprofile
-M.profile = function(name)
-    return profiles[name]
-end -- function boot
+-- @return xwos.modules.security.profile#xwos.modules.security.profile
 
----------------------------------
--- Creates a new security profile with given name
--- @function [parent=#xwos.modules.security] profile
+.pfunc("createProfile",
+------------------------
+-- create new profile with given name
+-- @function [parent=#xwsecintern] createProfile
+-- @param #xwos.modules.security self self
+-- @param classmanager#clazz clazz security class
+-- @param #xwsecprivates privates
 -- @param #string name
--- @return #secprofile
-M.createProfile = function(name)
-    -- TODO some meaningful implementation
-    local res = profiles[name]
-    if res == nil then
-        res = crProfile(name)
-        profiles[name] = res
-    end -- if profile
+-- @return xwos.modules.security.profile#xwos.modules.security.profile
+function (self, clazz, privates, name)
+    local res = _CMR.new("xwos.modules.security.profile", name)
+    ------------------
+    -- the known profiles by name
+    -- @field [parent=#xwsecprivates] #map<#string,xwos.modules.security.profile#xwos.modules.security.profile> profiles
+    privates.profiles[name] = res
     return res
-end -- function createProfile
+end) -- createProfile
 
-return M
+---------------------------------
+-- Pre-Boot sandbox module
+-- @function [parent=#xwos.modules.security] preboot
+-- @param #xwos.modules.security self self
+
+.func("preboot",
+---------------------------------
+-- @function [parent=#xwsecintern] preboot
+-- @param #xwos.modules.security self self
+-- @param classmanager#clazz clazz security class
+-- @param #xwsecprivates privates
+function(self, clazz, privates)
+    privates.kernel:debug("preboot security")
+end) -- function preboot
+
+---------------------------------
+-- Boot sandbox module
+-- @function [parent=#xwos.modules.security] boot
+-- @param #xwos.modules.security self self
+
+.func("boot",
+---------------------------------
+-- @function [parent=#xwsecintern] preboot
+-- @param #xwos.modules.security self self
+-- @param classmanager#clazz clazz security class
+-- @param #xwsecprivates privates
+function(self, clazz, privates)
+    privates.kernel:debug("boot security")
+end) -- function boot
+
+---------------------------------
+-- Returns profile by name
+-- @function [parent=#xwos.modules.security] profile
+-- @param #xwos.modules.security self self
+-- @param #string name
+-- @return xwos.modules.security.profile#xwos.modules.security.profile profile instance or nil if not found
+
+.func("profile",
+---------------------------------
+-- @function [parent=#xwsecintern] profile
+-- @param #xwos.modules.security self self
+-- @param classmanager#clazz clazz security class
+-- @param #xwsecprivates privates
+-- @param #string name
+-- @return xwos.modules.security.profile#xwos.modules.security.profile
+function(self, clazz, privates, name)
+    return privates.profiles[name]
+end) -- function profile
+
+---------------------------------
+-- Creates profile if not exists; returns profile if exists
+-- @function [parent=#xwos.modules.security] createProfile
+-- @param #xwos.modules.security self self
+-- @param #string name
+-- @return xwos.modules.security.profile#xwos.modules.security.profile profile instance
+
+.func("createProfile",
+---------------------------------
+-- @function [parent=#xwsecintern] createProfile
+-- @param #xwos.modules.security self self
+-- @param classmanager#clazz clazz security class
+-- @param #xwsecprivates privates
+-- @param #string name
+-- @return xwos.modules.security.profile#xwos.modules.security.profile
+function(self, clazz, privates, name)
+    -- TODO some meaningful implementation
+    local res = privates.profiles[name]
+    if res == nil then
+        res = privates:createProfile(name)
+    end -- if not res
+    return res
+end) -- function createProfile
+
+return nil

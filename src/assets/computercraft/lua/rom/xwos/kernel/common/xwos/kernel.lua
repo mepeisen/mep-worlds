@@ -391,7 +391,7 @@ function(self, clazz, privates, ver, kernelpaths, kernelRoot, cpfactory, oldGlob
     self:debug("loading module management")
     --------------------------------
     -- the kernel modules
-    -- @field [parent=#xwos.kernel] xwos.modulesmgr#xwos.modulesmgr modules
+    -- @field [parent=#xwos.kernel] xwos.kernel.modulesmgr#xwos.kernel.modulesmgr modules
     self.modules = _CMR.new('xwos.kernel.modulesmgr', self)
     
     self:debug("booting modules")

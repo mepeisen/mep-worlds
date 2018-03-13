@@ -15,46 +15,101 @@
 --    You should have received a copy of the GNU General Public License
 --    along with xwos.  If not, see <http://www.gnu.org/licenses/>.
 
+local originsert = table.insert
+local osstartTimer = os.startTimer
+local origipairs = ipairs
+local origunpack = unpack
+local origPullEventRaw = os.pullEventRaw
+local origerror = error
+local origtype = type
+local origsetfenv = setfenv
+
 -----------------------
 -- @module xwos.modules.sandbox
-local M = {}
+_CMR.class("xwos.modules.sandbox")
 
-local kernel -- xwos.kernel#xwos.kernel
-local originsert = table.insert
+------------------------
+-- the object privates
+-- @type xwsbprivates
+
+------------------------
+-- the internal class
+-- @type xwsbintern
+-- @extends #xwos.modules.sandbox 
+
+.ctor(
+------------------------
+-- create new module sandbox
+-- @function [parent=#xwsbintern] __ctor
+-- @param #xwos.modules.sandbox self self
+-- @param classmanager#clazz clazz sandbox class
+-- @param #xwsbprivates privates
+-- @param xwos.kernel#xwos.kernel kernel
+function (self, clazz, privates, kernel)
+    ---------------
+    -- kernel reference
+    -- @field [parent=#xwsbprivates] xwos.kernel#xwos.kernel kernel
+    privates.kernel = kernel
+end) -- ctor
 
 ---------------------------------
+-- Preboot sandbox module
 -- @function [parent=#xwos.modules.sandbox] preboot
--- @param xwos.kernel#xwos.kernel k
-M.preboot = function(k)
-    k.debug("preboot sandbox")
-    kernel = k
+-- @param #xwos.modules.sandbox self self
+
+.func("preboot",
+---------------------------------
+-- @function [parent=#xwsbintern] preboot
+-- @param #xwos.modules.sandbox self self
+-- @param classmanager#clazz clazz sandbox class
+-- @param #xwsbprivates privates
+function(self, clazz, privates)
+    privates.kernel:debug("preboot sandbox")
     
     -----------------------
     -- process input type with mapping to previous input
-    -- @field [parent=#xwos.modules.sandbox] xwos.modules.sandbox.procinput#xwos.modules.sandbox.procinput procinput the input process management
-    M.procinput = kernel.require("xwos/modules/sandbox/procinput")
-    M.procinput.setKernel(kernel)
+    -- @field [parent=#xwos.modules.sandbox] xwos.modules.sandbox.procinput#xwos.modules.sandbox.procinput procinput
+    self.procinput = _CMR.new("xwos.modules.sandbox.procinput", privates.kernel)
     
     -----------------------
     -- timers started from processes
-    -- @field [parent=#xwos.modules.sandbox] xwos.modules.sandbox.timers#xwos.modules.sandbox.timers timers the timer management
-    M.timers = kernel.require("xwos/modules/sandbox/timers")
-    M.timers.setKernel(kernel)
+    -- @field [parent=#xwos.modules.sandbox] xwos.modules.sandbox.timers#xwos.modules.sandbox.timers timers
+    self.timers = _CMR.new("xwos.modules.sandbox.timers", privates.kernel)
     
     -----------------------
     -- event queue handling
-    -- @field [parent=#xwos.modules.sandbox] xwos.modules.sandbox.evqueue#xwos.modules.sandbox.evqueue evqueue event queue management
-    M.evqueue = kernel.require("xwos/modules/sandbox/evqueue")
-    M.evqueue.setKernel(kernel)
+    -- @field [parent=#xwos.modules.sandbox] xwos.modules.sandbox.evqueue#xwos.modules.sandbox.evqueue evqueue
+    self.evqueue = _CMR.new("xwos.modules.sandbox.evqueue", privates.kernel)
+end) -- function preboot
 
-end -- function preboot
+---------------------------------
+-- Boot sandbox module
+-- @function [parent=#xwos.modules.sandbox] boot
+-- @param #xwos.modules.sandbox self self
 
-----------------------
--- @param xwos.processes#xwos.process proc the underlying process
--- @param #global env the global process environment
-local envFactory = function(proc, env)
-    kernel.debug("[PID"..proc.pid.."] preparing env", env)
-    env.pid = proc.pid
+.func("boot",
+---------------------------------
+-- @function [parent=#xwsbintern] boot
+-- @param #xwos.modules.sandbox self self
+-- @param classmanager#clazz clazz sandbox class
+-- @param #xwsbprivates privates
+function(self, clazz, privates)
+    privates.kernel:debug("boot sandbox")
+    privates.kernel.envFactories.sandbox = function(proc, env) privates:envFactory(proc, env) end
+end)
+
+.pfunc("envFactory",
+---------------------------------
+-- environment factory to create a sandbox
+-- @function [parent=#xwsbintern] envFactory
+-- @param #xwos.modules.sandbox self self
+-- @param classmanager#clazz clazz sandbox class
+-- @param #xwsbprivates privates
+-- @param xwos.kernel.process#xwos.kernel.process proc
+-- @param global#global env
+function(self, clazz, privates, proc, env)
+    proc:debug("[sb] preparing env", env)
+    env.pid = proc:pid()
 
     -- TODO this is partly original code from bios.
     -- we need to redeclare it to get into wrapped os.**** methods
@@ -330,9 +385,9 @@ local envFactory = function(proc, env)
     end -- function biosRead
 
     env.read = function( _sReplaceChar, _tHistory, _fnComplete, _sDefault )
-        proc.acquireInput()
+        proc:acquireInput()
         local res = {pcall(biosRead, _sReplaceChar,_tHistory,_fnComplete,_sDefault)}
-        proc.releaseInput()
+        proc:releaseInput()
         if res[1] then
             return res[2]
         end -- if res
@@ -340,7 +395,7 @@ local envFactory = function(proc, env)
     end -- function read
     
     env.sleep = function(nTime)
-      kernel.debug("[PID"..proc.pid.."] sleep", nTime, kernel.oldGlob.getfenv(0), kernel.oldGlob.getfenv(env.sleep))
+      proc:debug("sleep", nTime)
       if nTime ~= nil and type( nTime ) ~= "number" then
           error( "bad argument #1 (expected number, got " .. type( nTime ) .. ")", 2 ) 
       end
@@ -357,49 +412,56 @@ local envFactory = function(proc, env)
     end -- function os.sleep
     
     env.os.startTimer = function(s)
-        kernel.debug("[PID"..proc.pid.."] os.startTimer", s)
-        local timer = kernel.oldGlob.os.startTimer(s)
-        kernel.modules.instances.sandbox.timers.new(timer, proc)
+        proc:debug("os.startTimer", s)
+        local timer = osstartTimer(s)
+        -- TODO REFACTORING method call
+        privates.kernel.modules.instances.sandbox.timers.new(timer, proc)
         return timer
     end -- function os.startTimer
     env.os.pullEventRaw = function(filter)
-        kernel.debug("[PID"..proc.pid.."] os.pullEventRaw", filter)
+        proc:debug("os.pullEventRaw", filter)
         while true do
-            for k,v in kernel.oldGlob.ipairs(proc.evqueue) do
-                proc.evqueue[k] = nil
-                if filter == nil or v[1]==filter then
-                    kernel.debug("[PID"..proc.pid.."] returning event from local event queue", kernel.oldGlob.unpack(v))
-                    return kernel.oldGlob.unpack(v)
+            local evt = proc:popev()
+            while evt ~= nil do
+                if filter == nil or evt[1]==filter then
+                    proc:debug("returning event from local event queue", origunpack(evt))
+                    return origunpack(evt)
                 else -- if filter
-                    kernel.debug("[PID"..proc.pid.."] discard event from local event queue because of filter", kernel.oldGlob.unpack(v))
+                    proc:debug("discard event from local event queue because of filter", origunpack(evt))
                 end -- if filter
-            end -- for evqueue
+                evt = proc:popev()
+            end -- while local event
             
-            kernel.debug("[PID"..proc.pid.."] invoke os.pullEventRaw", filter)
-            local event = M.evqueue.processEvt(proc.pid, proc, {kernel.oldGlob.os.pullEventRaw()}, filter)
+            proc:debug("invoke os.pullEventRaw", filter)
+            -- TODO REFACTORING method call
+            local event = self.evqueue:processEvt(proc:pid(), proc, {origPullEventRaw()}, filter)
             if event ~= nil then
-                return kernel.oldGlob.unpack(event)
+                return origunpack(event)
             end -- if event
         end -- endless loop
     end -- function os.pullEventRaw
     env.os.pullEvent = function(filter)
-        kernel.debug("[PID"..proc.pid.."] os.pullEvent", filter)
-        local eventData = {proc.env.os.pullEventRaw(filter)}
+        proc:debug("os.pullEvent", filter)
+        local eventData = {env.os.pullEventRaw(filter)}
         if eventData[1] == "terminate" then
-            kernel.oldGlob.error( "Terminated", 0 )
+            origerror( "Terminated", 0 )
         end
-        return kernel.oldGlob.unpack(eventData)
+        return origunpack(eventData)
     end -- function os.pullEvent
+    
+    -- TODO refactor xwos with new class system
+    
     env.xwos = {}
     env.xwos.debug = function(msg)
         -- TODO find a way to pass variables etc.
         -- check for possible sandbox breaks during tostring
-        if kernel.oldGlob.type(msg) ~= "string" then
-            error("Wrong argument type (only strings allowed)")
+        if origtype(msg) ~= "string" then
+            origerror("Wrong argument type (only strings allowed)")
         else -- if not string
-            kernel.debug(msg)
+            proc:debug("[debug]", msg)
         end -- if string
     end -- function debug
+    
     ---------------------------------------
     -- process manager
     -- @type xwos.pmr
@@ -414,12 +476,12 @@ local envFactory = function(proc, env)
     -- @return #xwos.pmr.thread
     env.xwos.pmr.createThread = function(newenv)
         local nenv = {}
-        for k,v in kernel.oldGlob.pairs(kernel.oldGlob) do
+        for k,v in origipairs(privates.kernel.oldGlob) do
             nenv[k] = v
         end -- for oldGlob
         local function wrap(target, src)
-            for k,v in kernel.oldGlob.pairs(src) do
-                if kernel.oldGlob.type(v) == "table" and kernel.oldGlob.type(target[k]) == "table" then
+            for k,v in origipairs(src) do
+                if origtype(v) == "table" and origtype(target[k]) == "table" then
                     wrap(v, target[k])
                 else -- if tables
                     target[k] = v
@@ -429,7 +491,7 @@ local envFactory = function(proc, env)
         if newenv ~= nil then
             wrap(nenv, newenv)
         end -- if nenv
-        local nproc = kernel.processes.new(proc, kernel, env, kernel.envFactories)
+        local nproc = privates.kernel.processes:create(proc, privates.kernel, env, privates.kernel.envFactories) -- TODO get process parent env factories
         ---------------------------------------
         -- the new thread
         -- @type xwos.pmr.thread
@@ -438,26 +500,26 @@ local envFactory = function(proc, env)
         -- join thread and wait for finish
         -- @function [parent=#xwos.pmr.thread] join
         R.join = function()
-            nproc.join(proc)
+            nproc:join(proc)
         end -- function join
         ---------------------------------------
         -- terminate thread
         -- @function [parent=#xwos.pmr.thread] terminate
         R.termninate = function()
-            nproc.termninate()
-        end -- function termninate
+            nproc:terminate()
+        end -- function terminate
         ---------------------------------------
         -- spawn thread and invoke function
         -- @function [parent=#xwos.pmr.thread] spawn
         -- @param #function func the function to invoke
         -- @param ... arguments
         R.spawn = function(func, ...)
-            nproc.spawn(func, ...)
-        end -- function termninate
+            nproc:spawn(func, ...)
+        end -- function spawn
         -- TODO do we need this? we are declaring the functions already inside process thread with correct fenv
-        kernel.oldGlob.setfenv(R.join, kernel.nenv)
-        kernel.oldGlob.setfenv(R.terminate, kernel.nenv)
-        kernel.oldGlob.setfenv(R.spawn, kernel.nenv)
+        origsetfenv(R.join, privates.kernel.nenv)
+        origsetfenv(R.terminate, privates.kernel.nenv)
+        origsetfenv(R.spawn, privates.kernel.nenv)
         return R
     end -- function createThread
     
@@ -465,7 +527,7 @@ local envFactory = function(proc, env)
         if type( _sFile ) ~= "string" then
             error( "bad argument #1 (expected string, got " .. type( _sFile ) .. ")", 2 )
         end
-        local fnFile, e = loadfile( _sFile, kernel.nenv )
+        local fnFile, e = loadfile( _sFile, privates.kernel.nenv )
         if fnFile then
             return fnFile()
         else
@@ -474,26 +536,18 @@ local envFactory = function(proc, env)
     end -- dofile
     
     -- TODO do we need this? we are declaring the functions already inside process thread with correct fenv
-    kernel.oldGlob.setfenv(biosRead, kernel.nenv)
-    kernel.oldGlob.setfenv(env.read, kernel.nenv)
-    kernel.oldGlob.setfenv(env.sleep, kernel.nenv)
-    kernel.oldGlob.setfenv(env.dofile, kernel.nenv)
-    kernel.oldGlob.setfenv(env.os.sleep, kernel.nenv)
-    kernel.oldGlob.setfenv(env.os.startTimer, kernel.nenv)
-    kernel.oldGlob.setfenv(env.os.pullEventRaw, kernel.nenv)
-    kernel.oldGlob.setfenv(env.os.pullEvent, kernel.nenv)
-    kernel.oldGlob.setfenv(env.xwos.debug, kernel.nenv)
-    kernel.oldGlob.setfenv(env.xwos.pmr.createThread, kernel.nenv)
-end -- function envFactory
+    origsetfenv(biosRead, privates.kernel.nenv)
+    origsetfenv(env.read, privates.kernel.nenv)
+    origsetfenv(env.sleep, privates.kernel.nenv)
+    origsetfenv(env.dofile, privates.kernel.nenv)
+    origsetfenv(env.os.sleep, privates.kernel.nenv)
+    origsetfenv(env.os.startTimer, privates.kernel.nenv)
+    origsetfenv(env.os.pullEventRaw, privates.kernel.nenv)
+    origsetfenv(env.os.pullEvent, privates.kernel.nenv)
+    origsetfenv(env.xwos.debug, privates.kernel.nenv)
+    origsetfenv(env.xwos.pmr.createThread, privates.kernel.nenv)
+end) -- function envFactory
 
----------------------------------
--- @function [parent=#xwos.modules.sandbox] boot
--- @param xwos.kernel#xwos.kernel k
-M.boot = function(k)
-    k.debug("boot sandbox")
-    
-    kernel.envFactories.sandbox = envFactory
-end -- function boot
 
 -- wrap lua console and wrap programs...
 
@@ -570,4 +624,4 @@ end -- function boot
 -- timer                http://computercraft.info/wiki/Timer_(event)
 -- turtle_inventory     http://computercraft.info/wiki/Turtle_inventory_(event)
 
-return M
+return nil
