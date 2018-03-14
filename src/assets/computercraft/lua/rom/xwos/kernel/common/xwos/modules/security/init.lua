@@ -41,6 +41,10 @@ function (self, clazz, privates, kernel)
     -- kernel reference
     -- @field [parent=#xwsecprivates] xwos.kernel#xwos.kernel kernel
     privates.kernel = kernel
+    ------------------
+    -- the known profiles by name
+    -- @field [parent=#xwsecprivates] #map<#string,xwos.modules.security.profile#xwos.modules.security.profile> profiles
+    privates.profiles = {}
     privates:createProfile("root")
     privates:createProfile("admin")
     privates:createProfile("user")
@@ -65,9 +69,6 @@ end) -- ctor
 -- @return xwos.modules.security.profile#xwos.modules.security.profile
 function (self, clazz, privates, name)
     local res = _CMR.new("xwos.modules.security.profile", name)
-    ------------------
-    -- the known profiles by name
-    -- @field [parent=#xwsecprivates] #map<#string,xwos.modules.security.profile#xwos.modules.security.profile> profiles
     privates.profiles[name] = res
     return res
 end) -- createProfile

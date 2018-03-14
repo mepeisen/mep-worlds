@@ -19,7 +19,6 @@ term.clear()
 
 local pairs = pairs
 local tinsert = table.insert
-local error = error
 local setfenv = setfenv
 local fsexists = fs.exists
 local fsisdir = fs.isDir
@@ -29,6 +28,9 @@ local loadfile = loadfile
 local getfenv = getfenv
 local print = print
 local split = string.gmatch
+local gsub = string.gsub
+local setmetatable = setmetatable
+local error = error
 
 local tArgs = {...}
 
@@ -48,8 +50,19 @@ local kernelRoot = "/rom/xwos"
 if arg0:sub(0, 4) ~= "rom/" then
     print()
     print("WARNING! Unsecure invocation detected. Read manual for installing xwos into ROM.")
-    sleep(5) -- TODO config option to remove sleep
+    if not fs.exists("/xwos/private/unsecureBoot1.dat") then
+        sleep(5)
+        fs.open("/xwos/private/unsecureBoot1.dat", "w"):close()
+    end -- if exists
     kernelRoot = "/xwos" -- TODO get path from arg0, relative to start script
+end -- if not rom
+if cclite~=nil then
+    print()
+    print("WARNING! Unsecure invocation detected. Within cclite security may be broken.")
+    if not fs.exists("/xwos/private/unsecureBoot2.dat") then
+        sleep(5)
+        fs.open("/xwos/private/unsecureBoot2.dat", "w"):close()
+    end -- if exists
 end -- if not rom
 
 local kernelpaths = { "", kernelRoot.."/kernel/common" }
@@ -104,32 +117,36 @@ for k, v in pairs(oldGlob) do
 end -- for _G
 
 -- TODO CCLite does not have require??? Or is it a 1.7 ccraft problem?
-if oldGlob.require == nil then
+if oldGlob.require == nil and cclite ~= nil then
     local oldload = loadfile
-    local olderror = error
     oldGlob.require = function(path)
         -- print("require "..path)
         local res, err = oldload(path..".lua")
         if res then
             return res()
         else -- if res
-            olderror(err)
+            error(err)
         end -- if not res
     end -- function require
+    oldGlob.debug = {
+        getinfo = function(n)
+            -- TODO find a way to detect file and line in cclite
+            return {
+                source = "@?",
+                short_src = "?",
+                currentline = -1,
+                linedefined = -1,
+                what = "C",
+                name = "?",
+                namewhat = "",
+                nups = 0,
+                func = nil
+            }
+        end -- function debug.getinfo
+    }
     newGlob.require = oldGlob.require
+    newGlob.debug = oldGlob.debug
 end -- if not require
-
--- kernel require method to load a file from kernel
-local function krequire(path)
-    for k, v in pairs(kernelpaths) do
-        local target = v .. "/" .. string.gsub(path, "%.", "/")
-        local targetFile = target .. ".lua"
-        if fsexists(targetFile) then
-            return newGlob.require(target)
-        end -- if file exists
-    end -- for kernelpaths
-    return nil
-end -- function require
 
 local cpfactory = function(env)
     ---------------
@@ -148,7 +165,7 @@ local cpfactory = function(env)
     -- @param #string path the path to file
     -- @return #any the file result
     function classmanager.require(path)
-        local file = path:gsub("%.", "/")
+        local file = gsub(path, "%.", "/")
         for k,v in pairs(classpath) do
             local path = v.."/"..file..".lua"
             if fsexists(path) and not fsisdir(path) then
@@ -185,6 +202,7 @@ local cpfactory = function(env)
     local function loadClassFile(name, file, path)
         local res, err = loadfile(path)
         if res then
+            setfenv(res, env)
             res()
             if classes[name] == nil then
                 err = file.." did not declare class "..name
@@ -199,14 +217,16 @@ local cpfactory = function(env)
     end -- function loadClassFile
     
     local function loadClass(name)
-        local file = name:gsub("%.", "/")
+        local file = gsub(name, "%.", "/")
         for k,v in pairs(classpath) do
             local path1 = v.."/"..file..".lua"
             local path2 = v.."/"..file.."/init.lua"
             if fsexists(path1) and not fsisdir(path1) then
                 loadClassFile(name, file, path1)
+                return
             elseif fsexists(path2) and not fsisdir(path2) then
                 loadClassFile(name, file, path2)
+                return
             end -- if isfile
         end -- for cp
         local err = "class "..name.." not found"
@@ -217,12 +237,13 @@ local cpfactory = function(env)
     local function addObjMethods(self, privates, index, objclazz, clazz)
         for k,v in pairs(clazz._funcs) do
             index[k] = function(self, ...)
-                clazz._funcs[k](self, clazz, privates, ...)
+                return clazz._funcs[k](self, clazz, privates, ...)
             end -- function
             setfenv(index[k], env)
             if clazz._super ~= nil then
-                index.__index = {}
-                addObjMethods(self, privates, index.__index, clazz, clazz._super)
+                local mt = { __index = {} }
+                setmetatable(index, mt)
+                addObjMethods(self, privates, mt.__index, clazz, clazz._super)
             end -- if super
         end -- for funcs
     end -- function addObjMethods
@@ -230,12 +251,13 @@ local cpfactory = function(env)
     local function addPrivateMethods(self, privates, index, objclazz, clazz)
         for k,v in pairs(clazz._privates) do
             index[k] = function(self, ...)
-                clazz._privates[k](self, clazz, privates, ...)
+                return clazz._privates[k](self, clazz, privates, ...)
             end -- function
             setfenv(index[k], env)
             if clazz._super ~= nil then
-                index.__index = {}
-                addPrivateMethods(self, privates, index.__index, clazz, clazz._super)
+                local mt = { __index = {} }
+                setmetatable(index, mt)
+                addPrivateMethods(self, privates, mt.__index, clazz, clazz._super)
             end -- if super
         end -- for funcs
     end -- function addPrivateMethods
@@ -258,10 +280,10 @@ local cpfactory = function(env)
         if clazz._supername ~= nil and clazz._super == nil then
             loadAndDefineClass(clazz._supername)
             clazz._super = classes[clazz._supername]
-            clazz._funcs.__index = clazz._super._funcs
-            -- TODO security: wrong env from invokeCtor
+            local mt = { __index = clazz._super._funcs }
+            setmetatable(clazz._funcs, mt)
             clazz._superctor = function(self, privates, ...)
-                invokeCtor(self, privates, clazz._super, clazz._super)
+                invokeCtor(self, privates, clazz._super, clazz._super, ...)
             end -- function
             setfenv(clazz._superctor, env)
             
@@ -278,15 +300,17 @@ local cpfactory = function(env)
         end -- if not super
     end -- function loadClass
     
-    local function construct(name, clazz)
+    local function construct(name, clazz, ...)
         local obj = {}
         local privates = {}
         obj.class = name
-        obj.__index = {}
-        privates.__index = {}
-        addObjMethods(obj, privates, obj.__index, clazz, clazz)
-        addPrivateMethods(obj, privates, privates.__index, clazz, clazz)
-        invokeCtor(obj, privates, clazz, clazz)
+        local mt1 = { __index={} }
+        setmetatable(obj, mt1)
+        local mt2 = { __index={} }
+        setmetatable(privates, mt2)
+        addObjMethods(obj, privates, mt1.__index, clazz, clazz)
+        addPrivateMethods(obj, privates, mt2.__index, clazz, clazz)
+        invokeCtor(obj, privates, clazz, clazz, ...)
         return obj
     end -- function construct
     
@@ -324,7 +348,7 @@ local cpfactory = function(env)
             error("Cannot create new instance of singleton "..name)
         end -- if singleton
         
-        return construct(name, clazz)
+        return construct(name, clazz, ...)
     end -- function new
     
     ---------------
@@ -342,14 +366,16 @@ local cpfactory = function(env)
     -- @return #table the found packages (package names in keys)
     function classmanager.findPackages(prefix)
         local res = {}
-        local file = prefix:gsub("%.", "/")
+        local file = gsub(prefix, "%.", "/")
         for k,v in pairs(classpath) do
             local path = v.."/"..file
-            for _, f in pairs(fslist(path)) do
-                if fsisdir(path.."/"..f) then
-                    res[prefix.."."..f] = f
-                end -- if fs.isdir
-            end -- for fs.list
+            if (fsisdir(path)) then
+                for _, f in pairs(fslist(path)) do
+                    if fsisdir(path.."/"..f) then
+                        res[prefix.."."..f] = f
+                    end -- if fs.isdir
+                end -- for fs.list
+            end -- if isdir
         end -- for co
         return res
     end -- function findPackages
@@ -361,7 +387,7 @@ local cpfactory = function(env)
     -- @return #table the found classes (class names in keys)
     function classmanager.findClasses(package)
         local res = {}
-        local file = prefix:gsub("%.", "/")
+        local file = gsub(package, "%.", "/")
         for k,v in pairs(classpath) do
             local path = v.."/"..file
             for _, f in pairs(fslist(path)) do
@@ -380,6 +406,7 @@ local cpfactory = function(env)
     -- @return #clazz the class instance
     function classmanager.class(name)
         if classes[name] ~= nil then
+            -- print(cclite.traceback())
             error("Duplicate class declaration: "..name)
         end -- if classes
         
@@ -444,6 +471,7 @@ local cpfactory = function(env)
             -- @field [parent=#clazz] #string _supername
             _supername = nil
         }
+        setfenv(clazz._superctor, env)
         classes[name] = clazz
         
         ---------------
@@ -458,6 +486,7 @@ local cpfactory = function(env)
             end -- if private
             return clazz
         end -- function ctor
+        setfenv(clazz.singleton, env)
         
         ---------------
         -- declare constructor
@@ -472,6 +501,7 @@ local cpfactory = function(env)
             setfenv(func, env)
             return clazz
         end -- function ctor
+        setfenv(clazz.ctor, env)
         
         ---------------
         -- declare function
@@ -487,6 +517,7 @@ local cpfactory = function(env)
             setfenv(func, env)
             return clazz
         end -- function func
+        setfenv(clazz.func, env)
         
         ---------------
         -- declare private function located inside object privates
@@ -502,6 +533,7 @@ local cpfactory = function(env)
             setfenv(func, env)
             return clazz
         end -- function func
+        setfenv(clazz.pfunc, env)
         
         ---------------
         -- declare static function
@@ -517,6 +549,7 @@ local cpfactory = function(env)
             setfenv(func, env)
             return clazz
         end -- function func
+        setfenv(clazz.func, env)
         
         ---------------
         -- class inheritance
@@ -527,9 +560,27 @@ local cpfactory = function(env)
             clazz._supername = name
             return clazz
         end -- function clazz
+        setfenv(clazz.extends, env)
         
         return clazz
     end -- function class
+    
+    setfenv(classmanager.require, env)
+    setfenv(classmanager.addcp, env)
+    setfenv(errClass, env)
+    setfenv(loadClassFile, env)
+    setfenv(loadClass, env)
+    setfenv(addObjMethods, env)
+    setfenv(addPrivateMethods, env)
+    setfenv(invokeCtor, env)
+    setfenv(loadAndDefineClass, env)
+    setfenv(construct, env)
+    setfenv(classmanager.get, env)
+    setfenv(classmanager.new, env)
+    setfenv(classmanager.load, env)
+    setfenv(classmanager.findPackages, env)
+    setfenv(classmanager.findClasses, env)
+    setfenv(classmanager.class, env)
     
     return classmanager
 end -- function create
@@ -539,13 +590,14 @@ newGlob._CMR = cmr
 cmr.addcp(table.unpack(kernelpaths))
 
 setfenv(1, newGlob)
-local state, err = pcall(function()
-        local kernel = cmr.get('xwos.kernel') -- xwos.kernel#xwos.kernel
-        
-        kernel:boot(myver, kernelpaths, kernelRoot, cpfactory, oldGlob, tArgs)
-        kernel:startup()
-    end -- function ex
-)
+local func = function()
+    local kernel = cmr.get('xwos.kernel') -- xwos.kernel#xwos.kernel
+    
+    kernel:boot(myver, kernelpaths, kernelRoot, cpfactory, oldGlob, tArgs)
+    kernel:startup()
+end -- function ex
+setfenv(func, newGlob)
+local state, err = pcall(func)
 setfenv(1, old1)
 
 if not state then

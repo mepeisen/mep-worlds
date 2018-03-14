@@ -86,13 +86,13 @@ function(self, clazz, privates)
     for i, v in pairs(privates.moduleOrder) do
         if self.instances[v] ~= nil then
             privates.kernel:debug("preboot kernel module",v)
-            self.instances[v].preboot()
+            self.instances[v]:preboot()
         end -- if exists
     end -- for moduleOrder
     for i, v in pairs(self.instances) do
         if not tcontains(privates.moduleOrder, i) then
             privates.kernel:debug("preboot kernel module",v)
-            v.preboot()
+            v:preboot()
         end -- if not contains
     end -- for modules
 end) -- function preboot
@@ -112,13 +112,13 @@ function(self, clazz, privates)
     for i, v in pairs(privates.moduleOrder) do
         if self.instances[v] ~= nil then
             privates.kernel:debug("boot kernel module",v)
-            self.instances[v].boot()
+            self.instances[v]:boot()
         end -- if exists
     end -- for moduleOrder
     for i, v in pairs(self.instances) do
         if not tcontains(privates.moduleOrder, i) then
             privates.kernel:debug("boot kernel module",v)
-            v.boot()
+            v:boot()
         end -- if not contains
     end -- for modules
 end) -- function preboot

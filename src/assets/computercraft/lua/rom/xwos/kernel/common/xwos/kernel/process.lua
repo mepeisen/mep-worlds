@@ -112,13 +112,13 @@ function(self, clazz, privates, pprivates, p, k, newPid, env, factories)
     -- the process state; "initializing", "running" or "terminated"
     -- @field [parent=#procprivates] #string procstate 
     privates.procstate = "initializing"
-    privates:debug("pocstate =", privates.procstate)
+    self:debug("pocstate =", privates.procstate)
     
     --------------------------------
     -- the process environment used globally in this process
     -- @field [parent=#procprivates] global#global env
     privates.env = { pid = privates.pid }
-    privates:debug("env =", privates.env)
+    self:debug("env =", privates.env)
     
     local nenvmt = {
         __index = function(table, key)
@@ -220,7 +220,7 @@ end) -- function pushev
 -- @return #number
 function(self, clazz, privates)
     return privates.pid
-end) -- function debug
+end) -- function pid
 
 -------------------------------
 -- debug log message
@@ -308,7 +308,7 @@ end) -- function join
 -- @function [parent=#xwos.kernel.process] releaseInput
 -- @param #xwos.kernel.process self the process object
 
-.proc("releaseInput",
+.func("releaseInput",
 --------------------------------------
 -- @function [parent=#procintern] releaseInput
 -- @param #xwos.kernel.process self
@@ -323,7 +323,7 @@ end) -- function acquireInput
 -- @function [parent=#xwos.kernel.process] wakeup
 -- @param #xwos.kernel.process self the process object
 
-.proc("wakeup",
+.func("wakeup",
 --------------------------------------
 -- @function [parent=#procintern] wakeup
 -- @param #xwos.kernel.process self
@@ -367,6 +367,28 @@ function(self, clazz, privates)
     privates.processes.procs[privates.pid] = nil
     privates.processes.list:remove(self)
 end) -- function remove
+    
+--------------------------------
+-- Spawn the process (invoke main function)
+-- @function [parent=#xwos.kernel.process] spawnClass
+-- @param #xwos.kernel.process self the process object
+-- @param #string class the class to invoke
+-- @param ... the arguments for given function
+
+.func("spawnClass",
+--------------------------------
+-- @function [parent=#procintern] spawnClass
+-- @param #xwos.kernel.process self
+-- @param classmanager#clazz clazz
+-- @param #procprivates privates
+-- @param #string class the class to invoke
+-- @param ... the arguments for given function
+function(self, clazz, privates, class, ...)
+    self:spawn(function(...)
+        local obj = _CMR.new(class)
+        obj:main(...)
+    end, ...)
+end) -- function spawnClass
     
 --------------------------------
 -- Spawn the process (invoke function)

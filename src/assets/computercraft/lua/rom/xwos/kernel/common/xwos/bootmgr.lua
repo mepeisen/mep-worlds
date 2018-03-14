@@ -15,9 +15,17 @@
 --    You should have received a copy of the GNU General Public License
 --    along with xwos.  If not, see <http://www.gnu.org/licenses/>.
 
-print("BOOT MANAGER (in a real sense...)")
+--------------------------------
+-- a boot manager
+-- @module xwos.bootmgr
+_CMR.class("xwos.bootmgr")
 
-local gui = xwos.xwgui.scene.create(term.current())
-gui:add(xwos.xwgui.text.create("FOO", 1, 1, colors.white, colors.black))
-gui:redraw()
+.func("main",
+function(self, clazz, privates)
+    print("BOOT MANAGER (in a real sense...)")
+end) -- function main
+
+--local gui = xwos.xwgui.scene.create(term.current())
+--gui:add(xwos.xwgui.text.create("FOO", 1, 1, colors.white, colors.black))
+--gui:redraw()
 

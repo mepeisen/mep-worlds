@@ -33,7 +33,6 @@ local coKernel -- the kernels boot process
 
 -- TODO currently not allowed in ccraft :-(
 -- local origStringMeta = getmetatable("")
-
 --------------------------------
 -- local kernel
 -- @type xwos.kernel
@@ -434,18 +433,31 @@ function(self, clazz, privates, ver, kernelpaths, kernelRoot, cpfactory, oldGlob
         return R
     end -- function wrapfenv
     self:debug("sandbox: wrapfenv(oldGlob)")
-    --------------------------------
-    -- the old fenv for global functions
-    -- @field [parent=#xwos.kernel] #table oldfenv
-    self.oldfenv = wrapfenv(oldGlob, self.nenv, {
-        tostring=true, -- TODO problem for ccraft 1.7 or for cclite? in ccraft 1.8 this works...
+    
+    local blacklist = {
         getfenv=true,
         setfenv=true,
         shell={run=true, clearAlias=true, dir=true, getRunningProgram=true},
         package="*",
         bit32={bxor=true},
         redstone={getBundledOutput=true}
-    })
+    }
+    -- hack for cclite emu
+    if cclite ~= nil then
+        blacklist.loadstring = true
+        blacklist.tostring = true -- TODO problem for ccraft 1.7 or for cclite? in ccraft 1.8 this works...
+        blacklist.os = "*"
+    end -- if cclite debugger
+    
+    --------------------------------
+    -- the old fenv for global functions
+    -- @field [parent=#xwos.kernel] #table oldfenv
+    self.oldfenv = wrapfenv(oldGlob, self.nenv, blacklist)
+    -- hack for cclite emu
+    if cclite ~= nil then
+        self.nenv.debug = debug
+        self.nenv.cclite = cclite
+    end -- if cclite debugger
     
 --    print("installing kernel classes...")
 -- TODO
@@ -485,9 +497,9 @@ function(self, clazz, privates)
     end -- for oldGlob
     
     self:debug("creating root process")
-    local proc = self.processes:new(nil, self, nenv, self.envFactories) -- TODO factories from root profile (per profile factories)
-    local startupData = self:readSecureData('core/startup.dat', "xwos.bootmgr")
-    self:debug("spawning thread with startup script " .. startupData)
+    local proc = self.processes:create(nil, self, nenv, self.envFactories) -- TODO factories from root profile (per profile factories)
+    local startupData = self:readSecureData("core/startup.dat", "xwos.bootmgr")
+    self:debug("spawning thread with startup script", startupData)
     proc:spawnClass(startupData)
     proc:join(nil)
     
