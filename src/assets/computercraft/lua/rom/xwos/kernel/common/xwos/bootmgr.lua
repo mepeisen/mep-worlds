@@ -28,7 +28,7 @@ function(self, clazz, privates)
     _CMR.load("xwos.gui.text")
     
     local gui = xwos.gui.stage.create(term.current())
-    gui:push(xwos.gui.text.create("FOO", 2, 2, colors.white, colors.black))
+    gui:push(xwos.gui.text.create("FOO", 2, 2, colors.gray, colors.black))
     gui:redraw()
 end) -- function main
 

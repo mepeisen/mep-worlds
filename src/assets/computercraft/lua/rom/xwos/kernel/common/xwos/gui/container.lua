@@ -53,7 +53,9 @@ _CMR.class("xwos.gui.container").extends("xwos.gui.component")
 -- @param #number y
 -- @param ... initial children
 function(self, clazz, privates, x, y, ...)
+    clazz._superctor(self, privates)
     privates._children = _CMR.new("xwos.xwlist", ...)
+    for k in privates._children:iterate() do k._container = self end -- TODO find a better solution; non private field, do not override container (xwlist) etc.
     privates._x = x or 0
     privates._y = y or 0
 end) -- ctor
@@ -63,6 +65,7 @@ end) -- ctor
 -- @param #number x
 -- @param #number y
 -- @param ... initial children
+-- @return #xwos.gui.container
 .sfunc("create", function(x, y, ...)
     return _CMR.new("xwos.gui.container", x, y, ...)
 end) -- function create
@@ -88,6 +91,7 @@ end) -- function create
 -- @return xwos.gui.component#xwos.gui.component
 function (self, clazz, privates, t)
     local R = privates._children:push(t)
+    R._container = self -- TODO find a better solution; non private field, do not override container (xwlist) etc.
     self:redraw()
     return R
 end) -- function push
@@ -109,6 +113,7 @@ end) -- function push
 -- @return xwos.gui.component#xwos.gui.component
 function (self, clazz, privates, t)
     local R = privates._children:unshift(t)
+    R._container = self -- TODO find a better solution; non private field, do not override container (xwlist) etc.
     self:redraw()
     return R
 end) -- function unshift
@@ -131,6 +136,7 @@ end) -- function unshift
 -- @return xwos.gui.component#xwos.gui.component
 function (self, clazz, privates, t, after)
     local R = privates._children:insert(t, after)
+    R._container = self -- TODO find a better solution; non private field, do not override container (xwlist) etc.
     self:redraw()
     return R
 end) -- function insert
@@ -150,6 +156,7 @@ end) -- function insert
 -- @return xwos.gui.component#xwos.gui.component
 function (self, clazz, privates)
     local R = privates._children:pop()
+    R._container = nil -- TODO find a better solution; non private field, do not override container (xwlist) etc.
     self:redraw()
     return R
 end) -- function pop
@@ -169,6 +176,7 @@ end) -- function pop
 -- @return xwos.gui.component#xwos.gui.component
 function (self, clazz, privates)
     local R = privates._children:shift()
+    R._container = nil -- TODO find a better solution; non private field, do not override container (xwlist) etc.
     self:redraw()
     return R
 end) -- function shift
@@ -190,6 +198,7 @@ end) -- function shift
 -- @return xwos.gui.component#xwos.gui.component
 function (self, clazz, privates, t)
     privates._children:remove(t)
+    t._container = self -- TODO find a better solution; non private field, do not override container (xwlist) etc.
     self:redraw()
     return t
 end) -- function remove
@@ -301,8 +310,8 @@ end) -- function setPos
 -- @return #xwos.gui.container
 function (self, clazz, privates)
     if privates._visible then
-        for k,v in privates._children:iterate() do
-            v:paint()
+        for k in privates._children:iterate() do
+            k:paint()
         end -- for children
     end -- if visible
     return self
@@ -321,7 +330,7 @@ end) -- function paint
 
 .func("str",
 ------------------------
--- @function [parent=#xwcintern] paint
+-- @function [parent=#xwcintern] str
 -- @param #xwos.gui.container self
 -- @param classmanager#clazz clazz
 -- @param #xwcprivates privates

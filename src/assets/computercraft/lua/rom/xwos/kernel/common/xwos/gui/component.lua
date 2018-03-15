@@ -273,13 +273,13 @@ end) -- function hide
 
 ------------------------
 -- Request a redraw on this component; will do nothing if no container is available
--- @function [parent=#xwos.gui.component] paint
+-- @function [parent=#xwos.gui.component] redraw
 -- @param #xwos.gui.component self self
 -- @return #xwos.gui.component self for chaining
 
 .func("redraw",
 ------------------------
--- @function [parent=#xwcintern] paint
+-- @function [parent=#xwcintern] redraw
 -- @param #xwos.gui.component self
 -- @param classmanager#clazz clazz
 -- @param #xwcprivates privates

@@ -65,6 +65,7 @@ _CMR.class("xwos.gui.text").extends("xwos.gui.component")
 -- @param #number fg
 -- @param #number bg
 function(self, clazz, privates, text, x, y, fg, bg)
+    clazz._superctor(self, privates)
     privates._x = x or 0
     privates._y = y or 0
     privates._fg = fg or 0
@@ -218,8 +219,8 @@ end) -- function setPos
 -- @param #xwcprivates privates
 -- @return #xwos.gui.text
 function (self, clazz, privates)
-    if privates._container ~= nil and privates._visible then
-        privates._container:str(privates._x, privates._y, privates._content, privates._fg, privates._bg)
+    if self._container ~= nil and privates._visible then
+        self._container:str(privates._x, privates._y, privates._content, privates._fg, privates._bg)
     end -- if container and visible
     return self
 end) -- function paint

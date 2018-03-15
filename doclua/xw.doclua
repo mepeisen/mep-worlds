@@ -1,0 +1,124 @@
+--    Copyright Martin Eisengardt 2018 xworlds.eu
+--    
+--    This file is part of xwos.
+--
+--    xwos is free software: you can redistribute it and/or modify
+--    it under the terms of the GNU General Public License as published by
+--    the Free Software Foundation, either version 3 of the License, or
+--    (at your option) any later version.
+--
+--    xwos is distributed in the hope that it will be useful,
+--    but WITHOUT ANY WARRANTY; without even the implied warranty of
+--    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+--    GNU General Public License for more details.
+--
+--    You should have received a copy of the GNU General Public License
+--    along with xwos.  If not, see <http://www.gnu.org/licenses/>.
+
+-------------------------------------------------------------------------------
+-- @module xw
+
+-------------------------------------------------------------------------------
+-- prints some useful information to kernel debug log; only works with activated debugging
+-- @function [parent=#xw] debug
+-- @param ... variables to print
+
+-------------------------------------------------------------------------------
+-- process tool
+-- @field [parent=#xw] #xw_pmr pmr
+
+-------------------------------------------------------------------------------
+-- double linked list
+-- @field [parent=#xw] #xw_xwlist xwlist
+
+-------------------------------------------------------------------------------
+-- terminal gui
+-- @field [parent=#xw] #xw_gui gui
+
+-------------------------------------------------------------------------------
+-- @type xw_gui
+
+-------------------------------------------------------------------------------
+-- base class
+-- @field [parent=#xw_gui] #xw_gui_component component
+
+-------------------------------------------------------------------------------
+-- container to manage multiple children
+-- @field [parent=#xw_gui] #xw_gui_container container
+
+-------------------------------------------------------------------------------
+-- stage to manage terminal windows
+-- @field [parent=#xw_gui] #xw_gui_stage stage
+
+-------------------------------------------------------------------------------
+-- static texts
+-- @field [parent=#xw_gui] #xw_gui_text text
+
+-------------------------------------------------------------------------------
+-- @type xw_gui_component
+
+-------------------------------------------------------------------------------
+-- @type xw_gui_container
+
+------------------------
+-- @function [parent=#xw_gui_container] create
+-- @param #number x
+-- @param #number y
+-- @param ... initial children
+-- @return xwos.gui.container#xwos.gui.container
+
+-------------------------------------------------------------------------------
+-- @type xw_gui_stage
+
+------------------------
+-- create new stage
+-- @function [parent=#xw_gui_stage] create
+-- @param window#windowObject window
+-- @return xwos.gui.stage#xwos.gui.stage
+
+-------------------------------------------------------------------------------
+-- @type xw_gui_text
+
+-------------------------------------------------------------------------------
+-- @type xw_xwlist
+
+------------------------
+-- create new list
+-- @function [parent=#xw_xwlist] create
+-- @param ... initial objects
+-- @return xwos.xwlist#xwos.xwlist list
+
+-------------------------------------------------------------------------------
+-- @type xw_pmr
+
+---------------------------------------
+-- create a new child thread
+-- @function [parent=#xw_pmr] createThread
+-- @param #table newenv the environment of the new thread
+-- @return #xw_pmr_thread
+
+---------------------------------------
+-- join thread and wait for finish
+-- @function [parent=#xw_pmr_thread] join
+
+---------------------------------------
+-- request thread termination (as soon as possible)
+-- @function [parent=#xw_pmr_thread] terminate
+
+---------------------------------------
+-- spawn thread and invoke function
+-- @function [parent=#xw_pmr_thread] spawn
+-- @param #function func the function to invoke
+-- @param ... arguments
+
+------------------------
+-- create new text
+-- @function [parent=#xw_gui_text] create
+-- @param #string content the text content
+-- @param #number x the x position
+-- @param #number y the y position
+-- @param #number fg the foreground
+-- @param #number bg the background
+-- @return xwos.gui.text#xwos.gui.text the text component
+
+return nil

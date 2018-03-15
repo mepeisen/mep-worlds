@@ -134,7 +134,7 @@
 
 ------------------------------------------------------------------------------
 -- xwos user api
--- @field[parent = #global] xwos#xwos xwos
+-- @field[parent = #global] xw#xw xwos
 
 ------------------------------------------------------------------------------
 -- Returns the current process id

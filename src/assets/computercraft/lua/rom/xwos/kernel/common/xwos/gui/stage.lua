@@ -43,8 +43,8 @@ _CMR.class("xwos.gui.stage").extends("xwos.gui.container")
 -- @param #xwcprivates privates
 -- @param window#windowObject window
 function(self, clazz, privates, window, ...)
-    privates._window = window
     clazz._superctor(self, privates, ...)
+    privates._window = window
 end) -- ctor
 
 .sfunc("create",
@@ -52,6 +52,7 @@ end) -- ctor
 -- create new stage
 -- @function [parent=#xwos.gui.stage] create
 -- @param window#windowObject window
+-- @return #xwos.gui.stage
 function (window, ...)
     return _CMR.new("xwos.gui.stage", window, ...)
 end) -- function create
@@ -178,6 +179,29 @@ function (self, clazz, privates, x, y)
 end) -- function setPos
 
 ------------------------
+-- Request a redraw on this component; will do nothing if no container is available
+-- @function [parent=#xwos.gui.stage] redraw
+-- @param #xwos.gui.stage self self
+-- @return #xwos.gui.stage self for chaining
+
+.func("redraw",
+------------------------
+-- @function [parent=#xwcintern] redraw
+-- @param #xwos.gui.stage self
+-- @param classmanager#clazz clazz
+-- @param #xwcprivates privates
+-- @return #xwos.gui.stage self for chaining
+function (self, clazz, privates)
+    if privates._visible then
+        if self._container ~= nil then
+            self._container:redraw()
+        else
+            self:paint()
+        end -- if container
+    end -- if visible
+end) -- function redraw
+
+------------------------
 -- Redraw this single component; should not be invoked directly without care, instead call redraw on root stage
 -- @function [parent=#xwos.gui.stage] paint
 -- @param #xwos.gui.stage self self
@@ -208,7 +232,7 @@ end) -- function paint
 
 .func("str",
 ------------------------
--- @function [parent=#xwcintern] paint
+-- @function [parent=#xwcintern] str
 -- @param #xwos.gui.stage self
 -- @param classmanager#clazz clazz
 -- @param #xwcprivates privates
