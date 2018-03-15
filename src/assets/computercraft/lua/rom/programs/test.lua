@@ -1,27 +1,18 @@
-local cmgr = require('/rom/xwos/kernel/common/classmanager')() -- classmanager#classmanager
+local function foo()
+    --local str = cclite.traceback()
+    --print(str)
+    
+    local level = 1
+    while level < 5 do
+        local state, err = pcall(error, "@", level + 2)
+        if err == "@" then break end
+        print(err)
+        level = level + 1
+    end
+end -- foo
 
-for _, f in pairs(fs.list("/rom")) do
-    print(f)
-end -- for fs.list
---
---cmgr.class("foobase").ctor(
---    function(self, clazz, privates, arg0)
---        print("foobase: self", self)
---        print("foobase: privates", privates)
---        for k,v in pairs(clazz) do
---            print("foobase: clazz", k, v)
---        end
---    end -- ctor
---)
---cmgr.class("foo").extends("foobase").ctor(
---    function(self, clazz, privates, arg0)
---        clazz._superctor(self, arg0)
---        print("foo: self", self)
---        print("foo: privates", privates)
---        for k,v in pairs(clazz) do
---            print("foo: clazz", k, v)
---        end
---    end -- ctor
---)
---
---cmgr.new("foo", 123)
+local function bar()
+    foo()
+end -- bar
+
+bar()

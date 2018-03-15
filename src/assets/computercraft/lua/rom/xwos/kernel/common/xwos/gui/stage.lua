@@ -44,7 +44,7 @@ _CMR.class("xwos.gui.stage").extends("xwos.gui.container")
 -- @param window#windowObject window
 function(self, clazz, privates, window, ...)
     privates._window = window
-    clazz._superctor(self, ...)
+    clazz._superctor(self, privates, ...)
 end) -- ctor
 
 .sfunc("create",

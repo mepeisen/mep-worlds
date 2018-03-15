@@ -24,6 +24,7 @@ local type = type
 local dofile = dofile
 local loadfile = loadfile
 local pcall = pcall
+local xpcall = xpcall
 local origpackage = package
 local print = print
 local error = error
@@ -32,6 +33,7 @@ local pairs = pairs
 local origyield = coroutine.yield
 local originsert = table.insert
 local origqueue = os.queueEvent
+local unpack = unpack
 
 -- TODO hide xwos.kernel.process constructor (only allow instantiation from xwos.kernel.processes functions) 
 
@@ -420,6 +422,19 @@ function(self, clazz, privates, func, ...)
         return
     end -- if not res
     
+    local errhandler = function(err)
+        if privates.kernel.traceErrors then
+            local trace = privates.kernel:trace()
+            local tracestr = err .. "\n at"
+            for i, v in pairs(trace) do
+                tracestr = tracestr .. "\n -> " .. v.hr
+            end -- for trace
+            return tracestr
+        else
+            return err
+        end -- if traceErrors
+    end -- function errhandler
+    
     local spawn0 = function(...)
         privates.procstate = "running"
         self:debug("pocstate", privates.procstate)
@@ -430,7 +445,8 @@ function(self, clazz, privates, func, ...)
             v(self, privates.env)
         end -- for factories
         if type(func) == "string" then
-            local func2 = function(...)
+            local args = {...}
+            local func2 = function()
                 self:debug("doFile", func)
                 local fnFile, e = loadfile(func, privates.kernel.nenv)
                 if fnFile then
@@ -438,16 +454,21 @@ function(self, clazz, privates, func, ...)
                 else -- if res
                     error( e, 2 )
                 end -- if not res
-                return dofile(func, ...)
+                return dofile(func, unpack(args))
             end -- function func2
             setfenv(func2, privates.kernel.nenv)
             --------------------------------
             -- the return state from process function
             -- @field [parent=#xwos.kernel.process] #table result
-            self.result = {pcall(func2, ...)}
+            self.result = {xpcall(func2, errhandler)}
         else -- if string
             self:debug("invoke function", func)
-            self.result = {pcall(func, ...)}
+            local args = {...}
+            local func2 = function()
+                func(unpack(args))
+            end -- function func2
+            setfenv(func2, privates.kernel.nenv)
+            self.result = {xpcall(func2, errhandler)}
         end -- if string
         if not self.result[1] then
             self:debug("ERR:", self.result[2])
@@ -568,6 +589,7 @@ function(self, clazz, privates, func, ...)
     
     self:debug("setting new env", env0)
     setfenv(spawn0, env0)
+    setfenv(errhandler, env0)
     setfenv(loader1, env0)
     setfenv(loader2, env0)
     setfenv(privates.env.require, env0)

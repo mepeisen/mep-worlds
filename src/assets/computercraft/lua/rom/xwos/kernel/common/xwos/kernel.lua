@@ -22,6 +22,8 @@ local origtype = type
 local origpairs = pairs
 local origload = load
 local origpcall = pcall
+local origerror = error
+local originsert = table.insert
 local origprint = print
 local origtostring = tostring
 
@@ -77,6 +79,11 @@ function(self, clazz, privates, ver, kernelpaths, kernelRoot, cpfactory, oldGlob
             self:print("activating kernel debug mode...")
         end, -- function debug
         
+        trace = function()
+            self.traceErrors = true
+            self:print("activating kernel error trace...")
+        end, -- function debug
+        
         eventLog = function()
             self.eventLog = true
             self:print("activating kernel event log...")
@@ -87,6 +94,11 @@ function(self, clazz, privates, ver, kernelpaths, kernelRoot, cpfactory, oldGlob
     -- the root path to kernel
     -- @field [parent=#xwos.kernel] #string kernelRoot
     self.kernelRoot = kernelRoot
+
+    -------------------------------
+    -- true for kernel error tracing; activated through script invocation/argument ("xwos trace")
+    -- @field [parent=#xwos.kernel] #boolean traceErrors
+    self.traceErrors = false
 
     -------------------------------
     -- true for kernel debugging; activated through script invocation/argument ("xwos debug")
@@ -634,6 +646,93 @@ function(self, clazz, privates, path, data)
     h.write(data)
     h.close()
 end -- function readSecureData
+)
+
+-------------------------------
+-- returns stack trace information
+-- @function [parent=#xwos.kernel] trace
+-- @param #xwos.kernel self the kernel object
+-- @return #list<#traceitem>
+
+-------------------------------
+-- a stacktrace item
+-- @type traceitem
+
+-------------------------------
+-- the filename of this trace item (if known)
+-- @field [parent=#traceitem] #string filename
+
+-------------------------------
+-- simple function name (if known)
+-- @field [parent=#tracitem] #string func
+
+-------------------------------
+-- human readable entry
+-- @field [parent=#tracitem] #string hr
+
+-------------------------------
+-- the line number of this item (if known)
+-- @field [parent=#traceitem] #number line
+
+-------------------------------
+-- the file path of this item (may not be available)
+-- @field [parent=#traceitem] #string path
+
+-------------------------------
+-- the type of item.
+-- "F" for lua functions.
+-- "B" for builtin functions.
+-- "M" main script.
+-- "C" for cunstructor invocations.
+-- "S" for static class functions.
+-- "M" for instance object methods.
+-- "?" for unknown sources.
+-- @field [parent=#traceitem] #string type
+
+-------------------------------
+-- class name for class related functions
+-- @field [parent=#traceitem] #string clazz
+
+-------------------------------
+-- method name for class related functions
+-- @field [parent=#traceitem] #string method
+
+.func("trace",
+-------------------------------
+-- @function [parent=#xwkernelintern] trace
+-- @param #xwos.kernel self
+-- @param classmanager#clazz clazz
+-- @param #xwkernelprivates privates
+-- @return #list<#traceitem>
+function(self, clazz, privates)
+    if self.oldGlob.cclite ~= nil then
+        -- cclite debug traces
+        local trace = self.oldGlob.cclite.traceback()
+        local res = {}
+        for v in string.lines(trace) do
+            if string.startsWith(v, " [C]") then
+                -- TODO parse "[C]: in function ´pcall´"
+                originsert(res, { hr=v, type="B" })
+            elseif string.startsWith(v, " ") then
+                -- TODO parse "test.lua:2: in function ´foo´
+                originsert(res, { hr=v, type="F" })
+            end -- if trace
+        end -- for lines
+        return res
+    end -- cclite
+    
+    -- classic way
+    local res = {}
+    local level = 1
+    while level < 30 do -- TODO configure max depth
+        local state, err = origpcall(origerror, "$$$", level + 2)
+        if err == "$$$" then break end
+        -- TODO parse: "test.lua:15:"
+        originsert(res, { hr=string.sub(err, 0, -6), type="F" })
+        level = level + 1
+    end
+    return res
+end -- function trace
 )
 
 return nil
