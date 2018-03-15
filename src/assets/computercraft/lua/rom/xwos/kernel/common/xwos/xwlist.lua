@@ -61,12 +61,13 @@ _CMR.class("xwos.xwlist")
 -- @function [parent=#xwos.xwlist] create
 -- @param ... initial objects
 -- @return #xwos.xwlist list
--- 
+
+.sfunc("create",
 ------------------------
 -- @function [parent=#xwlistintern] create
 -- @param ...
 -- @return #xwos.xwlist
-.sfunc("create", function(...)
+function(...)
     return _CMR.new("xwlist", ...)
 end) -- function create
 

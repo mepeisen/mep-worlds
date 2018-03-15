@@ -15,20 +15,22 @@
 --    You should have received a copy of the GNU General Public License
 --    along with xwos.  If not, see <http://www.gnu.org/licenses/>.
 
---------------------------------
--- a boot manager
--- @module xwos.bootmgr
-_CMR.class("xwos.bootmgr")
+-----------------------
+-- threads in applications
+-- @module xwos.pmr.thread
 
-.func("main",
-function(self, clazz, privates)
-    print("BOOT MANAGER (in a real sense...)")
-    
-    _CMR.load("xwos.gui.stage")
-    _CMR.load("xwos.gui.text")
-    
-    local gui = xwos.gui.stage.create(term.current())
-    gui:add(xwos.gui.text.create("FOO", 1, 1, colors.white, colors.black))
-    gui:redraw()
-end) -- function main
+---------------------------------------
+-- join thread and wait for finish
+-- @function [parent=#xwos.pmr.thread] join
 
+---------------------------------------
+-- request thread termination (as soon as possible)
+-- @function [parent=#xwos.pmr.thread] terminate
+
+---------------------------------------
+-- spawn thread and invoke function
+-- @function [parent=#xwos.pmr.thread] spawn
+-- @param #function func the function to invoke
+-- @param ... arguments
+
+return nil

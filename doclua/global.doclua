@@ -132,4 +132,13 @@
 -- class manager for local classes
 -- @field[parent = #global] classmanager#classmanager _CMR
 
+------------------------------------------------------------------------------
+-- xwos user api
+-- @field[parent = #global] xwos#xwos xwos
+
+------------------------------------------------------------------------------
+-- Returns the current process id
+-- @function [parent=#global] pid
+-- @return #number the pid
+
 return nil

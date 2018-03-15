@@ -109,7 +109,7 @@ end)
 -- @param global#global env
 function(self, clazz, privates, proc, env)
     proc:debug("[sb] preparing env", env)
-    env.pid = proc:pid()
+    env.pid = function() return proc:pid() end
 
     -- TODO this is partly original code from bios.
     -- we need to redeclare it to get into wrapped os.**** methods
@@ -534,8 +534,11 @@ function(self, clazz, privates, proc, env)
         end
     end -- dofile
     
+    env._CMR = privates.kernel.cpfactory(env)
+    
     -- TODO do we need this? we are declaring the functions already inside process thread with correct fenv
     origsetfenv(biosRead, privates.kernel.nenv)
+    origsetfenv(env.pid, privates.kernel.nenv)
     origsetfenv(env.read, privates.kernel.nenv)
     origsetfenv(env.sleep, privates.kernel.nenv)
     origsetfenv(env.dofile, privates.kernel.nenv)

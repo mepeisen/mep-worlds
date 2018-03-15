@@ -34,7 +34,7 @@ local error = error
 
 local tArgs = {...}
 
-local myver = "0.0.2" -- TODO manipulate through maven build
+local myver = "0.0.3" -- TODO manipulate through maven build
 local osvs = os.version()
 local osvIter = string.gmatch(osvs, "%S+")
 local osn = osvIter()
@@ -288,7 +288,7 @@ local cpfactory = function(env)
             setfenv(clazz._superctor, env)
             
             local cur = env
-            for k, v in s:gmatch("%s+") do
+            for v in split(name, "[^%.]+") do
                 if cur[v] == nil then
                     cur[v] = {}
                 end -- if not cur
@@ -511,7 +511,7 @@ local cpfactory = function(env)
         -- @return #clazz self for chaining
         function clazz.func(name, func)
             if clazz._funcs[name] ~= nil then
-                error("Duplicate function declaration: "..name)
+                error("Duplicate function declaration: "..clazz._name.."."..name)
             end -- if func
             clazz._funcs[name] = func
             setfenv(func, env)
@@ -527,7 +527,7 @@ local cpfactory = function(env)
         -- @return #clazz self for chaining
         function clazz.pfunc(name, func)
             if clazz._privates[name] ~= nil then
-                error("Duplicate function declaration: "..name)
+                error("Duplicate private function declaration: "..clazz._name.."."..name)
             end -- if func
             clazz._privates[name] = func
             setfenv(func, env)
@@ -543,7 +543,7 @@ local cpfactory = function(env)
         -- @return #clazz self for chaining
         function clazz.sfunc(name, func)
             if clazz._statics[name] ~= nil then
-                error("Duplicate static function declaration: "..name)
+                error("Duplicate static function declaration: "..clazz._name.."."..name)
             end -- if func
             clazz._statics[name] = func
             setfenv(func, env)
