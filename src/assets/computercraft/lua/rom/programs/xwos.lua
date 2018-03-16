@@ -360,6 +360,16 @@ local cpfactory = function(env)
     end -- function load
     
     ---------------
+    -- load all class within given package
+    -- @function [parent=#classmanager] loadAll
+    -- @param #string package the package name
+    function classmanager.loadAll(package)
+        for name in pairs(classmanager.findClasses(package)) do
+            loadAndDefineClass(name)
+        end -- for class
+    end -- function load
+    
+    ---------------
     -- find packages with given prefix
     -- @function [parent=#classmanager] findPackages
     -- @param #string prefix the package prefix

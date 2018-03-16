@@ -35,26 +35,51 @@ _CMR.class("xwos.gui.stage").extends("xwos.gui.container")
 -- the terminal window; do not manipulate directly without care
 -- @field [parent=#xwcprivates] window#windowObject _window the terminal window
 
+------------------------
+-- the width; do not manipulate directly without care; instead call the setSize method
+-- @field [parent=#xwcprivates] #number _width
+
+------------------------
+-- the height; do not manipulate directly without care; instead call the setSize method
+-- @field [parent=#xwcprivates] #number _height
+
+-- TODO fetch window resize events to update inner height/width variables and to redraw 
+
 .ctor(
 ------------------------
 -- @function [parent=#xwcintern] ctor
 -- @param #xwos.gui.text self
 -- @param classmanager#clazz clazz
 -- @param #xwcprivates privates
--- @param window#windowObject window
-function(self, clazz, privates, window, ...)
-    clazz._superctor(self, privates, ...)
-    privates._window = window
+-- @param window#windowObject window; if numeric, it is interpreted as x coordinate within parent container
+-- @param #number y the y coordinate within parent container; if window object is given it is interpreted as a child object
+-- @param #number width the width within parent container; if window object is given it is interpreted as a child object
+-- @param #number height the height within parent container; if window object is given it is interpreted as a child object
+function(self, clazz, privates, window, y, width, height, ...)
+    if type(window) == "number" then
+        privates._x = window
+        privates._y = y or 0
+        privates._width = width or 0
+        privates._height = height or 0
+        clazz._superctor(self, privates, ...)
+    else -- if number
+        privates._window = window
+        clazz._superctor(self, privates, y, width, height, ...)
+    end -- if number
 end) -- ctor
 
 .sfunc("create",
 ------------------------
 -- create new stage
 -- @function [parent=#xwos.gui.stage] create
--- @param window#windowObject window
+-- @param window#windowObject window; if numeric, it is interpreted as x coordinate within parent container
+-- @param #number y the y coordinate within parent container; if window object is given it is interpreted as a child object
+-- @param #number width the width within parent container; if window object is given it is interpreted as a child object
+-- @param #number height the height within parent container; if window object is given it is interpreted as a child object
+-- @param ...
 -- @return #xwos.gui.stage
-function (window, ...)
-    return _CMR.new("xwos.gui.stage", window, ...)
+function (...)
+    return _CMR.new("xwos.gui.stage", ...)
 end) -- function create
 
 -- abstract function to be overridden
@@ -75,8 +100,7 @@ end) -- function create
 -- @param #xwcprivates privates
 -- @return #number
 function (self, clazz, privates)
-    local w, h = privates._window.getSize()
-    return w
+    return privates._width
 end) -- function width
 
 ------------------------
@@ -93,8 +117,7 @@ end) -- function width
 -- @param #xwcprivates privates
 -- @return #number
 function (self, clazz, privates)
-    local w, h = self._window.getSize()
-    return h
+    return privates._height
 end) -- function height
 
 ------------------------
@@ -115,7 +138,27 @@ end) -- function height
 -- @param #number height
 -- @return #xwos.gui.stage
 function (self, clazz, privates, width, height)
-    privates._window.reposition(privates._x, privates._y, width, height)
+    privates._width = width
+    privates._height = height
+    
+    -- TODO duplicate code (setPos)
+    
+    -- generate on demand
+    if privates._window == nil then
+        if privates._container ~= nil then
+            privates._window = privates._container:crwin(privates._x, privates._y, privates._width, privates._height)
+            return -- is already has the correct position and size
+        else
+            return -- we have nothing to do yet; resize without known terminal
+        end -- if container
+    end -- if not window
+    
+    -- resize
+    if privates._container ~= nil then
+        privates._container:movewin(privates._x, privates._y, privates._width, privates._height, privates._window)
+    else
+        privates._window.reposition(privates._x, privates._y, width, height)
+    end -- if container
     self:redraw()
 end) -- function setSize
 
@@ -173,9 +216,24 @@ end) -- function y
 function (self, clazz, privates, x, y)
     privates._x = x
     privates._y = y
-    local width, height = privates._window.getSize()
-    privates._window.reposition(x, y, width, height)
-    privates:redraw()
+    
+    -- generate on demand
+    if privates._window == nil then
+        if privates._container ~= nil then
+            privates._window = privates._container:crwin(privates._x, privates._y, privates._width, privates._height)
+            return -- is already has the correct position and size
+        else
+            return -- we have nothing to do yet; resize without known terminal
+        end -- if container
+    end -- if not window
+    
+    -- resize
+    if privates._container ~= nil then
+        privates._container:movewin(privates._x, privates._y, privates._width, privates._height, privates._window)
+    else
+        privates._window.reposition(privates._x, privates._y, width, height)
+    end -- if container
+    self:redraw()
 end) -- function setPos
 
 ------------------------
@@ -193,6 +251,15 @@ end) -- function setPos
 -- @return #xwos.gui.stage self for chaining
 function (self, clazz, privates)
     if privates._visible then
+        -- generate on demand TODO: Duplicate code
+        if privates._window == nil then
+            if privates._container ~= nil then
+                privates._window = privates._container:crwin(privates._x, privates._y, privates._width, privates._height)
+            else
+                return -- we have nothing to do yet
+            end -- if container
+        end -- if not window
+    
         if self._container ~= nil then
             self._container:redraw()
         else
@@ -215,6 +282,15 @@ end) -- function redraw
 -- @param #xwcprivates privates
 -- @return #xwos.gui.stage
 function (self, clazz, privates)
+    -- generate on demand TODO: Duplicate code
+    if privates._window == nil then
+        if privates._container ~= nil then
+            privates._window = privates._container:crwin(privates._x, privates._y, privates._width, privates._height)
+        else
+            return -- we have nothing to do yet
+        end -- if container
+    end -- if not window
+        
     privates._window.clear()
     clazz._super._funcs.paint(self, clazz, privates)
 end) -- function paint
@@ -243,12 +319,80 @@ end) -- function paint
 -- @param #number bg
 -- @return #xwos.gui.stage
 function (self, clazz, privates, x, y, str, fg, bg)
-    if privates._window ~= nil and privates._visible then
+    -- generate on demand TODO: Duplicate code
+    if privates._window == nil then
+        if privates._container ~= nil then
+            privates._window = privates._container:crwin(privates._x, privates._y, privates._width, privates._height)
+        else
+            return -- we have nothing to do yet
+        end -- if container
+    end -- if not window
+    
+    if privates._visible then
         privates._window.setCursorPos(x, y)
         privates._window.setTextColor(fg)
         privates._window.setBackgroundColor(bg)
         privates._window.write(str)
     end -- if stage and visible
 end) -- function str
+
+------------------------
+-- Acquire a new windowObject from parent terminal
+-- @function [parent=#xwos.gui.stage] crwin
+-- @param #xwos.gui.stage self self
+-- @param #number x the x position of the window
+-- @param #number y the y position of the window
+-- @param #number width the width of the window
+-- @param #number height the height of the window
+-- @return window#windowObject the new window object; maybe nil if parent is not yet known
+
+.func("crwin",
+------------------------
+-- @function [parent=#xwcintern] crwin
+-- @param #xwos.gui.stage self
+-- @param classmanager#clazz clazz
+-- @param #xwcprivates privates
+-- @param #number x
+-- @param #number y
+-- @param #number width
+-- @param #number height
+-- @return window#windowObject
+function (self, clazz, privates, x, y, width, height)
+    -- generate on demand TODO: Duplicate code
+    if privates._window == nil then
+        if privates._container ~= nil then
+            privates._window = privates._container:crwin(privates._x, privates._y, privates._width, privates._height)
+        else
+            return -- we have nothing to do yet
+        end -- if container
+    end -- if not window
+    
+    return window.create(privates._term, x + privates._x, y + privates._y, width, height, true)
+end) -- function crwin
+
+------------------------
+-- Move an existing windowObject in parent terminal
+-- @function [parent=#xwos.gui.stage] movewin
+-- @param #xwos.gui.stage self self
+-- @param #number x the new x position of the window
+-- @param #number y the new y position of the window
+-- @param #number width
+-- @param #number height
+-- @param window#windowObject win the existing window object
+
+.func("movewin",
+------------------------
+-- @function [parent=#xwcintern] movewin
+-- @param #xwos.gui.stage self
+-- @param classmanager#clazz clazz
+-- @param #xwcprivates privates
+-- @param #number x
+-- @param #number y
+-- @param #number width
+-- @param #number height
+-- @param window#windowObject win
+function (self, clazz, privates, x, y, width, height, win)
+    win.reposition(x, y, width, height)
+end) -- function movewin
 
 return nil

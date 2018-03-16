@@ -24,8 +24,7 @@ _CMR.class("xwos.bootmgr")
 function(self, clazz, privates)
     print("BOOT MANAGER (in a real sense...)")
     
-    _CMR.load("xwos.gui.stage")
-    _CMR.load("xwos.gui.text")
+    _CMR.loadAll("xwos.gui")
     
     local gui = xwos.gui.stage.create(term.current())
     gui:push(xwos.gui.text.create("FOO", 2, 2, colors.gray, colors.black))

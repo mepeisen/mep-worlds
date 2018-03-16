@@ -54,7 +54,7 @@ _CMR.class("xwos.gui.container").extends("xwos.gui.component")
 -- @param ... initial children
 function(self, clazz, privates, x, y, ...)
     clazz._superctor(self, privates)
-    privates._children = _CMR.new("xwos.xwlist", ...)
+    privates._children = xwos.xwlist.create(...)
     for k in privates._children:iterate() do k._container = self end -- TODO find a better solution; non private field, do not override container (xwlist) etc.
     privates._x = x or 0
     privates._y = y or 0
@@ -346,5 +346,59 @@ function (self, clazz, privates, x, y, str, fg, bg)
     end -- if container and visible
     return self
 end) -- function str
+
+------------------------
+-- Acquire a new windowObject from parent terminal
+-- @function [parent=#xwos.gui.container] crwin
+-- @param #xwos.gui.container self self
+-- @param #number x the x position of the window
+-- @param #number y the y position of the window
+-- @param #number width the width of the window
+-- @param #number height the height of the window
+-- @return window#windowObject the new window object; maybe nil if parent is not yet known
+
+.func("crwin",
+------------------------
+-- @function [parent=#xwcintern] crwin
+-- @param #xwos.gui.container self
+-- @param classmanager#clazz clazz
+-- @param #xwcprivates privates
+-- @param #number x
+-- @param #number y
+-- @param #number width
+-- @param #number height
+-- @return window#windowObject
+function (self, clazz, privates, x, y, width, height)
+    if privates._container ~= nil then
+        return privates._container:crwin(x + privates._x, y + privates._y, width, height)
+    end -- if container
+end) -- function crwin
+
+------------------------
+-- Move an existing windowObject in parent terminal
+-- @function [parent=#xwos.gui.container] movewin
+-- @param #xwos.gui.container self self
+-- @param #number x the new x position of the window
+-- @param #number y the new y position of the window
+-- @param #number width the new width
+-- @param #number height the new height
+-- @param window#windowObject win the existing window object
+
+.func("movewin",
+------------------------
+-- @function [parent=#xwcintern] movewin
+-- @param #xwos.gui.container self
+-- @param classmanager#clazz clazz
+-- @param #xwcprivates privates
+-- @param #number x
+-- @param #number y
+-- @param #number width
+-- @param #number height
+-- @param window#windowObject win
+function (self, clazz, privates, x, y, width, height, win)
+    if privates._container ~= nil then
+        privates._container:movewin(x + privates._x, y + privates._y, width, height, win)
+    end -- if container
+end) -- function movewin
 
 return nil

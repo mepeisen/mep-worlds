@@ -50,6 +50,11 @@
 -- @param #string name the class name
 
 ---------------
+-- load all class within given package
+-- @function [parent=#classmanager] loadAll
+-- @param #string package the package name
+
+---------------
 -- find packages with given prefix
 -- @function [parent=#classmanager] findPackages
 -- @param #string prefix the package prefix

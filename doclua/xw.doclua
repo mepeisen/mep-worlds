@@ -55,6 +55,10 @@
 -- @field [parent=#xw_gui] #xw_gui_text text
 
 -------------------------------------------------------------------------------
+-- frames
+-- @field [parent=#xw_gui] #xw_gui_frame frame
+
+-------------------------------------------------------------------------------
 -- @type xw_gui_component
 
 -------------------------------------------------------------------------------
@@ -73,11 +77,40 @@
 ------------------------
 -- create new stage
 -- @function [parent=#xw_gui_stage] create
--- @param window#windowObject window
+-- @param window#windowObject window; if numeric, it is interpreted as x coordinate within parent container
+-- @param #number y the y coordinate within parent container; if window object is given it is interpreted as a child object
+-- @param #number width the width within parent container; if window object is given it is interpreted as a child object
+-- @param #number height the height within parent container; if window object is given it is interpreted as a child object
+-- @param ... child objects
 -- @return xwos.gui.stage#xwos.gui.stage
 
 -------------------------------------------------------------------------------
 -- @type xw_gui_text
+
+------------------------
+-- create new text
+-- @function [parent=#xw_gui_text] create
+-- @param #string content the text content
+-- @param #number x the x position
+-- @param #number y the y position
+-- @param #number fg the foreground
+-- @param #number bg the background
+-- @return xwos.gui.text#xwos.gui.text the text component
+
+-------------------------------------------------------------------------------
+-- @type xw_gui_frame
+
+------------------------
+-- create new frame
+-- @function [parent=#xw_gui_frame] create
+-- @param #number x the x position
+-- @param #number y the y position
+-- @param #number width the outer width
+-- @param #number height the outer height
+-- @param #number ffg the frame foreground
+-- @param #number ffb the frame background
+-- @param #number bbg the body background
+-- @return xwos.gui.frame#xwos.gui.frame the frame component
 
 -------------------------------------------------------------------------------
 -- @type xw_xwlist
@@ -110,15 +143,5 @@
 -- @function [parent=#xw_pmr_thread] spawn
 -- @param #function func the function to invoke
 -- @param ... arguments
-
-------------------------
--- create new text
--- @function [parent=#xw_gui_text] create
--- @param #string content the text content
--- @param #number x the x position
--- @param #number y the y position
--- @param #number fg the foreground
--- @param #number bg the background
--- @return xwos.gui.text#xwos.gui.text the text component
 
 return nil

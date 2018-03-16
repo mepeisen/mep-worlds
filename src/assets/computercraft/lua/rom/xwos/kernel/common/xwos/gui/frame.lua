@@ -16,10 +16,10 @@
 --    along with xwos.  If not, see <http://www.gnu.org/licenses/>.
 
 --------------------------------
--- gui component holding a static, colored text
--- @type xwos.gui.text
+-- gui component displaying a frame
+-- @type xwos.gui.frame
 -- @extends xwos.gui.component#xwos.gui.component
-_CMR.class("xwos.gui.text").extends("xwos.gui.component")
+_CMR.class("xwos.gui.frame").extends("xwos.gui.component")
 
 ------------------------
 -- the object privates
@@ -29,7 +29,7 @@ _CMR.class("xwos.gui.text").extends("xwos.gui.component")
 ------------------------
 -- the internal class
 -- @type xwcintern
--- @extends #xwos.gui.text
+-- @extends #xwos.gui.frame
 
 ------------------------
 -- the x position; do not manipulate directly without care; instead call the setPos method
@@ -40,18 +40,34 @@ _CMR.class("xwos.gui.text").extends("xwos.gui.component")
 -- @field [parent=#xwcprivates] #number _y
 
 ------------------------
--- the text content; do not manipulate directly without care
--- @field [parent=#xwcprivates] #string _content 
+-- the width; do not manipulate directly without care; instead call the setPos method
+-- @field [parent=#xwcprivates] #number _width
 
 ------------------------
--- the text foreground; do not manipulate directly without care
--- @field [parent=#xwcprivates] #number _fg 
+-- the height; do not manipulate directly without care; instead call the setPos method
+-- @field [parent=#xwcprivates] #number _height
 
 ------------------------
--- the text content; do not manipulate directly without care
--- @field [parent=#xwcprivates] #number _bg 
+-- the frame foreground; do not manipulate directly without care
+-- @field [parent=#xwcprivates] #number _ffg 
 
--- TODO use stylesheets for fg/bg if nil is given
+------------------------
+-- the frame background; do not manipulate directly without care
+-- @field [parent=#xwcprivates] #number _fbg 
+
+------------------------
+-- the body background; do not manipulate directly without care
+-- @field [parent=#xwcprivates] #number _bbg 
+
+------------------------
+-- the window object to draw the frame
+-- @field [parent=#xwcprivates] window#windowObject _frame
+
+------------------------
+-- the window object to draw the content
+-- @field [parent=#xwcprivates] xwos.gui.stage#xwos.gui.stage _content
+
+-- TODO use stylesheets for ffg/fbg/bbg if nil is given
 
 .ctor(
 ------------------------
@@ -59,32 +75,38 @@ _CMR.class("xwos.gui.text").extends("xwos.gui.component")
 -- @param #xwos.gui.text self
 -- @param classmanager#clazz clazz
 -- @param #xwcprivates privates
--- @param #string text
 -- @param #number x
 -- @param #number y
--- @param #number fg
--- @param #number bg
-function(self, clazz, privates, text, x, y, fg, bg)
+-- @param #number width the outer width
+-- @param #number height the outer height
+-- @param #number ffg the frame foreground
+-- @param #number ffb the frame background
+-- @param #number bbg the body background
+function(self, clazz, privates, x, y, width, height, ffg, fbg, bbg)
     clazz._superctor(self, privates)
     privates._x = x or 0
     privates._y = y or 0
-    privates._fg = fg or colors.white
-    privates._bg = bg or colors.black
-    privates._content = text or ""
+    privates._width = width or 2
+    privates._height = height or 2
+    privates._ffg = ffg or colors.lightGray
+    privates._fbg = fbg or colors.blue
+    privates._bbg = bbg or colors.blue
+    privates._content = xwos.gui.stage.create(nil) -- TODO
 end) -- ctor
 
 .sfunc("create",
 ------------------------
 -- create new text
--- @function [parent=#xwos.gui.text] create
--- @param #string content the text content
--- @param #number x the x position
--- @param #number y the y position
--- @param #number fg the foreground
--- @param #number bg the background
--- @return #xwos.gui.text the text component
-function (content, x, y, fg, bg)
-    return _CMR.new("xwos.gui.text", content, x, y, fg, bg)
+-- @function [parent=#xwos.gui.frame] create
+-- @param #number x
+-- @param #number y
+-- @param #number width the outer width
+-- @param #number height the outer height
+-- @param #number ffg the frame foreground
+-- @param #number ffb the frame background
+-- @param #number bbg the body background
+function (x, y, width, height, ffg, ffb, bbg)
+    return _CMR.new("xwos.gui.frame", x, y, width, height, ffg, ffb, bbg)
 end) -- function create
 
 -- abstract function to be overridden
