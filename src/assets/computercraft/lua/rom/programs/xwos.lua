@@ -400,11 +400,13 @@ local cpfactory = function(env)
         local file = gsub(package, "%.", "/")
         for k,v in pairs(classpath) do
             local path = v.."/"..file
-            for _, f in pairs(fslist(path)) do
-                if f:sub(-4)==".lua" and not fsisdir(path.."/"..f) then
-                    res[package.."."..f] = true
-                end -- if not fs.isdir
-            end -- for fs.list
+            if fsisdir(path) then
+                for _, f in pairs(fslist(path)) do
+                    if f:sub(-4)==".lua" and not fsisdir(path.."/"..f) then
+                        res[package.."."..f:sub(0, -5)] = true
+                    end -- if not fs.isdir
+                end -- for fs.list
+            end -- if fs.isdir
         end -- for co
         return res
     end -- function findClasses
@@ -483,6 +485,22 @@ local cpfactory = function(env)
         }
         setfenv(clazz._superctor, env)
         classes[name] = clazz
+        
+        ---------------
+        -- delegate functions directly to private object
+        -- @function [parent=#clazz] delegate
+        -- @param #string property private property
+        -- @param ... name of the functions to be delegated
+        -- @return #clazz self for chaining
+        function clazz.delegate(property, ...)
+            for name in pairs({...}) do
+                clazz.func(name, function(self, clazz, privates, ...)
+                    local prop = privates[property]
+                    return prop[name](prop, ...)
+                end)
+            end -- for ...
+            return clazz
+        end -- function delegate
         
         ---------------
         -- declare a singleton

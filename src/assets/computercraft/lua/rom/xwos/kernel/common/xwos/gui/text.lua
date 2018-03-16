@@ -225,4 +225,6 @@ function (self, clazz, privates)
     return self
 end) -- function paint
 
+-- TODO get/set for fg/bg/content, events (change content/fg/bg)
+
 return nil

@@ -77,10 +77,12 @@
 ------------------------
 -- create new stage
 -- @function [parent=#xw_gui_stage] create
--- @param window#windowObject window; if numeric, it is interpreted as x coordinate within parent container
--- @param #number y the y coordinate within parent container; if window object is given it is interpreted as a child object
--- @param #number width the width within parent container; if window object is given it is interpreted as a child object
--- @param #number height the height within parent container; if window object is given it is interpreted as a child object
+-- @param window#windowObject window window object
+-- @param #number y the x coordinate within parent container; ignored if window object is given
+-- @param #number y the y coordinate within parent container; ignored if window object is given
+-- @param #number width the width within parent container; ignored if window object is given
+-- @param #number height the height within parent container; ignored if window object is given
+-- @param #number bg the background to be used
 -- @param ... child objects
 -- @return xwos.gui.stage#xwos.gui.stage
 
@@ -110,6 +112,7 @@
 -- @param #number ffg the frame foreground
 -- @param #number ffb the frame background
 -- @param #number bbg the body background
+-- @param ... initial objects
 -- @return xwos.gui.frame#xwos.gui.frame the frame component
 
 -------------------------------------------------------------------------------

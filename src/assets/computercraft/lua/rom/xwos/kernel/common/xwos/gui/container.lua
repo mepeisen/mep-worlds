@@ -15,6 +15,8 @@
 --    You should have received a copy of the GNU General Public License
 --    along with xwos.  If not, see <http://www.gnu.org/licenses/>.
 
+_CMR.load("xwos.xwlist")
+
 --------------------------------
 -- gui component that holds children but does not draw anything from itself; it has no size
 -- @type xwos.gui.container
@@ -54,7 +56,7 @@ _CMR.class("xwos.gui.container").extends("xwos.gui.component")
 -- @param ... initial children
 function(self, clazz, privates, x, y, ...)
     clazz._superctor(self, privates)
-    privates._children = xwos.xwlist.create(...)
+    privates._children = _CMR.new("xwos.xwlist", ...)
     for k in privates._children:iterate() do k._container = self end -- TODO find a better solution; non private field, do not override container (xwlist) etc.
     privates._x = x or 0
     privates._y = y or 0
@@ -341,8 +343,8 @@ end) -- function paint
 -- @param #number bg
 -- @return #xwos.gui.container
 function (self, clazz, privates, x, y, str, fg, bg)
-    if privates._container ~= nil and privates._visible then
-        privates._container:str(x + privates._x, y + privates._y, str, fg, bg)
+    if self._container ~= nil and privates._visible then
+        self._container:str(x + privates._x, y + privates._y, str, fg, bg)
     end -- if container and visible
     return self
 end) -- function str
@@ -369,8 +371,8 @@ end) -- function str
 -- @param #number height
 -- @return window#windowObject
 function (self, clazz, privates, x, y, width, height)
-    if privates._container ~= nil then
-        return privates._container:crwin(x + privates._x, y + privates._y, width, height)
+    if self._container ~= nil then
+        return self._container:crwin(x + privates._x, y + privates._y, width, height)
     end -- if container
 end) -- function crwin
 
@@ -396,9 +398,11 @@ end) -- function crwin
 -- @param #number height
 -- @param window#windowObject win
 function (self, clazz, privates, x, y, width, height, win)
-    if privates._container ~= nil then
-        privates._container:movewin(x + privates._x, y + privates._y, width, height, win)
+    if self._container ~= nil then
+        self._container:movewin(x + privates._x, y + privates._y, width, height, win)
     end -- if container
 end) -- function movewin
+
+-- TODO events (changed children)
 
 return nil

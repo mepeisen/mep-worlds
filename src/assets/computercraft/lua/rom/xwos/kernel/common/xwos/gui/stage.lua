@@ -43,7 +43,13 @@ _CMR.class("xwos.gui.stage").extends("xwos.gui.container")
 -- the height; do not manipulate directly without care; instead call the setSize method
 -- @field [parent=#xwcprivates] #number _height
 
+------------------------
+-- the background color
+-- @field [parent=#xwcprivates] #number _bg
+
 -- TODO fetch window resize events to update inner height/width variables and to redraw 
+
+-- TODO use stylesheets for bg if nil is given
 
 .ctor(
 ------------------------
@@ -51,31 +57,45 @@ _CMR.class("xwos.gui.stage").extends("xwos.gui.container")
 -- @param #xwos.gui.text self
 -- @param classmanager#clazz clazz
 -- @param #xwcprivates privates
--- @param window#windowObject window; if numeric, it is interpreted as x coordinate within parent container
--- @param #number y the y coordinate within parent container; if window object is given it is interpreted as a child object
--- @param #number width the width within parent container; if window object is given it is interpreted as a child object
--- @param #number height the height within parent container; if window object is given it is interpreted as a child object
-function(self, clazz, privates, window, y, width, height, ...)
-    if type(window) == "number" then
-        privates._x = window
-        privates._y = y or 0
+-- @param window#windowObject window window object
+-- @param #number y the x coordinate within parent container; ignored if window object is given
+-- @param #number y the y coordinate within parent container; ignored if window object is given
+-- @param #number width the width within parent container; ignored if window object is given
+-- @param #number height the height within parent container; ignored if window object is given
+-- @param #number bg the background to be used
+-- @param ... initial children
+function(self, clazz, privates, window, x, y, width, height, bg, ...)
+    if window == nil then
         privates._width = width or 0
         privates._height = height or 0
-        clazz._superctor(self, privates, ...)
-    else -- if number
+        privates._bg = bg or colors.black
+        clazz._superctor(self, privates, x or 0, y or 0, ...)
+    else -- if not window
         privates._window = window
-        clazz._superctor(self, privates, y, width, height, ...)
-    end -- if number
+        if window.getPosition ~= nil then
+            x, y = window.getPosition()
+        else -- if window
+            x = 0
+            y = 0
+        end -- if window
+        local w2, h2 = window.getSize()
+        privates._width = w2
+        privates._height = h2
+        privates._bg = colors.black
+        clazz._superctor(self, privates, x, y, ...)
+    end -- if window
 end) -- ctor
 
 .sfunc("create",
 ------------------------
 -- create new stage
 -- @function [parent=#xwos.gui.stage] create
--- @param window#windowObject window; if numeric, it is interpreted as x coordinate within parent container
--- @param #number y the y coordinate within parent container; if window object is given it is interpreted as a child object
--- @param #number width the width within parent container; if window object is given it is interpreted as a child object
--- @param #number height the height within parent container; if window object is given it is interpreted as a child object
+-- @param window#windowObject window window object
+-- @param #number y the x coordinate within parent container; ignored if window object is given
+-- @param #number y the y coordinate within parent container; ignored if window object is given
+-- @param #number width the width within parent container; ignored if window object is given
+-- @param #number height the height within parent container; ignored if window object is given
+-- @param #number bg the background to be used
 -- @param ...
 -- @return #xwos.gui.stage
 function (...)
@@ -145,8 +165,8 @@ function (self, clazz, privates, width, height)
     
     -- generate on demand
     if privates._window == nil then
-        if privates._container ~= nil then
-            privates._window = privates._container:crwin(privates._x, privates._y, privates._width, privates._height)
+        if self._container ~= nil then
+            privates._window = self._container:crwin(privates._x, privates._y, privates._width, privates._height)
             return -- is already has the correct position and size
         else
             return -- we have nothing to do yet; resize without known terminal
@@ -154,8 +174,8 @@ function (self, clazz, privates, width, height)
     end -- if not window
     
     -- resize
-    if privates._container ~= nil then
-        privates._container:movewin(privates._x, privates._y, privates._width, privates._height, privates._window)
+    if self._container ~= nil then
+        self._container:movewin(privates._x, privates._y, privates._width, privates._height, privates._window)
     else
         privates._window.reposition(privates._x, privates._y, width, height)
     end -- if container
@@ -219,8 +239,8 @@ function (self, clazz, privates, x, y)
     
     -- generate on demand
     if privates._window == nil then
-        if privates._container ~= nil then
-            privates._window = privates._container:crwin(privates._x, privates._y, privates._width, privates._height)
+        if self._container ~= nil then
+            privates._window = self._container:crwin(privates._x, privates._y, privates._width, privates._height)
             return -- is already has the correct position and size
         else
             return -- we have nothing to do yet; resize without known terminal
@@ -228,8 +248,8 @@ function (self, clazz, privates, x, y)
     end -- if not window
     
     -- resize
-    if privates._container ~= nil then
-        privates._container:movewin(privates._x, privates._y, privates._width, privates._height, privates._window)
+    if self._container ~= nil then
+        self._container:movewin(privates._x, privates._y, privates._width, privates._height, privates._window)
     else
         privates._window.reposition(privates._x, privates._y, width, height)
     end -- if container
@@ -253,8 +273,8 @@ function (self, clazz, privates)
     if privates._visible then
         -- generate on demand TODO: Duplicate code
         if privates._window == nil then
-            if privates._container ~= nil then
-                privates._window = privates._container:crwin(privates._x, privates._y, privates._width, privates._height)
+            if self._container ~= nil then
+                privates._window = self._container:crwin(privates._x, privates._y, privates._width, privates._height)
             else
                 return -- we have nothing to do yet
             end -- if container
@@ -284,13 +304,14 @@ end) -- function redraw
 function (self, clazz, privates)
     -- generate on demand TODO: Duplicate code
     if privates._window == nil then
-        if privates._container ~= nil then
-            privates._window = privates._container:crwin(privates._x, privates._y, privates._width, privates._height)
+        if self._container ~= nil then
+            privates._window = self._container:crwin(privates._x, privates._y, privates._width, privates._height)
         else
             return -- we have nothing to do yet
         end -- if container
     end -- if not window
-        
+    
+    privates._window.setBackgroundColor(privates._bg)
     privates._window.clear()
     clazz._super._funcs.paint(self, clazz, privates)
 end) -- function paint
@@ -321,8 +342,8 @@ end) -- function paint
 function (self, clazz, privates, x, y, str, fg, bg)
     -- generate on demand TODO: Duplicate code
     if privates._window == nil then
-        if privates._container ~= nil then
-            privates._window = privates._container:crwin(privates._x, privates._y, privates._width, privates._height)
+        if self._container ~= nil then
+            privates._window = self._container:crwin(privates._x, privates._y, privates._width, privates._height)
         else
             return -- we have nothing to do yet
         end -- if container
@@ -360,14 +381,14 @@ end) -- function str
 function (self, clazz, privates, x, y, width, height)
     -- generate on demand TODO: Duplicate code
     if privates._window == nil then
-        if privates._container ~= nil then
-            privates._window = privates._container:crwin(privates._x, privates._y, privates._width, privates._height)
+        if self._container ~= nil then
+            privates._window = self._container:crwin(privates._x, privates._y, privates._width, privates._height)
         else
             return -- we have nothing to do yet
         end -- if container
     end -- if not window
     
-    return window.create(privates._term, x + privates._x, y + privates._y, width, height, true)
+    return window.create(privates._window, x, y, width, height, true)
 end) -- function crwin
 
 ------------------------
@@ -394,5 +415,7 @@ end) -- function crwin
 function (self, clazz, privates, x, y, width, height, win)
     win.reposition(x, y, width, height)
 end) -- function movewin
+
+-- TODO setters (bg), events (changed children)
 
 return nil

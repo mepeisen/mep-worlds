@@ -158,5 +158,12 @@
 -- @function [parent=#clazz] extends
 -- @param #string name the class to extend
 -- @return #clazz self for chaining
+        
+---------------
+-- delegate functions directly to private object
+-- @function [parent=#clazz] delegate
+-- @param #string property private property
+-- @param ... name of the functions to be delegated
+-- @return #clazz self for chaining
 
 return nil

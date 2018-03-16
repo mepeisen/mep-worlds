@@ -27,7 +27,10 @@ function(self, clazz, privates)
     _CMR.loadAll("xwos.gui")
     
     local gui = xwos.gui.stage.create(term.current())
-    gui:push(xwos.gui.text.create("FOO", 2, 2, colors.gray, colors.black))
+    gui:push(
+    xwos.gui.frame.create(1, 1, 10, 10, colors.white, colors.blue, colors.blue,
+      xwos.gui.text.create("FOODDDDDDDDDDD", 2, 2, colors.gray, colors.black)
+    ))
     gui:redraw()
 end) -- function main
 
