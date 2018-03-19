@@ -150,6 +150,7 @@ _CMR.class("xwos.gui.frame").extends("xwos.gui.component")
 -- @field [parent=#xwcprivates] xwos.gui.stage#xwos.gui.stage _content
 
 -- TODO use stylesheets for ffg/fbg/bbg if nil is given
+-- TODO layout for maximum sized frames (use whole terminal), some layout constraints
 
 -- TODO support other styles (request ccraft utf support):
 -- ┌─┐  ┍━┑  ┎─┒  ┏━┓    (normal, bold)

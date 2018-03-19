@@ -1,1 +1,3 @@
-print(string.rep("─", 15, ""))
+print(string.rep("╭─╮", 5, " "))
+print(string.rep("│ │", 5, " "))
+print(string.rep("╰─╯", 5, " "))
