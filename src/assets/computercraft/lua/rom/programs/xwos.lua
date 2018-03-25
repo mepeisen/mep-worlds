@@ -439,6 +439,11 @@ local cpfactory = function(env)
             _statics = {},
             
             ---------------
+            -- the private static variables
+            -- @field [parent=#clazz] #table _pstatics
+            _pstatics = {},
+            
+            ---------------
             -- the private instance functions inside class
             -- @field [parent=#clazz] #table _privates
             _privates = {},
@@ -576,8 +581,40 @@ local cpfactory = function(env)
             clazz._statics[name] = func
             setfenv(func, env)
             return clazz
-        end -- function func
-        setfenv(clazz.func, env)
+        end -- function sfunc
+        setfenv(clazz.sfunc, env)
+        
+        ---------------
+        -- declare private static variables
+        -- @function [parent=#clazz] pstat
+        -- @param #string key
+        -- @param #any value
+        -- @return #clazz self for chaining
+        function clazz.pstat(key, value)
+            if clazz._pstatics[key] ~= nil then
+                error("Duplicate static variable declaration: "..clazz._name.."."..key)
+            end -- if func
+            clazz._pstatics[key] = value
+            return clazz
+        end -- function pstat
+        setfenv(clazz.pstat, env)
+        
+        ---------------
+        -- return private static variable
+        -- @function [parent=#clazz] getPstat
+        -- @param #string key
+        -- @return #table any private variable found in this clazz or in super classes
+        function clazz.getPstat(key)
+            local res = {}
+            local cur = clazz -- #clazz
+            while cur ~= nil do
+                if cur._pstatics[key] ~= nil then
+                    tinsert(res, cur._pstatics[key])
+                end -- if pstat
+                cur = cur._super
+            end -- while cur
+            return res
+        end -- function getPstat
         
         ---------------
         -- class inheritance

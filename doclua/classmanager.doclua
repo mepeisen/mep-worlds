@@ -154,6 +154,19 @@
 -- @return #clazz self for chaining
         
 ---------------
+-- declare private static variables in clazz type
+-- @function [parent=#clazz] pstat
+-- @param #string key
+-- @param #any value
+-- @return #clazz self for chaining
+        
+---------------
+-- return private static variable
+-- @function [parent=#clazz] getPstat
+-- @param #string key
+-- @return #table any private variable found in this clazz or in super classes
+        
+---------------
 -- class inheritance
 -- @function [parent=#clazz] extends
 -- @param #string name the class to extend
