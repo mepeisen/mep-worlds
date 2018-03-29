@@ -99,6 +99,10 @@
 ---------------
 -- the singleton flag
 -- @field [parent=#clazz] #boolean _singleton
+            
+---------------
+-- the abstract flag
+-- @field [parent=#clazz] #boolean _abstract
 
 ---------------
 -- true if singleton is private (non-visible through api)
@@ -124,6 +128,17 @@
 -- declare a singleton
 -- @function [parent=#clazz] singleton
 -- @param #boolean private true for non-visible singletons; defaults to false
+-- @return #clazz self for chaining
+
+---------------
+-- declare class to be abstract; abstract classes cannot be instantiated directly
+-- @function [parent=#clazz] abstract
+-- @return #clazz self for chaining
+
+---------------
+-- abstract functions to be overriden by child classes
+-- @function [parent=#clazz] aFunc
+-- @param ... name of the functions to be abstract
 -- @return #clazz self for chaining
 
 ---------------
@@ -165,13 +180,59 @@
 -- @function [parent=#clazz] getPstat
 -- @param #string key
 -- @return #table any private variable found in this clazz or in super classes
-        
+
 ---------------
--- class inheritance
+-- class inheritance (base classes)
 -- @function [parent=#clazz] extends
 -- @param #string name the class to extend
 -- @return #clazz self for chaining
-        
+
+---------------
+-- Class inheritance (public class mixins).
+-- Mixins are added to the private variables.
+-- All public methods of mixins are merged to the main object by delegators.
+-- If a method already exists it will not be merged.
+-- Mixins can be initialized by direct initialization and setting inside constructors.
+-- If a mixin is not initialized in ctor it will be created automatically with no arguments given to constructor.
+-- @function [parent=#clazz] mixin
+-- @param #string property property name for given mixin
+-- @param ... one or multiple mixins to add to the class
+-- @return #clazz self for chaining
+
+---------------
+-- friend classes allowing to access THIS object privates through method privates.
+-- @function [parent=#clazz] friends
+-- @param ... one or multiple classes being allowed to access object privates
+-- @return #clazz self for chaining
+
+---------------
+-- Receive object privates for given object; throws error if this class is not a friend of target class
+-- @function [parent=#clazz] privates
+-- @param #table object to query the privates
+-- @return #table object privates
+
+---------------
+-- Adding a private mixin (annotation) to any other object; only accessible by getAnnot method
+-- @function [parent=#clazz] annot
+-- @param #table target the target object to add the annotation
+-- @param #string name the class to instantiate
+-- @param ... constructor arguments for annotation class
+-- @return #table the instantiated mixin object as returned by method getDMixin
+
+---------------
+-- Returning a private mixin (annotation) added by annot
+-- @function [parent=#clazz] getAnnot
+-- @param #table target the target object to query the annotation from
+-- @param #string name the class of the annotation
+-- @return #table the annotation object
+
+---------------
+-- Clears a mixin (annotation)
+-- @function [parent=#clazz] clearAnnot
+-- @param #table target the target object to remove the annotation
+-- @param #string name the class of the annotation
+-- @return #table the (removed) annotation object
+
 ---------------
 -- delegate functions directly to private object
 -- @function [parent=#clazz] delegate

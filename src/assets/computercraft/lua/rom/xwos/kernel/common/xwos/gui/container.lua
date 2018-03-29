@@ -37,13 +37,11 @@ _CMR.class("xwos.gui.container").extends("xwos.gui.component")
 -- the children; do not manipulate directly without care; instead call the methods add etc.
 -- @field [parent=#xwcprivates] xwos.xwlist#xwos.xwlist _children
 
-------------------------
--- the x position; do not manipulate directly without care; instead call the setPos method
--- @field [parent=#xwcprivates] #number _x
-
-------------------------
--- the y position; do not manipulate directly without care; instead call the setPos method
--- @field [parent=#xwcprivates] #number _y
+-- default stylesheet
+.pstat('style', {
+    x = 0,
+    y = 0
+})
 
 .ctor(
 ------------------------
@@ -51,25 +49,21 @@ _CMR.class("xwos.gui.container").extends("xwos.gui.component")
 -- @param #xwos.gui.container self
 -- @param classmanager#clazz clazz
 -- @param #xwcprivates privates
--- @param #number x
--- @param #number y
+-- @param #table styles
 -- @param ... initial children
-function(self, clazz, privates, x, y, ...)
-    clazz._superctor(self, privates)
+function(self, clazz, privates, styles, ...)
+    clazz._superctor(self, privates, styles)
     privates._children = _CMR.new("xwos.xwlist", ...)
     for k in privates._children:iterate() do k._container = self end -- TODO find a better solution; non private field, do not override container (xwlist) etc.
-    privates._x = x or 0
-    privates._y = y or 0
 end) -- ctor
 
 ------------------------
 -- @function [parent=#xwos.gui.container] create
--- @param #number x
--- @param #number y
+-- @param #table styles
 -- @param ... initial children
 -- @return #xwos.gui.container
-.sfunc("create", function(x, y, ...)
-    return _CMR.new("xwos.gui.container", x, y, ...)
+.sfunc("create", function(styles, ...)
+    return _CMR.new("xwos.gui.container", styles, ...)
 end) -- function create
 
 -- abstract function to be overridden
@@ -253,7 +247,7 @@ end) -- function height
 -- @param #xwcprivates privates
 -- @return #number
 function (self, clazz, privates)
-    return privates._x
+    return self:getStyle("x")
 end) -- function x
 
 ------------------------
@@ -270,7 +264,7 @@ end) -- function x
 -- @param #xwcprivates privates
 -- @return #number
 function (self, clazz, privates)
-    return privates._y
+    return self:getStyle("y")
 end) -- function y
 
 ------------------------
@@ -291,9 +285,7 @@ end) -- function y
 -- @param #number y
 -- @return #xwos.gui.container
 function (self, clazz, privates, x, y)
-    privates._x = x
-    privates._y = y
-    self:redraw()
+    self:setStyles({x = x, y = y})
     return self
 end) -- function setPos
 
@@ -311,7 +303,7 @@ end) -- function setPos
 -- @param #xwcprivates privates
 -- @return #xwos.gui.container
 function (self, clazz, privates)
-    if privates._visible then
+    if self:isVisible() then
         for k in privates._children:iterate() do
             k:paint()
         end -- for children
@@ -343,8 +335,8 @@ end) -- function paint
 -- @param #number bg
 -- @return #xwos.gui.container
 function (self, clazz, privates, x, y, str, fg, bg)
-    if self._container ~= nil and privates._visible then
-        self._container:str(x + privates._x, y + privates._y, str, fg, bg)
+    if self._container ~= nil and self:isVisible() then
+        self._container:str(x + self:x(), y + self:y(), str, fg, bg)
     end -- if container and visible
     return self
 end) -- function str
@@ -372,7 +364,7 @@ end) -- function str
 -- @return window#windowObject
 function (self, clazz, privates, x, y, width, height)
     if self._container ~= nil then
-        return self._container:crwin(x + privates._x, y + privates._y, width, height)
+        return self._container:crwin(x + self:x(), y + self:y(), width, height)
     end -- if container
 end) -- function crwin
 
@@ -399,7 +391,7 @@ end) -- function crwin
 -- @param window#windowObject win
 function (self, clazz, privates, x, y, width, height, win)
     if self._container ~= nil then
-        self._container:movewin(x + privates._x, y + privates._y, width, height, win)
+        self._container:movewin(x + self:x(), y + self:y(), width, height, win)
     end -- if container
 end) -- function movewin
 

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <buildpath>
 	<buildpathentry kind="src" path="src/assets/computercraft/lua/rom/programs"/>
+	<buildpathentry kind="src" path="src/assets/computercraft/lua/rom/xwos/kernel/test"/>
 	<buildpathentry kind="src" path="installer"/>
 	<buildpathentry kind="src" path="doclua"/>
 	<buildpathentry kind="src" path="src/assets/computercraft/lua/rom/xwos/kernel/1/7"/>

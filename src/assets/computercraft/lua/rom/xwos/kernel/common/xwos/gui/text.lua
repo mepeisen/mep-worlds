@@ -31,27 +31,17 @@ _CMR.class("xwos.gui.text").extends("xwos.gui.component")
 -- @type xwcintern
 -- @extends #xwos.gui.text
 
-------------------------
--- the x position; do not manipulate directly without care; instead call the setPos method
--- @field [parent=#xwcprivates] #number _x
-
-------------------------
--- the y position; do not manipulate directly without care; instead call the setPos method
--- @field [parent=#xwcprivates] #number _y
+-- default stylesheet
+.pstat('style', {
+    x = 0,
+    y = 0,
+    fg = colors.white,
+    bg = colors.black
+})
 
 ------------------------
 -- the text content; do not manipulate directly without care
 -- @field [parent=#xwcprivates] #string _content 
-
-------------------------
--- the text foreground; do not manipulate directly without care
--- @field [parent=#xwcprivates] #number _fg 
-
-------------------------
--- the text content; do not manipulate directly without care
--- @field [parent=#xwcprivates] #number _bg 
-
--- TODO use stylesheets for fg/bg if nil is given
 
 .ctor(
 ------------------------
@@ -60,16 +50,9 @@ _CMR.class("xwos.gui.text").extends("xwos.gui.component")
 -- @param classmanager#clazz clazz
 -- @param #xwcprivates privates
 -- @param #string text
--- @param #number x
--- @param #number y
--- @param #number fg
--- @param #number bg
-function(self, clazz, privates, text, x, y, fg, bg)
-    clazz._superctor(self, privates)
-    privates._x = x or 0
-    privates._y = y or 0
-    privates._fg = fg or colors.white
-    privates._bg = bg or colors.black
+-- @param #table styles
+function(self, clazz, privates, text, styles)
+    clazz._superctor(self, privates, styles)
     privates._content = text or ""
 end) -- ctor
 
@@ -78,13 +61,10 @@ end) -- ctor
 -- create new text
 -- @function [parent=#xwos.gui.text] create
 -- @param #string content the text content
--- @param #number x the x position
--- @param #number y the y position
--- @param #number fg the foreground
--- @param #number bg the background
+-- @param #table styles
 -- @return #xwos.gui.text the text component
-function (content, x, y, fg, bg)
-    return _CMR.new("xwos.gui.text", content, x, y, fg, bg)
+function (content, styles)
+    return _CMR.new("xwos.gui.text", content, styles)
 end) -- function create
 
 -- abstract function to be overridden
@@ -105,6 +85,7 @@ end) -- function create
 -- @param #xwcprivates privates
 -- @return #number
 function (self, clazz, privates)
+    -- TODO styles
     return string.len(privates._content)
 end) -- function width
 
@@ -122,6 +103,7 @@ end) -- function width
 -- @param #xwcprivates privates
 -- @return #number
 function (self, clazz, privates)
+    -- TODO styles
     return 1
 end) -- function height
 
@@ -161,7 +143,7 @@ end) -- function setSize
 -- @param #xwcprivates privates
 -- @return #number
 function (self, clazz, privates)
-    return privates._x
+    return self:getStyle("x")
 end) -- function x
 
 ------------------------
@@ -178,7 +160,7 @@ end) -- function x
 -- @param #xwcprivates privates
 -- @return #number
 function (self, clazz, privates)
-    return privates._y
+    return self:getStyle("y")
 end) -- function y
 
 ------------------------
@@ -199,9 +181,7 @@ end) -- function y
 -- @param #number y
 -- @return #xwos.gui.text
 function (self, clazz, privates, x, y)
-    privates._x = x
-    privates._y = y
-    self:redraw()
+    self:setStyles({x = x, y = y})
     return self
 end) -- function setPos
 
@@ -219,12 +199,12 @@ end) -- function setPos
 -- @param #xwcprivates privates
 -- @return #xwos.gui.text
 function (self, clazz, privates)
-    if self._container ~= nil and privates._visible then
-        self._container:str(privates._x, privates._y, privates._content, privates._fg, privates._bg)
+    if self._container ~= nil and self:isVisible() then
+        self._container:str(self:x(), self:y(), privates._content, self:getStyle("fg"), self:getStyle("bg"))
     end -- if container and visible
     return self
 end) -- function paint
 
--- TODO get/set for fg/bg/content, events (change content/fg/bg)
+-- TODO get/set for content, events (change content/fg/bg)
 
 return nil

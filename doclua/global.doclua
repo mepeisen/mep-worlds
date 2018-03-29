@@ -137,6 +137,10 @@
 -- @field[parent = #global] xw#xw xwos
 
 ------------------------------------------------------------------------------
+-- luaunit
+-- @field[parent = #global] lu#lu lu
+
+------------------------------------------------------------------------------
 -- Returns the current process id
 -- @function [parent=#global] pid
 -- @return #number the pid

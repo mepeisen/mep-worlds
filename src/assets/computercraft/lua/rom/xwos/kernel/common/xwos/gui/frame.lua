@@ -33,33 +33,25 @@ _CMR.class("xwos.gui.frame").extends("xwos.gui.component")
 -- @type xwcintern
 -- @extends #xwos.gui.frame
 
-------------------------
--- the x position; do not manipulate directly without care; instead call the setPos method
--- @field [parent=#xwcprivates] #number _x
-
-------------------------
--- the y position; do not manipulate directly without care; instead call the setPos method
--- @field [parent=#xwcprivates] #number _y
-
-------------------------
--- the width; do not manipulate directly without care; instead call the setPos method
--- @field [parent=#xwcprivates] #number _width
-
-------------------------
--- the height; do not manipulate directly without care; instead call the setPos method
--- @field [parent=#xwcprivates] #number _height
-
-------------------------
--- the frame foreground; do not manipulate directly without care
--- @field [parent=#xwcprivates] #number _ffg 
-
-------------------------
--- the frame background; do not manipulate directly without care
--- @field [parent=#xwcprivates] #number _fbg 
-
-------------------------
--- the body background; do not manipulate directly without care
--- @field [parent=#xwcprivates] #number _bbg 
+-- default stylesheet
+.pstat('style', {
+    x = 0,
+    y = 0,
+    width = 2,
+    height = 3,
+    ffg = colors.lightGray,
+    fbg = colors.black,
+    bbg = colors.black,
+    tl = "\156",
+    t = "\140",
+    tr = "\148",
+    l = "\149",
+    r = "\149",
+    bl = "\141",
+    b = "\140",
+    br = "\133",
+    m = " "
+})
 
 ------------------------
 -- the text for top frame line
@@ -74,74 +66,6 @@ _CMR.class("xwos.gui.frame").extends("xwos.gui.component")
 -- @field [parent=#xwcprivates] #string _mid
 
 ------------------------
--- top left corner
--- @field [parent=#xwcprivates] #string _tl
-
-------------------------
--- top right corner
--- @field [parent=#xwcprivates] #string _tr
-
-------------------------
--- top line
--- @field [parent=#xwcprivates] #string _t
-
-------------------------
--- left line
--- @field [parent=#xwcprivates] #string _l
-
-------------------------
--- right line
--- @field [parent=#xwcprivates] #string _r
-
-------------------------
--- bottom left corner
--- @field [parent=#xwcprivates] #string _bl 
-
-------------------------
--- bottom right corner
--- @field [parent=#xwcprivates] #string _br
-
-------------------------
--- bottom line
--- @field [parent=#xwcprivates] #string _b
-
-------------------------
--- mid line
--- @field [parent=#xwcprivates] #string _m
-
-------------------------
--- top left corner inverted
--- @field [parent=#xwcprivates] #boolean _tli
-
-------------------------
--- top right corner inverted
--- @field [parent=#xwcprivates] #boolean _tri
-
-------------------------
--- top line inverted
--- @field [parent=#xwcprivates] #boolean _ti
-
-------------------------
--- left line inverted
--- @field [parent=#xwcprivates] #boolean _li
-
-------------------------
--- right line inverted
--- @field [parent=#xwcprivates] #boolean _ri
-
-------------------------
--- bottom left corner inverted
--- @field [parent=#xwcprivates] #boolean _bli
-
-------------------------
--- bottom right corner inverted
--- @field [parent=#xwcprivates] #boolean _bri
-
-------------------------
--- bottom line inverted
--- @field [parent=#xwcprivates] #boolean _bi
-
-------------------------
 -- the window object to draw the frame
 -- @field [parent=#xwcprivates] window#windowObject _frame
 
@@ -149,7 +73,6 @@ _CMR.class("xwos.gui.frame").extends("xwos.gui.component")
 -- the window object to draw the content
 -- @field [parent=#xwcprivates] xwos.gui.stage#xwos.gui.stage _content
 
--- TODO use stylesheets for ffg/fbg/bbg if nil is given
 -- TODO layout for maximum sized frames (use whole terminal), some layout constraints
 
 -- TODO support other styles (request ccraft utf support):
@@ -185,56 +108,36 @@ _CMR.class("xwos.gui.frame").extends("xwos.gui.component")
 -- @param #xwos.gui.frame self
 -- @param classmanager#clazz clazz
 -- @param #xwcprivates privates
--- @param #number x
--- @param #number y
--- @param #number width the outer width
--- @param #number height the outer height
--- @param #number ffg the frame foreground
--- @param #number ffb the frame background
--- @param #number bbg the body background
+-- @param #table styles
 -- @param ... initial objects
-function(self, clazz, privates, x, y, width, height, ffg, fbg, bbg, ...)
-    clazz._superctor(self, privates)
-    privates._x = x or 0
-    privates._y = y or 0
-    privates._width = width or 3
-    privates._height = height or 3
-    privates._ffg = ffg or colors.lightGray
-    privates._fbg = fbg or colors.black
-    privates._bbg = bbg or colors.black
+function(self, clazz, privates, styles, ...)
+    clazz._superctor(self, privates, styles)
     
-    privates._tl = "\156"
-    privates._t = "\140"
-    privates._tr = "\148"
-    privates._l = "\149"
-    privates._r = "\149"
-    privates._bl = "\141"
-    privates._b = "\140"
-    privates._br = "\133"
-    privates._m = " "
-    
-    privates._content = _CMR.new("xwos.gui.stage", nil, privates._x, privates._y, privates._width - 2, privates._height - 2, privates._bbg, ...)
+    privates._content = _CMR.new(
+        "xwos.gui.stage",
+        nil, {
+            x = self:x() + 1,
+            y = self:y() + 1,
+            width = self:width() - 2,
+            height = self:height() - 2,
+            background = self:getStyle("bbg")
+        }
+        , ...)
     privates._content._container = self
-    privates._top = string.rep(privates._t, privates._width - 2, "")
-    privates._bottom = string.rep(privates._b, privates._width - 2, "")
-    privates._mid = string.rep(privates._m, privates._width - 2, "")
+    privates._top = string.rep(self:getStyle("t"), self:width() - 2, "")
+    privates._bottom = string.rep(self:getStyle("b"), self:width() - 2, "")
+    privates._mid = string.rep(self:getStyle("m"), self:width() - 2, "")
 end) -- ctor
 
 .sfunc("create",
 ------------------------
 -- create new text
 -- @function [parent=#xwos.gui.frame] create
--- @param #number x
--- @param #number y
--- @param #number width the outer width
--- @param #number height the outer height
--- @param #number ffg the frame foreground
--- @param #number ffb the frame background
--- @param #number bbg the body background
+-- @param #table styles
 -- @param ... initial objects
 -- @return #xwos.gui.frame the frame object
-function (x, y, width, height, ffg, ffb, bbg, ...)
-    return _CMR.new("xwos.gui.frame", x, y, width, height, ffg, ffb, bbg, ...)
+function (styles, ...)
+    return _CMR.new("xwos.gui.frame", styles, ...)
 end) -- function create
 
 -- abstract function to be overridden
@@ -255,7 +158,7 @@ end) -- function create
 -- @param #xwcprivates privates
 -- @return #number
 function (self, clazz, privates)
-    return privates._width
+    return self:getStyle("width")
 end) -- function width
 
 ------------------------
@@ -272,7 +175,7 @@ end) -- function width
 -- @param #xwcprivates privates
 -- @return #number
 function (self, clazz, privates)
-    return privates._height
+    return self:getStyle("height")
 end) -- function height
 
 ------------------------
@@ -293,8 +196,7 @@ end) -- function height
 -- @param #number height
 -- @return #xwos.gui.frame
 function (self, clazz, privates, width, height)
-    privates._width = width
-    privates._height = height
+    self:setStyles({ width = width, height = height})
     privates._content:setSize(width - 2, height - 2) -- invokes redraw
     return self
 end) -- function setSize
@@ -313,7 +215,7 @@ end) -- function setSize
 -- @param #xwcprivates privates
 -- @return #number
 function (self, clazz, privates)
-    return privates._x
+    return self:getStyle("x")
 end) -- function x
 
 ------------------------
@@ -330,7 +232,7 @@ end) -- function x
 -- @param #xwcprivates privates
 -- @return #number
 function (self, clazz, privates)
-    return privates._y
+    return self:getStyle("y")
 end) -- function y
 
 ------------------------
@@ -351,8 +253,7 @@ end) -- function y
 -- @param #number y
 -- @return #xwos.gui.frame
 function (self, clazz, privates, x, y)
-    privates._x = x
-    privates._y = y
+    self:setStyles({ x = x, y = y})
     privates._content:setPos(x + 1, y + 1) -- invokes redraw...
     return self
 end) -- function setPos
@@ -371,19 +272,18 @@ end) -- function setPos
 -- @param #xwcprivates privates
 -- @return #xwos.gui.frame
 function (self, clazz, privates)
-    if self._container ~= nil and privates._visible then
-        
-        self._container:str(privates._x, privates._y, privates._tl, privates._ffg, privates._fbg)
-        self._container:str(privates._x + 1, privates._y, privates._top, privates._ffg, privates._fbg)
-        self._container:str(privates._x + privates._width - 1, privates._y, privates._tr, privates._ffg, privates._fbg)
-        for i=1, privates._height - 1, 1 do
-            self._container:str(privates._x, privates._y + i, privates._l, privates._ffg, privates._fbg)
-            self._container:str(privates._x + 1, privates._y + i, privates._mid, colors.black, privates._bbg)
-            self._container:str(privates._x + privates._width - 1, privates._y + i, privates._r, privates._ffg, privates._fbg)
+    if self._container ~= nil and self:isVisible() then
+        self._container:str(self:x(), self:y(), self:getStyle("tl"), self:getStyle("ffg"), self:getStyle("fbg"))
+        self._container:str(self:x() + 1, self:y(), privates._top, self:getStyle("ffg"), self:getStyle("fbg"))
+        self._container:str(self:x() + self:width() - 1, self:y(), self:getStyle("tr"), self:getStyle("ffg"), self:getStyle("fbg"))
+        for i=1, self:height() - 1, 1 do
+            self._container:str(self:x(), self:y() + i, privates._l, self:getStyle("ffg"), self:getStyle("fbg"))
+            self._container:str(self:x() + 1, self:y() + i, privates._mid, colors.black, self:getStyle("bbg"))
+            self._container:str(self:x() + self:width() - 1, self:y() + i, self:getStyle("r"), self:getStyle("ffg"), self:getStyle("fbg"))
         end -- for height
-        self._container:str(privates._x, privates._y + privates._height - 1, privates._bl, privates._ffg, privates._fbg)
-        self._container:str(privates._x + 1, privates._y + privates._height - 1, privates._bottom, privates._ffg, privates._fbg)
-        self._container:str(privates._x + privates._width - 1, privates._y + privates._height - 1, privates._br, privates._ffg, privates._fbg)
+        self._container:str(self:x(), self:y() + self:height() - 1, self:getStyle("bl"), self:getStyle("ffg"), self:getStyle("fbg"))
+        self._container:str(self:x() + 1, self:y() + self:height() - 1, privates._bottom, self:getStyle("ffg"), self:getStyle("fbg"))
+        self._container:str(self:x() + self:width() - 1, self:y() + self:height() - 1, self:getStyle("br"), self:getStyle("ffg"), self:getStyle("fbg"))
         privates._content:paint()
     end -- if container and visible
     return self
@@ -456,8 +356,8 @@ end) -- function paint
 -- @param #number bg
 -- @return #xwos.gui.container
 function (self, clazz, privates, x, y, str, fg, bg)
-    if self._container ~= nil and privates._visible then
-        self._container:str(x + privates._x, y + privates._y, str, fg, bg)
+    if self._container ~= nil and self:isVisible() then
+        self._container:str(x + self:x(), y + self:y(), str, fg, bg)
     end -- if container and visible
     return self
 end) -- function str
@@ -485,7 +385,7 @@ end) -- function str
 -- @return window#windowObject
 function (self, clazz, privates, x, y, width, height)
     if self._container ~= nil then
-        return self._container:crwin(x + privates._x, y + privates._y, width, height)
+        return self._container:crwin(x + self:x(), y + self:y(), width, height)
     end -- if container
 end) -- function crwin
 
@@ -512,10 +412,10 @@ end) -- function crwin
 -- @param window#windowObject win
 function (self, clazz, privates, x, y, width, height, win)
     if self._container ~= nil then
-        self._container:movewin(x + privates._x, y + privates._y, width, height, win)
+        self._container:movewin(x + self:x(), y + self:y(), width, height, win)
     end -- if container
 end) -- function movewin
 
--- TODO get/set for ffg/fbg/bbg, events (changed colors)
+-- TODO events (changed colors etc.)
 
 return nil

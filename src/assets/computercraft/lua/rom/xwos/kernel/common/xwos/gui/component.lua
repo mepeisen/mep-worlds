@@ -18,7 +18,7 @@
 --------------------------------
 -- gui component base class
 -- @type xwos.gui.component
-_CMR.class("xwos.gui.component") -- TODO abstract flag and abstract function support
+_CMR.class("xwos.gui.component").abstract()
 
 ------------------------
 -- the object privates
@@ -34,8 +34,13 @@ _CMR.class("xwos.gui.component") -- TODO abstract flag and abstract function sup
 -- @field [parent=#xwcprivates] xwos.gui.container#xwos.gui.container _container
 
 ------------------------
--- visible flag; do not change manually, instead invoke show() or hide()
--- @field [parent=#xwcprivates] #boolean _visible
+-- component local stylesheet; only contains the styles overridden on this component
+-- @field [parent=#xwcprivates] #table _style
+
+-- default stylesheet
+.pstat('style', {
+    visible = true
+})
 
 .ctor(
 ------------------------
@@ -43,8 +48,9 @@ _CMR.class("xwos.gui.component") -- TODO abstract flag and abstract function sup
 -- @param #xwos.gui.component self
 -- @param classmanager#clazz clazz
 -- @param #xwcprivates privates
-function(self, clazz, privates)
-  privates._visible = true
+-- @param #table styles
+function(self, clazz, privates, styles)
+  privates._style = styles or {}
 end) -- ctor
 
 -- abstract function to be overridden
@@ -55,33 +61,11 @@ end) -- ctor
 -- @param #xwos.gui.component self self
 -- @return #number width
 
-.func("width",
-------------------------
--- @function [parent=#xwcintern] width
--- @param #xwos.gui.component self
--- @param classmanager#clazz clazz
--- @param #xwcprivates privates
--- @return #number
-function (self, clazz, privates)
-    error("method not supported")
-end) -- function width
-
 ------------------------
 -- Returns component height
 -- @function [parent=#xwos.gui.component] height
 -- @param #xwos.gui.component self self
 -- @return #number height
-
-.func("height",
-------------------------
--- @function [parent=#xwcintern] height
--- @param #xwos.gui.component self
--- @param classmanager#clazz clazz
--- @param #xwcprivates privates
--- @return #number
-function (self, clazz, privates)
-    error("method not supported")
-end) -- function height
 
 ------------------------
 -- Changes components size
@@ -91,52 +75,17 @@ end) -- function height
 -- @param #number height
 -- @return #xwos.gui.component self for chaining
 
-.func("setSize",
-------------------------
--- @function [parent=#xwcintern] setSize
--- @param #xwos.gui.component self
--- @param classmanager#clazz clazz
--- @param #xwcprivates privates
--- @param #number width
--- @param #number height
--- @return #xwos.gui.component self for chaining
-function (self, clazz, privates, width, height)
-    error("method not supported")
-end) -- function setSize
-
 ------------------------
 -- Returns component x position within parent
 -- @function [parent=#xwos.gui.component] x
 -- @param #xwos.gui.component self self
 -- @return #number x position within parent
 
-.func("x",
-------------------------
--- @function [parent=#xwcintern] x
--- @param #xwos.gui.component self
--- @param classmanager#clazz clazz
--- @param #xwcprivates privates
--- @return #number
-function (self, clazz, privates)
-    error("method not supported")
-end) -- function x
-
 ------------------------
 -- Returns component y position within parent
 -- @function [parent=#xwos.gui.component] y
 -- @param #xwos.gui.component self self
 -- @return #number y position within parent
-
-.func("y",
-------------------------
--- @function [parent=#xwcintern] y
--- @param #xwos.gui.component self
--- @param classmanager#clazz clazz
--- @param #xwcprivates privates
--- @return #number
-function (self, clazz, privates)
-    error("method not supported")
-end) -- function y
 
 ------------------------
 -- Changes components position within parent
@@ -146,37 +95,112 @@ end) -- function y
 -- @param #number y
 -- @return #xwos.gui.component self for chaining
 
-.func("setPos",
-------------------------
--- @function [parent=#xwcintern] setPos
--- @param #xwos.gui.component self
--- @param classmanager#clazz clazz
--- @param #xwcprivates privates
--- @param #number x
--- @param #number y
--- @return #xwos.gui.component self for chaining
-function (self, clazz, privates, x, y)
-    error("method not supported")
-end) -- function setPos
-
 ------------------------
 -- Redraw this single component; should not be invoked directly without care, instead call redraw on root stage
 -- @function [parent=#xwos.gui.component] paint
 -- @param #xwos.gui.component self self
 -- @return #xwos.gui.component self for chaining
 
-.func("paint",
+.aFunc("width", "height", "setSize", "x", "y", "setPos", "paint")
+
+-- default implementations
+
 ------------------------
--- @function [parent=#xwcintern] paint
+-- Returns the style value for given key.
+-- Resolves the styles in following order:
+-- <ul>
+-- <li>Stylesheet from local styles (privates._style); set via constructor or via setStyle/SetStyles methods</li>
+-- <li>Default stylesheets from classes; private static "style"</li>
+-- <li>Default stylesheets from parent classes; private static "style"</li>
+-- </ul>
+-- @function [parent=#xwos.gui.component] getStyle
+-- @param #xwos.gui.component self self
+-- @param #string key
+-- @return #any
+
+.func("getStyle",
+------------------------
+-- @function [parent=#xwcintern] getStyle
 -- @param #xwos.gui.component self
 -- @param classmanager#clazz clazz
 -- @param #xwcprivates privates
--- @return #xwos.gui.component self for chaining
-function (self, clazz, privates)
-    error("method not supported")
-end) -- function paint
+-- @param #string key
+-- @return #any
+function(self, clazz, privates, key)
+    local res = privates._style[key]
+    if res == nil then
+        for k,v in pairs(clazz.getPstat("style")) do
+            res = v[key]
+            if res ~= nil then
+                return res
+            end -- if pstat
+        end -- for pstat
+    end -- if _style
+    return res
+end) -- function getStyle
 
--- default implementations
+------------------------
+-- Returns multiple style values for given keys. For more details see method getStyle.
+-- @function [parent=#xwos.gui.component] getStyles
+-- @param #xwos.gui.component self self
+-- @param ... key values to return
+-- @return ... style values
+
+.func("getStyles",
+------------------------
+-- @function [parent=#xwcintern] getStyles
+-- @param #xwos.gui.component self
+-- @param classmanager#clazz clazz
+-- @param #xwcprivates privates
+-- @param ...
+-- @return ...
+function(self, clazz, privates, ...)
+    local res = {}
+    for k,v in pairs({...}) do
+        table.insert(res, self:getStyle(v))
+    end -- for ...
+    return unpack(res)
+end) -- function getStyles
+
+------------------------
+-- Sets style value. Setting a style to nil will force using the default styles.
+-- @function [parent=#xwos.gui.component] setStyle
+-- @param #xwos.gui.component self self
+-- @param #string key
+-- @param #any value
+
+.func("setStyle",
+------------------------
+-- @function [parent=#xwcintern] setStyle
+-- @param #xwos.gui.component self
+-- @param classmanager#clazz clazz
+-- @param #xwcprivates privates
+-- @param #string key
+-- @param #any value
+function(self, clazz, privates, key, value)
+    privates._style[key] = value
+    self:redraw()
+end) -- function getStyle
+
+------------------------
+-- Sets style values. Setting a style to nil will force using the default styles.
+-- @function [parent=#xwos.gui.component] setStyles
+-- @param #xwos.gui.component self self
+-- @param #table values
+
+.func("setStyles",
+------------------------
+-- @function [parent=#xwcintern] setStyles
+-- @param #xwos.gui.component self
+-- @param classmanager#clazz clazz
+-- @param #xwcprivates privates
+-- @param #table values
+function(self, clazz, privates, values)
+    for k,v in pairs(values) do
+        privates._style[k] = v
+    end -- for values
+    self:redraw()
+end) -- function setStyles
 
 ------------------------
 -- Returns the visible flag
@@ -192,7 +216,7 @@ end) -- function paint
 -- @param #xwcprivates privates
 -- @return #boolean
 function (self, clazz, privates)
-    return privates._visible
+    return self:getStyle("visible")
 end) -- function isVisible
 
 ------------------------
@@ -243,10 +267,7 @@ end) -- function pos
 -- @param #xwcprivates privates
 -- @return #xwos.gui.component self for chaining
 function (self, clazz, privates)
-    if not privates._visible then
-        privates._visible = true
-        self:redraw()
-    end -- if not visible
+    self:setStyle("visible", true)
     return self
 end) -- function show
 
@@ -264,12 +285,27 @@ end) -- function show
 -- @param #xwcprivates privates
 -- @return #xwos.gui.component self for chaining
 function (self, clazz, privates)
-    if privates._visible then
-        privates._visible = false
-        self:redraw()
-    end -- if visible
+    self:setStyle("visible", false)
     return self
 end) -- function hide
+
+------------------------
+-- Clears visible style, falling back to defaults
+-- @function [parent=#xwos.gui.component] clearVisible
+-- @param #xwos.gui.component self self
+-- @return #xwos.gui.component self for chaining
+
+.func("clearVisible",
+------------------------
+-- @function [parent=#xwcintern] clearVisible
+-- @param #xwos.gui.component self
+-- @param classmanager#clazz clazz
+-- @param #xwcprivates privates
+-- @return #xwos.gui.component self for chaining
+function (self, clazz, privates)
+    self:setStyle("visible", nil)
+    return self
+end) -- function clearVisible
 
 ------------------------
 -- Request a redraw on this component; will do nothing if no container is available
@@ -285,7 +321,7 @@ end) -- function hide
 -- @param #xwcprivates privates
 -- @return #xwos.gui.component self for chaining
 function (self, clazz, privates)
-    if self._container ~= nil and privates._visible then
+    if self._container ~= nil and self:isVisible() then
         self._container:redraw()
     end -- if container
 end) -- function redraw

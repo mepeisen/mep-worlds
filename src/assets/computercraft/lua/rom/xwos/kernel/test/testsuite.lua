@@ -15,22 +15,10 @@
 --    You should have received a copy of the GNU General Public License
 --    along with xwos.  If not, see <http://www.gnu.org/licenses/>.
 
---------------------------------
--- a boot manager
--- @module xwos.bootmgr
-_CMR.class("xwos.bootmgr")
+lu = dofile(kernelRoot..'/kernel/test/luaunit/luaunit.lua')
 
-.func("main",
-function(self, clazz, privates)
-    print("BOOT MANAGER (in a real sense...)")
-    
-    _CMR.loadAll("xwos.gui")
-    
-    local gui = xwos.gui.stage.create(term.current())
-    gui:push(
-    xwos.gui.frame.create({x = 1, y = 1, width = 10, height = 10},
-      xwos.gui.text.create("FOODDDDDDDDDDD", {x = 2, y = 2})
-    ))
-    gui:redraw()
-end) -- function main
+dofile(kernelRoot..'/kernel/test/tests/classmanager.lua')
 
+local runner = lu.LuaUnit.new()
+runner:setOutputType("junit")
+os.exit( runner:runSuite("--name", "junit.xml", "--pattern", "Test*") )
