@@ -1,0 +1,274 @@
+--interface Node {
+--
+--  // NodeType
+--  const unsigned short      ELEMENT_NODE                   = 1;
+--  const unsigned short      ATTRIBUTE_NODE                 = 2;
+--  const unsigned short      TEXT_NODE                      = 3;
+--  const unsigned short      CDATA_SECTION_NODE             = 4;
+--  const unsigned short      ENTITY_REFERENCE_NODE          = 5;
+--  const unsigned short      ENTITY_NODE                    = 6;
+--  const unsigned short      PROCESSING_INSTRUCTION_NODE    = 7;
+--  const unsigned short      COMMENT_NODE                   = 8;
+--  const unsigned short      DOCUMENT_NODE                  = 9;
+--  const unsigned short      DOCUMENT_TYPE_NODE             = 10;
+--  const unsigned short      DOCUMENT_FRAGMENT_NODE         = 11;
+--  const unsigned short      NOTATION_NODE                  = 12;
+--
+--  readonly attribute DOMString        nodeName;
+--           attribute DOMString        nodeValue;
+--                                        // raises(DOMException) on setting
+--                                        // raises(DOMException) on retrieval
+--
+--  readonly attribute unsigned short   nodeType;
+--  readonly attribute Node             parentNode;
+--  readonly attribute NodeList         childNodes;
+--  readonly attribute Node             firstChild;
+--  readonly attribute Node             lastChild;
+--  readonly attribute Node             previousSibling;
+--  readonly attribute Node             nextSibling;
+--  readonly attribute NamedNodeMap     attributes;
+--  // Modified in DOM Level 2:
+--  readonly attribute Document         ownerDocument;
+--  Node               insertBefore(in Node newChild, 
+--                                  in Node refChild)
+--                                        raises(DOMException);
+--  Node               replaceChild(in Node newChild, 
+--                                  in Node oldChild)
+--                                        raises(DOMException);
+--  Node               removeChild(in Node oldChild)
+--                                        raises(DOMException);
+--  Node               appendChild(in Node newChild)
+--                                        raises(DOMException);
+--  boolean            hasChildNodes();
+--  Node               cloneNode(in boolean deep);
+--  // Modified in DOM Level 2:
+--  void               normalize();
+--  // Introduced in DOM Level 2:
+--  boolean            isSupported(in DOMString feature, 
+--                                 in DOMString version);
+--  // Introduced in DOM Level 2:
+--  readonly attribute DOMString        namespaceURI;
+--  // Introduced in DOM Level 2:
+--           attribute DOMString        prefix;
+--                                        // raises(DOMException) on setting
+--
+--  // Introduced in DOM Level 2:
+--  readonly attribute DOMString        localName;
+--  // Introduced in DOM Level 2:
+--  boolean            hasAttributes();
+--};
+
+--An integer indicating which type of node this is.
+--Note: Numeric codes up to 200 are reserved to W3C for possible future use.
+--Defined Constants
+--ATTRIBUTE_NODE
+--The node is an Attr.
+--CDATA_SECTION_NODE
+--The node is a CDATASection.
+--COMMENT_NODE
+--The node is a Comment.
+--DOCUMENT_FRAGMENT_NODE
+--The node is a DocumentFragment.
+--DOCUMENT_NODE
+--The node is a Document.
+--DOCUMENT_TYPE_NODE
+--The node is a DocumentType.
+--ELEMENT_NODE
+--The node is an Element.
+--ENTITY_NODE
+--The node is an Entity.
+--ENTITY_REFERENCE_NODE
+--The node is an EntityReference.
+--NOTATION_NODE
+--The node is a Notation.
+--PROCESSING_INSTRUCTION_NODE
+--The node is a ProcessingInstruction.
+--TEXT_NODE
+--The node is a Text node.
+
+--The values of nodeName, nodeValue, and attributes vary according to the node type as follows:
+--Interface              nodeName                    nodeValue                              attributes
+--Attr                   name of attribute           value of attribute                     null
+--CDATASection           #cdata-section              content of the CDATA Section           null
+--Comment                #comment                    content of the comment                 null
+--Document               #document                   null                                   null
+--DocumentFragment       #document-fragment          null                                   null
+--DocumentType           document type name          null                                   null
+--Element                tag name                    null                                   NamedNodeMap
+--Entity                 entity name                 null                                   null
+--EntityReference        name of entity referenced   null                                   null
+--Notation               notation name               null                                   null
+--ProcessingInstruction  target                      entire content excluding the target    null
+--Text                   #text                       content of the text node               null
+
+--Attributes
+--attributes of type NamedNodeMap, readonly
+--A NamedNodeMap containing the attributes of this node (if it is an Element) or null otherwise.
+
+--childNodes of type NodeList, readonly
+--A NodeList that contains all children of this node. If there are no children, this is a NodeList containing no nodes.
+
+--firstChild of type Node, readonly
+--The first child of this node. If there is no such node, this returns null.
+
+--lastChild of type Node, readonly
+--The last child of this node. If there is no such node, this returns null.
+
+--localName of type DOMString, readonly, introduced in DOM Level 2
+--Returns the local part of the qualified name of this node.
+--For nodes of any type other than ELEMENT_NODE and ATTRIBUTE_NODE and nodes created with a DOM Level 1 method, such as createElement from the Document interface, this is always null.
+
+--namespaceURI of type DOMString, readonly, introduced in DOM Level 2
+--The namespace URI of this node, or null if it is unspecified.
+--This is not a computed value that is the result of a namespace lookup based on an examination of the namespace declarations in scope. It is merely the namespace URI given at creation time.
+--For nodes of any type other than ELEMENT_NODE and ATTRIBUTE_NODE and nodes created with a DOM Level 1 method, such as createElement from the Document interface, this is always null. 
+--Note: Per the Namespaces in XML Specification [Namespaces] an attribute does not inherit its namespace from the element it is attached to. If an attribute is not explicitly given a namespace, it simply has no namespace.
+
+--nextSibling of type Node, readonly
+--The node immediately following this node. If there is no such node, this returns null.
+
+--nodeName of type DOMString, readonly
+--The name of this node, depending on its type; see the table above.
+
+--nodeType of type unsigned short, readonly
+--A code representing the type of the underlying object, as defined above.
+
+--nodeValue of type DOMString
+--The value of this node, depending on its type; see the table above. When it is defined to be null, setting it has no effect.
+--Exceptions on setting 
+--DOMException
+--NO_MODIFICATION_ALLOWED_ERR: Raised when the node is readonly.
+--Exceptions on retrieval 
+--DOMException
+--DOMSTRING_SIZE_ERR: Raised when it would return more characters than fit in a DOMString variable on the implementation platform.
+
+--ownerDocument of type Document, readonly, modified in DOM Level 2
+--The Document object associated with this node. This is also the Document object used to create new nodes. When this node is a Document or a DocumentType which is not used with any Document yet, this is null.
+
+--parentNode of type Node, readonly
+--The parent of this node. All nodes, except Attr, Document, DocumentFragment, Entity, and Notation may have a parent. However, if a node has just been created and not yet added to the tree, or if it has been removed from the tree, this is null.
+
+--prefix of type DOMString, introduced in DOM Level 2
+--The namespace prefix of this node, or null if it is unspecified.
+--Note that setting this attribute, when permitted, changes the nodeName attribute, which holds the qualified name, as well as the tagName and name attributes of the Element and Attr interfaces, when applicable.
+--Note also that changing the prefix of an attribute that is known to have a default value, does not make a new attribute with the default value and the original prefix appear, since the namespaceURI and localName do not change.
+--For nodes of any type other than ELEMENT_NODE and ATTRIBUTE_NODE and nodes created with a DOM Level 1 method, such as createElement from the Document interface, this is always null.
+--Exceptions on setting 
+--DOMException
+--INVALID_CHARACTER_ERR: Raised if the specified prefix contains an illegal character.
+--NO_MODIFICATION_ALLOWED_ERR: Raised if this node is readonly.
+--NAMESPACE_ERR: Raised if the specified prefix is malformed, if the namespaceURI of this node is null, if the specified prefix is "xml" and the namespaceURI of this node is different from "http://www.w3.org/XML/1998/namespace", if this node is an attribute and the specified prefix is "xmlns" and the namespaceURI of this node is different from "http://www.w3.org/2000/xmlns/", or if this node is an attribute and the qualifiedName of this node is "xmlns" [Namespaces].
+
+--previousSibling of type Node, readonly
+--The node immediately preceding this node. If there is no such node, this returns null.
+
+--Methods
+--appendChild
+--Adds the node newChild to the end of the list of children of this node. If the newChild is already in the tree, it is first removed. 
+--Parameters 
+--newChild of type Node
+--The node to add.
+--If it is a DocumentFragment object, the entire contents of the document fragment are moved into the child list of this node
+--Return Value 
+--Node
+--The node added.
+--Exceptions 
+--DOMException
+--HIERARCHY_REQUEST_ERR: Raised if this node is of a type that does not allow children of the type of the newChild node, or if the node to append is one of this node's ancestors.
+--WRONG_DOCUMENT_ERR: Raised if newChild was created from a different document than the one that created this node.
+--NO_MODIFICATION_ALLOWED_ERR: Raised if this node is readonly.
+--
+--cloneNode
+--Returns a duplicate of this node, i.e., serves as a generic copy constructor for nodes. The duplicate node has no parent; (parentNode is null.).
+--Cloning an Element copies all attributes and their values, including those generated by the XML processor to represent defaulted attributes, but this method does not copy any text it contains unless it is a deep clone, since the text is contained in a child Text node. Cloning an Attribute directly, as opposed to be cloned as part of an Element cloning operation, returns a specified attribute (specified is true). Cloning any other type of node simply returns a copy of this node.
+--Note that cloning an immutable subtree results in a mutable copy, but the children of an EntityReference clone are readonly. In addition, clones of unspecified Attr nodes are specified. And, cloning Document, DocumentType, Entity, and Notation nodes is implementation dependent. 
+--Parameters 
+--deep of type boolean
+--If true, recursively clone the subtree under the specified node; if false, clone only the node itself (and its attributes, if it is an Element).
+--Return Value 
+--Node
+--The duplicate node.
+--
+--hasAttributes introduced in DOM Level 2
+--Returns whether this node (if it is an element) has any attributes. 
+--Return Value 
+--boolean
+--true if this node has any attributes, false otherwise.
+--No Parameters
+--No Exceptions
+--
+--hasChildNodes
+--Returns whether this node has any children. 
+--Return Value 
+--boolean
+--true if this node has any children, false otherwise.
+--No Parameters
+--No Exceptions
+--
+--insertBefore
+--Inserts the node newChild before the existing child node refChild. If refChild is null, insert newChild at the end of the list of children.
+--If newChild is a DocumentFragment object, all of its children are inserted, in the same order, before refChild. If the newChild is already in the tree, it is first removed. 
+--Parameters 
+--newChild of type Node
+--The node to insert.
+--refChild of type Node
+--The reference node, i.e., the node before which the new node must be inserted.
+--Return Value 
+--Node
+--The node being inserted.
+--Exceptions 
+--DOMException
+--HIERARCHY_REQUEST_ERR: Raised if this node is of a type that does not allow children of the type of the newChild node, or if the node to insert is one of this node's ancestors.
+--WRONG_DOCUMENT_ERR: Raised if newChild was created from a different document than the one that created this node.
+--NO_MODIFICATION_ALLOWED_ERR: Raised if this node is readonly or if the parent of the node being inserted is readonly.
+--NOT_FOUND_ERR: Raised if refChild is not a child of this node.
+--
+--isSupported introduced in DOM Level 2
+--Tests whether the DOM implementation implements a specific feature and that feature is supported by this node. 
+--Parameters 
+--feature of type DOMString
+--The name of the feature to test. This is the same name which can be passed to the method hasFeature on DOMImplementation.
+--version of type DOMString
+--This is the version number of the feature to test. In Level 2, version 1, this is the string "2.0". If the version is not specified, supporting any version of the feature will cause the method to return true.
+--Return Value 
+--boolean
+--Returns true if the specified feature is supported on this node, false otherwise.
+--No Exceptions
+--
+--normalize modified in DOM Level 2
+--Puts all Text nodes in the full depth of the sub-tree underneath this Node, including attribute nodes, into a "normal" form where only structure (e.g., elements, comments, processing instructions, CDATA sections, and entity references) separates Text nodes, i.e., there are neither adjacent Text nodes nor empty Text nodes. This can be used to ensure that the DOM view of a document is the same as if it were saved and re-loaded, and is useful when operations (such as XPointer [XPointer] lookups) that depend on a particular document tree structure are to be used. 
+--Note: In cases where the document contains CDATASections, the normalize operation alone may not be sufficient, since XPointers do not differentiate between Text nodes and CDATASection nodes.
+--No Parameters
+--No Return Value
+--No Exceptions
+--
+--removeChild
+--Removes the child node indicated by oldChild from the list of children, and returns it. 
+--Parameters 
+--oldChild of type Node
+--The node being removed.
+--Return Value 
+--Node
+--The node removed.
+--Exceptions 
+--DOMException
+--NO_MODIFICATION_ALLOWED_ERR: Raised if this node is readonly.
+--NOT_FOUND_ERR: Raised if oldChild is not a child of this node.
+--
+--replaceChild
+--Replaces the child node oldChild with newChild in the list of children, and returns the oldChild node.
+--If newChild is a DocumentFragment object, oldChild is replaced by all of the DocumentFragment children, which are inserted in the same order. If the newChild is already in the tree, it is first removed. 
+--Parameters 
+--newChild of type Node
+--The new node to put in the child list.
+--oldChild of type Node
+--The node being replaced in the list.
+--Return Value 
+--Node
+--The node replaced.
+--Exceptions 
+--DOMException
+--HIERARCHY_REQUEST_ERR: Raised if this node is of a type that does not allow children of the type of the newChild node, or if the node to put in is one of this node's ancestors.
+--WRONG_DOCUMENT_ERR: Raised if newChild was created from a different document than the one that created this node.
+--NO_MODIFICATION_ALLOWED_ERR: Raised if this node or the parent of the new node is readonly.
+--NOT_FOUND_ERR: Raised if oldChild is not a child of this node.

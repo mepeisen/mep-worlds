@@ -2563,8 +2563,8 @@ end
             currentNode = nil,
             suiteStarted = true,
             startTime = os.clock(),
-            startDate = os.date(os.getenv('LUAUNIT_DATEFMT')),
-            startIsodate = os.date('%Y-%m-%dT%H:%M:%S'),
+            startDate = "?", --os.date(os.getenv('LUAUNIT_DATEFMT')), rework for ccraft
+            startIsodate = "?", --os.date('%Y-%m-%dT%H:%M:%S'), rework for ccraft
             patternIncludeFilter = self.patternIncludeFilter,
             tests = {},
             failures = {},
@@ -2717,7 +2717,7 @@ end
             return {
                 status = NodeStatus.ERROR,
                 msg = e,
-                trace = string.sub(debug.traceback("", 3), 2)
+                trace = "?" -- string.sub(debug.traceback("", 3), 2) CCraft fix
             }
         end
 

@@ -15,13 +15,6 @@
 --    You should have received a copy of the GNU General Public License
 --    along with xwos.  If not, see <http://www.gnu.org/licenses/>.
 
-return function(boot)
-    getfenv(1).boot = boot
-    lu = boot.krequire('luaunit/luaunit')
-    
-    boot.krequire('tests/classmanager')
-    
-    local runner = lu.LuaUnit.new()
-    runner:setOutputType("junit")
-    runner:runSuite("--name", "junit.xml", "--pattern", "Test*")
-end
+_CMR.class('SOMEOTHERCLASS:-(')
+
+return nil

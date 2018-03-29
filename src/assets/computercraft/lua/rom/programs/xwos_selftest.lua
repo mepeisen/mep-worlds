@@ -16,40 +16,38 @@
 --    along with xwos.  If not, see <http://www.gnu.org/licenses/>.
 
 term.clear()
+term.setCursorPos(1, 1)
 
 local arg0 = shell.getRunningProgram()
-kernelRoot = "/rom/xwos"
+local kernelRoot = "/rom/xwos"
 if arg0:sub(0, 4) ~= "rom/" then
     kernelRoot = "/xwos" -- TODO get path from arg0, relative to start script
-end -- if not rom
+end -- if not secured
 
-if require == nil then
-    local oldload = loadfile
-    require = function(path)
-        -- print("require "..path)
-        local res, err = oldload(path..".lua")
-        if res then
-            return res()
-        else -- if res
-            error(err)
-        end -- if not res
-    end -- function require
-    debug = {
-        getinfo = function(n)
-            -- TODO find a way to detect file and line in cclite
-            return {
-                source = "@?",
-                short_src = "?",
-                currentline = -1,
-                linedefined = -1,
-                what = "C",
-                name = "?",
-                namewhat = "",
-                nups = 0,
-                func = nil
-            }
-        end -- function debug.getinfo
-    }
-end -- if not require
+local boot = dofile(kernelRoot.."/kernel/common/boot.lua");
 
-dofile(kernelRoot..'/kernel/test/testsuite.lua')
+local myver = boot.version()
+
+-- check if already booted
+if xwos then
+  print()
+  print("FAILED... We are already running XW-OS...")
+  return nil
+end -- if already booted
+
+-- check if valid operating system
+if boot.isUnknownHostOst() then
+    print()
+    print("FAILED... running on unknown operating system or version...")
+    print("OS-version we got: " .. osvs)
+    print("Currently we require CraftOS at version 1.7/1.8")
+    return nil
+end -- if valid
+
+print("** testing XW-OS........")
+print("** XW-OS version " .. myver)
+
+boot.runSandbox(function()
+    boot.injectKernelPath("kernel/test")
+    boot.krequire("testsuite")(boot)
+end)

@@ -67,6 +67,11 @@
 -- @return #table the found classes (class names in keys)
 
 ---------------
+-- Checks if given class is defined
+-- @function [parent=#classmanager] defined
+-- @param #string name the class name
+
+---------------
 -- declares a new class
 -- @function [parent=#classmanager] class
 -- @param #string name the class name
@@ -113,16 +118,24 @@
 -- @field [parent=#clazz] #table _singletonInstance
             
 ---------------
--- the super constructor from base class
--- @field [parent=#clazz] #function _superctor
-            
----------------
 -- the super class (extends)
 -- @field [parent=#clazz] #clazz _super
             
 ---------------
 -- the super class name (unresolved)
 -- @field [parent=#clazz] #string _supername
+
+---------------
+-- defined flag
+-- @field [parent=#clazz] #boolean _defined
+
+---------------
+-- the mixins added to this class
+-- @field [parent=#clazz] #table _mixins
+            
+---------------
+-- the friends allowing to query object privates
+-- @field [parent=#clazz] #table _friends
 
 ---------------
 -- declare a singleton
@@ -188,6 +201,12 @@
 -- @return #clazz self for chaining
 
 ---------------
+-- super method invocation; only valid within methods.
+-- @function [parent=#clazz] super
+-- @param ... the method arguments
+-- @return #any super method return
+
+---------------
 -- Class inheritance (public class mixins).
 -- Mixins are added to the private variables.
 -- All public methods of mixins are merged to the main object by delegators.
@@ -196,7 +215,7 @@
 -- If a mixin is not initialized in ctor it will be created automatically with no arguments given to constructor.
 -- @function [parent=#clazz] mixin
 -- @param #string property property name for given mixin
--- @param ... one or multiple mixins to add to the class
+-- @param #string mixin the mixin to add to this class
 -- @return #clazz self for chaining
 
 ---------------
@@ -217,7 +236,7 @@
 -- @param #table target the target object to add the annotation
 -- @param #string name the class to instantiate
 -- @param ... constructor arguments for annotation class
--- @return #table the instantiated mixin object as returned by method getDMixin
+-- @return #table the instantiated mixin object as returned by method getAnnot
 
 ---------------
 -- Returning a private mixin (annotation) added by annot

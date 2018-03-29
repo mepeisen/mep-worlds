@@ -1,0 +1,59 @@
+--exception DOMException {
+--  unsigned short   code;
+--};
+--// ExceptionCode
+--const unsigned short      INDEX_SIZE_ERR                 = 1;
+--const unsigned short      DOMSTRING_SIZE_ERR             = 2;
+--const unsigned short      HIERARCHY_REQUEST_ERR          = 3;
+--const unsigned short      WRONG_DOCUMENT_ERR             = 4;
+--const unsigned short      INVALID_CHARACTER_ERR          = 5;
+--const unsigned short      NO_DATA_ALLOWED_ERR            = 6;
+--const unsigned short      NO_MODIFICATION_ALLOWED_ERR    = 7;
+--const unsigned short      NOT_FOUND_ERR                  = 8;
+--const unsigned short      NOT_SUPPORTED_ERR              = 9;
+--const unsigned short      INUSE_ATTRIBUTE_ERR            = 10;
+--// Introduced in DOM Level 2:
+--const unsigned short      INVALID_STATE_ERR              = 11;
+--// Introduced in DOM Level 2:
+--const unsigned short      SYNTAX_ERR                     = 12;
+--// Introduced in DOM Level 2:
+--const unsigned short      INVALID_MODIFICATION_ERR       = 13;
+--// Introduced in DOM Level 2:
+--const unsigned short      NAMESPACE_ERR                  = 14;
+--// Introduced in DOM Level 2:
+--const unsigned short      INVALID_ACCESS_ERR             = 15;
+
+--Definition group ExceptionCode
+--An integer indicating the type of error generated.
+--Note: Other numeric codes are reserved for W3C for possible future use.
+--Defined Constants
+--DOMSTRING_SIZE_ERR
+--If the specified range of text does not fit into a DOMString
+--HIERARCHY_REQUEST_ERR
+--If any node is inserted somewhere it doesn't belong
+--INDEX_SIZE_ERR
+--If index or size is negative, or greater than the allowed value
+--INUSE_ATTRIBUTE_ERR
+--If an attempt is made to add an attribute that is already in use elsewhere
+--INVALID_ACCESS_ERR, introduced in DOM Level 2.
+--If a parameter or an operation is not supported by the underlying object.
+--INVALID_CHARACTER_ERR
+--If an invalid or illegal character is specified, such as in a name. See production 2 in the XML specification for the definition of a legal character, and production 5 for the definition of a legal name character.
+--INVALID_MODIFICATION_ERR, introduced in DOM Level 2.
+--If an attempt is made to modify the type of the underlying object.
+--INVALID_STATE_ERR, introduced in DOM Level 2.
+--If an attempt is made to use an object that is not, or is no longer, usable.
+--NAMESPACE_ERR, introduced in DOM Level 2.
+--If an attempt is made to create or change an object in a way which is incorrect with regard to namespaces.
+--NOT_FOUND_ERR
+--If an attempt is made to reference a node in a context where it does not exist
+--NOT_SUPPORTED_ERR
+--If the implementation does not support the requested type of object or operation.
+--NO_DATA_ALLOWED_ERR
+--If data is specified for a node which does not support data
+--NO_MODIFICATION_ALLOWED_ERR
+--If an attempt is made to modify an object where modifications are not allowed
+--SYNTAX_ERR, introduced in DOM Level 2.
+--If an invalid or illegal string is specified.
+--WRONG_DOCUMENT_ERR
+--If a node is used in a different document than the one that created it (that doesn't support it)

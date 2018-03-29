@@ -36,6 +36,9 @@ return function(env)
     env = env or _G
     local classes = {} -- #map<#string,#clazz>
     
+    local objects = {}
+    setmetatable(objects, { __mode = 'k' })
+    
      -- TODO security: the local functions may have from env...
     
     ---------------
@@ -114,33 +117,84 @@ return function(env)
         error(err)
     end -- function loadClass
     
+    local function wrapLocalClazz(name, self, privates, clazz, objclazz)
+        local locclazz = {}
+        setmetatable(locclazz, {__index = objclazz})
+        locclazz.super = function(...)
+            local cur = clazz._super
+            while cur ~= nil do
+                if cur._funcs[name] ~= nil then
+                   return cur._funcs[name](self, wrapLocalClazz(name, self, privates, cur, objclazz), privates, ...)
+                end -- if superfunc
+                cur = cur._super
+            end
+            return nil -- do nothing if no super method is available
+        end
+        setfenv(locclazz.super, env)
+        return locclazz
+    end -- function wrapLocalClazz
+    
+    local function wrapPLocalClazz(name, self, privates, clazz, objclazz)
+        local locclazz = {}
+        setmetatable(locclazz, {__index = objclazz})
+        locclazz.super = function(...)
+            local cur = clazz._super
+            while cur ~= nil do
+                if cur._privates[name] ~= nil then
+                   return cur._privates[name](self, wrapPLocalClazz(name, self, privates, cur, objclazz), privates, ...)
+                end -- if superfunc
+                cur = cur._super
+            end
+            return nil -- do nothing if no super method is available
+        end
+        setfenv(locclazz.super, env)
+        return locclazz
+    end -- function wrapPLocalClazz
+    
     local function addObjMethods(self, privates, index, objclazz, clazz)
         for k,v in pairs(clazz._funcs) do
-            index[k] = function(self, ...)
-                return clazz._funcs[k](self, clazz, privates, ...)
-            end -- function
-            setfenv(index[k], env)
-            if clazz._super ~= nil then
-                local mt = { __index = {} }
-                setmetatable(index, mt)
-                addObjMethods(self, privates, mt.__index, clazz, clazz._super)
-            end -- if super
+            if index[k] == nil then
+                index[k] = function(self, ...)
+                    return clazz._funcs[k](self, wrapLocalClazz(k, self, privates, clazz, objclazz), privates, ...)
+                end -- function
+                setfenv(index[k], env)
+            end -- if not func
         end -- for funcs
+        if clazz._super ~= nil then
+            addObjMethods(self, privates, index, objclazz, clazz._super)
+        end -- if super
     end -- function addObjMethods
     
     local function addPrivateMethods(self, privates, index, objclazz, clazz)
         for k,v in pairs(clazz._privates) do
-            index[k] = function(self, ...)
-                return clazz._privates[k](self, clazz, privates, ...)
+            index[k] = function(_, ...)
+                return clazz._privates[k](self, wrapPLocalClazz(k, self, privates, clazz, objclazz), privates, ...)
             end -- function
             setfenv(index[k], env)
             if clazz._super ~= nil then
                 local mt = { __index = {} }
                 setmetatable(index, mt)
-                addPrivateMethods(self, privates, mt.__index, clazz, clazz._super)
+                addPrivateMethods(self, privates, mt.__index, objclazz, clazz._super)
             end -- if super
         end -- for funcs
     end -- function addPrivateMethods
+    
+    local function wrapCLocalClazz(self, privates, clazz, objclazz)
+        local locclazz = {}
+        setmetatable(locclazz, {__index = objclazz})
+        locclazz.super = function(...)
+            local cur = clazz._super
+            while cur ~= nil do
+                if cur._ctor ~= nil then
+                   return cur._ctor(self, wrapCLocalClazz(self, privates, cur, objclazz), privates, ...)
+                end -- if superctor
+                cur = cur._super
+            end
+            return nil -- do nothing if no super method is available
+        end
+        setfenv(locclazz.super, env)
+        return locclazz
+    end -- function wrapCLocalClazz
     
     local function invokeCtor(self, privates, objclazz, clazz, ...)
         if clazz._ctor == nil then
@@ -148,7 +202,7 @@ return function(env)
                 invokeCtor(self, privates, objclazz, clazz._super, ...)
             end -- if super
         else -- if not ctor
-            clazz._ctor(self, clazz, privates, ...)
+            clazz._ctor(self, wrapCLocalClazz(self, privates, clazz, objclazz), privates, ...)
         end -- if ctor
     end -- function invokeCtor
     
@@ -157,15 +211,8 @@ return function(env)
             loadClass(name)
         end -- if class
         local clazz = classes[name]
-        if clazz._supername ~= nil and clazz._super == nil then
-            loadAndDefineClass(clazz._supername)
-            clazz._super = classes[clazz._supername]
-            local mt = { __index = clazz._super._funcs }
-            setmetatable(clazz._funcs, mt)
-            clazz._superctor = function(self, privates, ...)
-                invokeCtor(self, privates, clazz._super, clazz._super, ...)
-            end -- function
-            setfenv(clazz._superctor, env)
+        if not clazz._defined then
+            clazz._defined = true
             
             local cur = env
             for v in split(name, "[^%.]+") do
@@ -177,12 +224,33 @@ return function(env)
             for k, v in pairs(clazz._statics) do
                 cur[k] = v
             end -- for statics
-        end -- if not super
+            
+            if clazz._supername ~= nil and clazz._super == nil then
+                loadAndDefineClass(clazz._supername)
+                clazz._super = classes[clazz._supername]
+            end -- if not super
+            
+            for _, m in pairs(clazz._mixins) do
+                local property = m.property
+                local mixin = m.mixin
+                loadAndDefineClass(mixin)
+                local mc = classes[mixin]
+                while mc ~= nil do
+                    for k,v in pairs(mc._funcs) do
+                        if clazz._funcs[k] == nil then
+                            clazz.delegate(property, k)
+                        end -- if not func
+                    end -- for funcs
+                    mc = mc._super
+                end -- while mc
+            end -- for mixins
+        end -- if not defined
     end -- function loadClass
     
     local function construct(name, clazz, ...)
         local obj = {}
         local privates = {}
+        objects[obj] = {privates = privates, clazz = clazz, annot = {}}
         obj.class = name
         local mt1 = { __index={} }
         setmetatable(obj, mt1)
@@ -191,6 +259,12 @@ return function(env)
         addObjMethods(obj, privates, mt1.__index, clazz, clazz)
         addPrivateMethods(obj, privates, mt2.__index, clazz, clazz)
         invokeCtor(obj, privates, clazz, clazz, ...)
+        
+        for k,v in pairs(clazz._mixins) do
+            if privates[v.property] == nil then
+                privates[v.property] = classmanager.new(v.mixin)
+            end -- if not property
+        end -- mixins
         return obj
     end -- function construct
     
@@ -200,6 +274,7 @@ return function(env)
     -- @param #string name the class name
     -- @return #table the object instance
     function classmanager.get(name)
+        -- TODO private singleton support
         loadAndDefineClass(name)
         
         local clazz = classes[name]
@@ -212,7 +287,7 @@ return function(env)
         end -- if not singletonInstance
         
         return clazz._singletonInstance
-    end -- function new
+    end -- function get
     
     ---------------
     -- create new class instance
@@ -240,6 +315,14 @@ return function(env)
     -- @param #string name the class name
     function classmanager.load(name)
         loadAndDefineClass(name)
+    end -- function load
+    
+    ---------------
+    -- Checks if given class is defined
+    -- @function [parent=#classmanager] defined
+    -- @param #string name the class name
+    function classmanager.defined(name)
+        return classes[name] ~= nil
     end -- function load
     
     ---------------
@@ -305,7 +388,7 @@ return function(env)
             error("Duplicate class declaration: "..name)
         end -- if classes
         
-        -- TODO support field defaults, mixins
+        -- TODO support field defaults
         
         ---------------
         -- a local class declaration
@@ -347,6 +430,11 @@ return function(env)
             _singleton = false,
             
             ---------------
+            -- defined flag
+            -- @field [parent=#clazz] #boolean _defined
+            _defined = false,
+            
+            ---------------
             -- the abstract flag
             -- @field [parent=#clazz] #boolean _abstract
             _abstract = false,
@@ -362,11 +450,6 @@ return function(env)
             _singletonInstance = nil,
             
             ---------------
-            -- the super constructor from base class
-            -- @field [parent=#clazz] #function _superctor
-            _superctor = function() end,
-            
-            ---------------
             -- the super class (extends)
             -- @field [parent=#clazz] #clazz _super
             _super = nil,
@@ -374,9 +457,18 @@ return function(env)
             ---------------
             -- the super class name (unresolved)
             -- @field [parent=#clazz] #string _supername
-            _supername = nil
+            _supername = nil,
+            
+            ---------------
+            -- the mixins added to this class
+            -- @field [parent=#clazz] #table _mixins
+            _mixins = {},
+            
+            ---------------
+            -- the friends allowing to query object privates
+            -- @field [parent=#clazz] #table _friends
+            _friends = {}
         }
-        setfenv(clazz._superctor, env)
         classes[name] = clazz
         
         ---------------
@@ -386,7 +478,8 @@ return function(env)
         function clazz.abstract()
             clazz._abstract = true
             return clazz
-        end -- function aFunc
+        end -- function abstract
+        setfenv(clazz.abstract, env)
         
         ---------------
         -- abstract functions to be overriden by child classes
@@ -394,13 +487,14 @@ return function(env)
         -- @param ... name of the functions to be abstract
         -- @return #clazz self for chaining
         function clazz.aFunc(...)
-            for name in pairs({...}) do
+            for k, name in pairs({...}) do
                 clazz.func(name, function(self, clazz, privates, ...)
                     error("method not supported")
                 end)
             end -- for ...
             return clazz
         end -- function aFunc
+        setfenv(clazz.aFunc, env)
         
         ---------------
         -- delegate functions directly to private object
@@ -409,7 +503,7 @@ return function(env)
         -- @param ... name of the functions to be delegated
         -- @return #clazz self for chaining
         function clazz.delegate(property, ...)
-            for name in pairs({...}) do
+            for _, name in pairs({...}) do
                 clazz.func(name, function(self, clazz, privates, ...)
                     local prop = privates[property]
                     return prop[name](prop, ...)
@@ -417,6 +511,7 @@ return function(env)
             end -- for ...
             return clazz
         end -- function delegate
+        setfenv(clazz.delegate, env)
         
         ---------------
         -- declare a singleton
@@ -526,6 +621,57 @@ return function(env)
             end -- while cur
             return res
         end -- function getPstat
+        setfenv(clazz.getPstat, env)
+
+        ---------------
+        -- Class inheritance (public class mixins).
+        -- Mixins are added to the private variables.
+        -- All public methods of mixins are merged to the main object by delegators.
+        -- If a method already exists it will not be merged.
+        -- Mixins can be initialized by direct initialization and setting inside constructors.
+        -- If a mixin is not initialized in ctor it will be created automatically with no arguments given to constructor.
+        -- @function [parent=#clazz] mixin
+        -- @param #string property property name for given mixin
+        -- @param #string mixin the mixin to add to this class
+        -- @return #clazz self for chaining
+        function clazz.mixin(property, mixin)
+            tinsert(clazz._mixins, {
+                property = property,
+                mixin = mixin
+            })
+            return clazz
+        end -- function mixin
+        setfenv(clazz.mixin, env)
+
+        ---------------
+        -- friend classes allowing to access THIS object privates through method privates.
+        -- @function [parent=#clazz] friends
+        -- @param ... one or multiple classes being allowed to access object privates
+        -- @return #clazz self for chaining
+        function clazz.friends(...)
+            for _, v in pairs({...}) do
+                clazz._friends[v] = true
+            end -- for friends
+            return clazz
+        end -- function friends
+        setfenv(clazz.friends, env)
+
+        ---------------
+        -- Receive object privates for given object; throws error if this class is not a friend of target class
+        -- @function [parent=#clazz] privates
+        -- @param #table object to query the privates
+        -- @return #table object privates
+        function clazz.privates(object)
+            local desc = objects[object]
+            if desc ~= nil then
+                if not desc.clazz._friends[clazz._name] then
+                    error(clazz._name..' is not allowed to access '..desc.clazz._name..' privates')
+                end -- if not friend
+                return desc.privates
+            end -- if desc
+            error('Error getting object descriptor')
+        end -- function friends
+        setfenv(clazz.privates, env)
         
         ---------------
         -- class inheritance
@@ -537,12 +683,69 @@ return function(env)
             return clazz
         end -- function clazz
         setfenv(clazz.extends, env)
+
+        ---------------
+        -- Adding a private mixin (annotation) to any other object; only accessible by getAnnot method
+        -- @function [parent=#clazz] annot
+        -- @param #table target the target object to add the annotation
+        -- @param #string name the class to instantiate
+        -- @param ... constructor arguments for annotation class
+        -- @return #table the instantiated mixin object as returned by method getAnnot
+        function clazz.annot(target, name, ...)
+            local desc = objects[target]
+            if desc ~= nil then
+                if desc.annot[clazz._name] == nil then
+                    desc.annot[clazz._name] = {}
+                end -- if annot
+                local obj = classmanager.new(name, ...)
+                desc.annot[clazz._name][name] = obj
+                return obj
+            end -- if desc
+            error('Error getting object descriptor')
+        end -- function annot
+        setfenv(clazz.annot, env)
+        
+        ---------------
+        -- Returning a private mixin (annotation) added by annot
+        -- @function [parent=#clazz] getAnnot
+        -- @param #table target the target object to query the annotation from
+        -- @param #string name the class of the annotation
+        -- @return #table the annotation object
+        function clazz.getAnnot(target, name)
+            local desc = objects[target]
+            if desc ~= nil then
+                if desc.annot[clazz._name] == nil then
+                    return nil
+                end -- if annot
+                return desc.annot[clazz._name][name]
+            end -- if desc
+            error('Error getting object descriptor')
+        end -- function getAnnot
+        setfenv(clazz.getAnnot, env)
+        
+        ---------------
+        -- Clears a mixin (annotation)
+        -- @function [parent=#clazz] clearAnnot
+        -- @param #table target the target object to remove the annotation
+        -- @param #string name the class of the annotation
+        -- @return #table the (removed) annotation object
+        function clazz.clearAnnot(target, name)
+            local desc = objects[target]
+            if desc ~= nil then
+                local old = nil
+                if desc.annot[clazz._name] ~= nil then
+                    old = desc.annot[clazz._name][name]
+                    desc.annot[clazz._name][name] = nil
+                end -- if annot
+                return old
+            end -- if desc
+            error('Error getting object descriptor')
+        end -- function clearAnnot
+        setfenv(clazz.clearAnnot, env)
         
         return clazz
     end -- function class
     
-    setfenv(classmanager.require, env)
-    setfenv(classmanager.addcp, env)
     setfenv(errClass, env)
     setfenv(loadClassFile, env)
     setfenv(loadClass, env)
@@ -551,11 +754,17 @@ return function(env)
     setfenv(invokeCtor, env)
     setfenv(loadAndDefineClass, env)
     setfenv(construct, env)
+    setfenv(wrapCLocalClazz, env)
+    setfenv(wrapLocalClazz, env)
+    setfenv(wrapPLocalClazz, env)
+    setfenv(classmanager.require, env)
+    setfenv(classmanager.addcp, env)
     setfenv(classmanager.get, env)
     setfenv(classmanager.new, env)
     setfenv(classmanager.load, env)
     setfenv(classmanager.findPackages, env)
     setfenv(classmanager.findClasses, env)
+    setfenv(classmanager.defined, env)
     setfenv(classmanager.class, env)
     
     return classmanager
