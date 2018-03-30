@@ -14,7 +14,6 @@ cp -r "../src/assets/computercraft/lua/rom/xwos" "/var/lib/jenkins/.local/share/
 
 echo "using Display: $DISPLAY"
 flvrec.py -o record.flv -P ../vnc-pass.txt localhost$DISPLAY &
-THE_PID=$!
 
 # Xvfb :99 -screen 0 1024x768x24 &
 # THE_PID=$!
@@ -31,7 +30,5 @@ sleep 10s
 
 xdotool key s h u t d o w n Return
 sleep 2s
-
-kill -4 $THE_PID
 
 cp "/var/lib/jenkins/.local/share/love/ccemu/data/0/junit.xml" .
