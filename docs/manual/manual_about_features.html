@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>XWOS | Latest snapshot</title>
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+  <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
+  <link rel="stylesheet" href="../dist/css/AdminLTE.min.css">
+  <link rel="stylesheet" href="../dist/css/skins/skin-blue.min.css">
+  <link rel="stylesheet" href="../style.css">
+  <!--[if lt IE 9]>
+  <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+  <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+  <![endif]-->
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+<div class="wrapper">
+
+  <header class="main-header">
+
+    <a href="index.html" class="logo">
+      <span class="logo-mini"><b>XW</b>OS</span>
+      <span class="logo-lg"><b>XW</b>OS</span>
+    </a>
+
+    <nav class="navbar navbar-static-top" role="navigation">
+      <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+        <span class="sr-only">Toggle navigation</span>
+      </a>
+      
+      <div id="navbar-custom-menu" class="navbar-custom-menu">
+      </div>
+    </nav>
+  </header>
+  
+  <aside class="main-sidebar">
+
+    <section id="sidebar" class="sidebar">
+    </section>
+  </aside>
+
+  <div class="content-wrapper">
+    <section class="content-header">
+      <h1>
+        XWOS
+      <small>About</small>
+      </h1>
+      <ol class="breadcrumb">
+        <li><a href="../index.html"><i class="fa fa-home"></i> Home</a></li>
+        <li><a href="index.html"><i class="fa fa-home"></i> Latest snapshot</a></li>
+        <li><a href="manual_about.html"></a><i class="fa fa-book"></i> About XWOS</li>
+        <li class="active"><i class="fa fa-book"></i> Features</li>
+      </ol>
+    </section>
+
+    <section class="content">
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="multi_process_management">
+    				<h2 class="page-header"><a href="#multi_process_management">Multi process management/ Sandboxing</a></h2>
+    				<p class="lead">
+    					<b>XWOS</b> introduces a complete sandbox. That means that all applications and even user sessions are isolated processes.
+    					They are not allowed to communicate but over a secure API. One process may not change code or data of another processes.
+    					As an end user you can create a more secure computer and allowing guests to use it. 
+    				</p>
+    				<p class="lead">
+    					From developers point of view the lua api is very "simple". It is not very handy to write real process related tasks.
+    					I am solving this by introducing process hierarchy, IPC (inter process communication) and threads.
+    					And all is written in LUA and coroutine. Applications still should call yield whenever possible.
+    				</p>
+    			</section>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="security_profiles">
+    				<h2 class="page-header"><a href="#security_profiles">Security profiles</a></h2>
+    				<p class="lead">
+    					A Security manager is used to control the access to resources and APIs. This does not only provide a simple login system.
+    					Instead it covers following topics known from modern systems like windows or linux.
+    				</p>
+    				<ul>
+    					<li>Multiple access levels (root, administrator, user, guest)</li>
+    					<li>File/ directory ownership and ACL</li>
+    					<li>Per process ACL and application profiles, f.e. an app requesting control over turtle movement. <b>XWOS</b> will request the user to login with administrator account for granting access. "Run as administrator"...</li>
+    				</ul>
+    			</section>
+    		</div>
+    	</div>
+    	
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="real_multitasking">
+    				<h2 class="page-header"><a href="#real_multitasking">"Real" multitasking</a></h2>
+    				<p class="lead">
+    					The multi tasking is still based on lua coroutine. But there are important improvements for ComputerCraft: The event system will be rewritten.
+    					Each process gets its own event queue. That's really important when multiple processes need special events, for example multiple processes go to sleep.
+    					No more deadlocks, no more problems on multiple apps.
+    				</p>
+    			</section>
+    		</div>
+    	</div>
+    	
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="app_management">
+    				<h2 class="page-header"><a href="#app_management">Application management</a></h2>
+    				<p class="lead">
+    					Writing <b>XWOS</b> apps will require to use some application description. You are forces to have version numbers, a common file layout and some other things.
+    					All of these requirements leads us to have a more finer control over what is installed and which user is allowed to use it.
+    					As a computer user You already know it from every modern operating system. You always are able to see what is installed and to manually uninstall or upgrade it.
+    				</p>
+    				<p class="lead">
+    					Another task is to support computer disks to distribute applications and upgrades to computers. Think of some adventure where one first gets a small app and
+    					has to earn newer versions by giving some diamonds to NPCs.
+    				</p>
+    				<p class="lead">
+    					You may still be able to use other code outside <b>XWOS</b>.
+    				</p>
+    			</section>
+    		</div>
+    	</div>
+    	
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="hibernate">
+    				<h2 class="page-header"><a href="#hibernate">Hibernation mode</a></h2>
+    				<p class="lead">
+    					Hibernate applications is very complicated. However <b>XWOS</b> provides a clean way fpr applications to remember their state during server shutdown.
+    					Persistent apps are restarted as soon as the server is restarted. This is very useful for single player mode or for tablets. No more dead turtles somewhere
+    					on their way.
+    				</p>
+    			</section>
+    		</div>
+    	</div>
+    	
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="cloud">
+    				<h2 class="page-header"><a href="#cloud">Cloud services</a></h2>
+    				<p class="lead">
+    					A special cloud service will be included, supporting multiple computer Networks and clouds.
+    					Setup a new computer/turtle via disk, installing from a "cloud server".
+    					Using remote Desktops etc. in your cloud and even write cloud aware applications.
+    				</p>
+    				<p class="lead">
+    					First app will be a "mining turtle Garage". A Cloud Server will Control the mining turtles and once they done their work, they will go back to garage, getting refueled and waiting for new orders.
+    					On your pocket computer you can add tasks to a mining queue to get some free turtle and let
+    					it start mining on the players position.
+    				</p>
+    				<p class="lead">
+    					Maybe someone can program a drone turtle to let you "buy" items in the minecraft "online shop" and let a free turtle deliver it to your position...
+    				</p>
+    			</section>
+    		</div>
+    	</div>
+    </section>
+  </div>
+
+  <footer class="main-footer">
+    <div class="pull-right hidden-xs">
+      Design by adminLTE
+    </div>
+    <strong>Copyright &copy; 2018 xworlds.eu.</strong> All rights reserved.
+  </footer>
+</div>
+
+<script src="../plugins/jQuery/jquery-2.2.3.min.js"></script>
+<script src="../bootstrap/js/bootstrap.min.js"></script>
+<script src="../dist/js/app.min.js"></script>
+
+<script type="text/javascript">
+$(function(){
+	$("#sidebar").load("parts_menu.html")
+	$("#navbar-custom-menu").load("../parts_nav.html")
+});
+</script>
+</body>
+</html>

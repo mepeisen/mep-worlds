@@ -33,10 +33,16 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying'
-                sh "cp bin/xwos.zip /srv/ftp-mounts/xworlds/httpdocs/xwos"
-                sh "cp bin/record.flv /srv/ftp-mounts/xworlds/httpdocs/xwos"
-                sh "cp -r docs /srv/ftp-mounts/xworlds/httpdocs/xwos"
-                sh "xsltproc -o /srv/ftp-mounts/xworlds/docs/junit.html junit.xslt bin/junit.xml"
+                sh "cp bin/xwos.zip /srv/ftp-mounts/xworlds/httpdocs/xwos/latest"
+                sh "cp bin/record.flv /srv/ftp-mounts/xworlds/httpdocs/xwos/latest"
+                sh "cp docs/*.html /srv/ftp-mounts/xworlds/httpdocs/xwos"
+                sh "cp docs/*.css /srv/ftp-mounts/xworlds/httpdocs/xwos"
+                sh "cp -r docs/bootstrap /srv/ftp-mounts/xworlds/httpdocs/xwos"
+                sh "cp -r docs/dist /srv/ftp-mounts/xworlds/httpdocs/xwos"
+                sh "cp -r docs/plugins /srv/ftp-mounts/xworlds/httpdocs/xwos"
+                sh "cp -r docs/manual/* /srv/ftp-mounts/xworlds/httpdocs/xwos/latest"
+                sh "xsltproc -o /srv/ftp-mounts/xworlds/latest/junit.html junit.xslt bin/junit.xml"
+                sh "date \"+%Y-%m-%d %H:%M:%S\" > /srv/ftp-mounts/xworlds/httpdocs/xwos/parts_snapshot.html"
             }
 
         }

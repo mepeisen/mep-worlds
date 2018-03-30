@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>XWOS | News</title>
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+  <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
+  <link rel="stylesheet" href="dist/css/AdminLTE.min.css">
+  <link rel="stylesheet" href="dist/css/skins/skin-blue.min.css">
+  <link rel="stylesheet" href="style.css">
+  <!--[if lt IE 9]>
+  <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+  <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+  <![endif]-->
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+<div class="wrapper">
+
+  <header class="main-header">
+
+    <a href="index.html" class="logo">
+      <span class="logo-mini"><b>XW</b>OS</span>
+      <span class="logo-lg"><b>XW</b>OS</span>
+    </a>
+
+    <nav class="navbar navbar-static-top" role="navigation">
+      <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+        <span class="sr-only">Toggle navigation</span>
+      </a>
+      
+      <div id="navbar-custom-menu" class="navbar-custom-menu">
+      </div>
+    </nav>
+  </header>
+  
+  <aside class="main-sidebar">
+
+    <section id="sidebar" class="sidebar">
+    </section>
+  </aside>
+
+  <div class="content-wrapper">
+    <section class="content-header">
+      <h1>
+        XWOS
+        <small>News</small>
+      </h1>
+      <ol class="breadcrumb">
+        <li><a href="index.html"><i class="fa fa-home"></i> Home</a></li>
+        <li class="active"><i class="fa fa-newspaper-o"></i> News</li>
+      </ol>
+    </section>
+
+    <section class="content">
+      <div class="row">
+      	<div class="col-md-12">
+      		<ul class="timeline">
+      			<li class="time-label"><span class="bg-green">30 Mar. 2018</span></li>
+      			<li>
+      				<i class="fa fa-gears bg-blue"></i>
+      				<div class="timeline-item">
+      					<h3 class="timeline-header">New homepage</h3>
+      					<div class="timeline-body">
+      						For upcoming third alpha version I did some homepage. You are viewing it ;-)
+      					</div>
+      				</div>
+      			</li>
+      			<li>
+      				<i class="fa fa-gears bg-blue"></i>
+      				<div class="timeline-item">
+      					<h3 class="timeline-header">Major refactoring and luaunit selftests</h3>
+      					<div class="timeline-body">
+      						Version 0.0.3 will come with major refactoring in class manager. Some nice stuff (mixins, friend classes, annotations). See the docs for details.
+      						By using luaunit we will be able to create test reports for xwos and -later on - applications.
+      					</div>
+      				</div>
+      			</li>
+      			<li>
+      				<i class="fa fa-gears bg-blue"></i>
+      				<div class="timeline-item">
+      					<h3 class="timeline-header">Jenkins and github setup</h3>
+      					<div class="timeline-body">
+      						It took some time to setup a jenkins build as well as a github mirror. Now every upcoming version will be tested automatically.
+      						The test report can be viewed as web site as well as FLV video.
+      					</div>
+      				</div>
+      			</li>
+      			<li class="time-label"><span class="bg-green">25 Mar. 2018</span></li>
+      			<li>
+      				<i class="fa fa-desktop bg-blue"></i>
+      				<div class="timeline-item">
+      					<h3 class="timeline-header">ComputerCraft - Unicode support</h3>
+      					<div class="timeline-body">
+      						To get some nice drawings in GUI I decided to add unicode compatibility to ComputerCraft. It took some days and some discussion in community.
+      						See the <a href="https://github.com/dan200/ComputerCraft/pull/531">first</a>, <a href="https://github.com/dan200/ComputerCraft/pull/532">second</a> and last but not least the
+      						<a href="https://github.com/dan200/ComputerCraft/pull/532#issuecomment-375955562">third try</a> at github. Hope that dan merges this pull request one day.
+      					</div>
+      				</div>
+      			</li>
+      			<li class="time-label"><span class="bg-green">14 Mar. 2018</span></li>
+      			<li>
+      				<i class="fa fa-download bg-blue"></i>
+      				<div class="timeline-item">
+      					<h3 class="timeline-header">Published v0.0.2</h3>
+      					<div class="timeline-body">
+      						Version 0.0.2 contains a major refactoring with some class loader and it contains libraries allen/moses.
+      						Now it was time to experiment with CCLite, a ComputerCraft emulator. It took some time to add compatible code.
+      					</div>
+      				</div>
+      			</li>
+      			<li class="time-label"><span class="bg-green">4 Mar. 2018</span></li>
+      			<li>
+      				<i class="fa fa-download bg-blue"></i>
+      				<div class="timeline-item">
+      					<h3 class="timeline-header">Published first alpha</h3>
+      					<div class="timeline-body">The day everything started. Not really. I already worked on XWOS some days before. But now it was time to create a forum post at ComputerCraft forum.
+      					The first version does some self test but under the hood there are some interesting features.</div>
+      				</div>
+      			</li>
+      			<li>
+      				<i class="fa fa-clock-o bg-gray"></i>
+      			</li>
+      		</ul>
+      	</div>
+      </div>
+    </section>
+  </div>
+
+  <footer class="main-footer">
+    <div class="pull-right hidden-xs">
+      Design by adminLTE
+    </div>
+    <strong>Copyright &copy; 2018 xworlds.eu.</strong> All rights reserved.
+  </footer>
+</div>
+
+<script src="plugins/jQuery/jquery-2.2.3.min.js"></script>
+<script src="bootstrap/js/bootstrap.min.js"></script>
+<script src="dist/js/app.min.js"></script>
+
+<script type="text/javascript">
+$(function(){
+	$("#sidebar").load("parts_menu.html")
+	$("#navbar-custom-menu").load("parts_nav.html")
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>XWOS | Latest snapshot</title>
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+  <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
+  <link rel="stylesheet" href="../dist/css/AdminLTE.min.css">
+  <link rel="stylesheet" href="../dist/css/skins/skin-blue.min.css">
+  <link rel="stylesheet" href="../style.css">
+  <!--[if lt IE 9]>
+  <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+  <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+  <![endif]-->
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+<div class="wrapper">
+
+  <header class="main-header">
+
+    <a href="index.html" class="logo">
+      <span class="logo-mini"><b>XW</b>OS</span>
+      <span class="logo-lg"><b>XW</b>OS</span>
+    </a>
+
+    <nav class="navbar navbar-static-top" role="navigation">
+      <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+        <span class="sr-only">Toggle navigation</span>
+      </a>
+      
+      <div id="navbar-custom-menu" class="navbar-custom-menu">
+      </div>
+    </nav>
+  </header>
+  
+  <aside class="main-sidebar">
+
+    <section id="sidebar" class="sidebar">
+    </section>
+  </aside>
+
+  <div class="content-wrapper">
+    <section class="content-header">
+      <h1>
+        XWOS
+      <small>Latest snapshot</small>
+      </h1>
+      <ol class="breadcrumb">
+        <li><a href="../index.html"><i class="fa fa-home"></i> Home</a></li>
+        <li><a href="index.html"><i class="fa fa-home"></i> Latest snapshot</a></li>
+        <li><a href="manual_enduser.html"><i class="fa fa-desktop"></i> End user manual</a></li>
+        <li class="active"><i class="fa fa-desktop"></i> Unicode</li>
+      </ol>
+    </section>
+
+    <section class="content">
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="about_unicode">
+    				<h2 class="page-header"><a href="#about_unicode">About Unicode</a></h2>
+    				<p class="lead">
+    					ComputerCraft uses some small character set: ISO-8859-1. It contains ASCII characters and some more things.
+    					But it does not support many languages or graphical symbols. For best user experience I recommend to install
+    					full unicode support. Unicode supports (theoretically) over one million different characters. For more
+    					details You can <a href="https://en.wikipedia.org/wiki/Unicode">read WikiPedia</a>. <b>XWOS</b> itself will work on
+    					non unicode ComputerCraft.
+    				</p>
+    			</section>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="activate_unicode">
+    				<h2 class="page-header"><a href="#activate_unicode">Activate Unicode</a></h2>
+    				<p class="lead">
+    					First of all You need a custom build. Dan did not yet merge the Unicode support into official build.
+    					View my <a href="https://github.com/dan200/ComputerCraft/pull/532#issuecomment-375918302">comment at GitHub</a>.
+    					You will find the custom plugin jar. Replace this jar with your current version in mods folder of your plugin
+    					installation. If you do not trust the JAR you can review my changes and build it from source. 
+    				</p>
+    				<p class="lead">
+    					Second task is to install a unicode font that covers all of the known characters. I decided to use GNU Unifont.
+    					You can find the corresponding resource pack within the same link. Download it and copy it to the resourcepacks folder
+    					of your minecraft installation. Why do you need an additional resource pack? The main reason is that GNU Unifont is
+    					published under terms of GPL and this is incompatible to ComputerCrafts license. So we cannot ship ComputerCraft
+    					together with Gnu Unifont. 
+    				</p>
+    				<p class="lead">
+    					Important: After starting your minecraft you need to activate the resource pack. If you do not do it you will get
+    					a broken display as soon as you switch the font.
+    				</p>
+    			</section>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="use_unifont">
+    				<h2 class="page-header"><a href="#use_unifont">Using GNU Unifont</a></h2>
+    				<p class="lead">
+    					<b>XWOS</b> will automatically assume that GNU Unifont is available as soon as it detects the unicode support.
+    					If some client does not know how to handle GNU Unifont he will still use the old font and see "?" characters instead
+    					of nice unicode characters. So please inform Your friends to install GNU Unifont too.
+    				</p>
+    				<p class="lead">
+    					If you like to use GNU Unifont outside you can activate it by following code line (see sample code in my GitHub comment):
+    				</p>
+    				<pre>term.native().setFontName("unifont")</pre>
+    			</section>
+    		</div>
+    	</div>
+    </section>
+  </div>
+
+  <footer class="main-footer">
+    <div class="pull-right hidden-xs">
+      Design by adminLTE
+    </div>
+    <strong>Copyright &copy; 2018 xworlds.eu.</strong> All rights reserved.
+  </footer>
+</div>
+
+<script src="../plugins/jQuery/jquery-2.2.3.min.js"></script>
+<script src="../bootstrap/js/bootstrap.min.js"></script>
+<script src="../dist/js/app.min.js"></script>
+
+<script type="text/javascript">
+$(function(){
+	$("#sidebar").load("parts_menu.html")
+	$("#navbar-custom-menu").load("../parts_nav.html")
+});
+</script>
+</body>
+</html>

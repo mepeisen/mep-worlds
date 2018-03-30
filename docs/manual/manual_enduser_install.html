@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>XWOS | Latest snapshot</title>
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+  <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
+  <link rel="stylesheet" href="../dist/css/AdminLTE.min.css">
+  <link rel="stylesheet" href="../dist/css/skins/skin-blue.min.css">
+  <link rel="stylesheet" href="../style.css">
+  <!--[if lt IE 9]>
+  <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+  <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+  <![endif]-->
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+<div class="wrapper">
+
+  <header class="main-header">
+
+    <a href="index.html" class="logo">
+      <span class="logo-mini"><b>XW</b>OS</span>
+      <span class="logo-lg"><b>XW</b>OS</span>
+    </a>
+
+    <nav class="navbar navbar-static-top" role="navigation">
+      <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+        <span class="sr-only">Toggle navigation</span>
+      </a>
+      
+      <div id="navbar-custom-menu" class="navbar-custom-menu">
+      </div>
+    </nav>
+  </header>
+  
+  <aside class="main-sidebar">
+
+    <section id="sidebar" class="sidebar">
+    </section>
+  </aside>
+
+  <div class="content-wrapper">
+    <section class="content-header">
+      <h1>
+        XWOS
+      <small>Latest snapshot</small>
+      </h1>
+      <ol class="breadcrumb">
+        <li><a href="../index.html"><i class="fa fa-home"></i> Home</a></li>
+        <li><a href="index.html"><i class="fa fa-home"></i> Latest snapshot</a></li>
+        <li><a href="manual_enduser.html"><i class="fa fa-desktop"></i> End user manual</a></li>
+        <li class="active"><i class="fa fa-desktop"></i> Installation</li>
+      </ol>
+    </section>
+
+    <section class="content">
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="resource_pack">
+    				<h2 class="page-header"><a href="#resource_pack">Resource pack</a></h2>
+    				<p class="lead">
+    					Installation via resource pack is recommended if You have control over your server. Notice that this resource pack must be installed on servers
+    					or single player games. If you install it in clients and then remotely connect to a minecraft server it won't work for you.
+    				</p>
+    				<p class="lead">
+    					Download <a href="xwos.zip">xwos.zip</a> and put it to your minecraft resource packs folder. You will find it within your minecraft installation.
+    					It is simply called "resourcepacks". You do not need to extract it.
+    				</p>
+    			</section>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="pastebin">
+    				<h2 class="page-header"><a href="#pastebin">Pastebin installer</a></h2>
+    				<p class="lead">
+    					There is a pastebin installer. By using this installer you can setup <b>XWOS</b> on every server having installed ComputerCraft but not having the resource pack.
+    					There are three differences You should always remember:
+    				</p>
+    				<ul>
+    					<li>Installing via pastebin must be done on every single device that will use <b>XWOS</b>.</li>
+    					<li>You or other users may be able to hack into the <b>XWOS</b> files because they are writable.</li>
+    					<li>It requires disk space because <b>XWOS</b> is saved as regular files onto your device.</li>
+    				</ul>
+    				<p class="lead">
+    					So if you need additional security on multi user servers You should choose the resource pack to install <b>XWOS</b> into read only memory.
+    				</p>
+    				<p class="lead">
+    					To install XWOS simply type following command into your console:
+    				</p>
+    				<pre>pastebin run cst2hmTN</pre>
+    			</section>
+    		</div>
+    	</div>
+    </section>
+  </div>
+
+  <footer class="main-footer">
+    <div class="pull-right hidden-xs">
+      Design by adminLTE
+    </div>
+    <strong>Copyright &copy; 2018 xworlds.eu.</strong> All rights reserved.
+  </footer>
+</div>
+
+<script src="../plugins/jQuery/jquery-2.2.3.min.js"></script>
+<script src="../bootstrap/js/bootstrap.min.js"></script>
+<script src="../dist/js/app.min.js"></script>
+
+<script type="text/javascript">
+$(function(){
+	$("#sidebar").load("parts_menu.html")
+	$("#navbar-custom-menu").load("../parts_nav.html")
+});
+</script>
+</body>
+</html>
