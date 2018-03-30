@@ -26,7 +26,7 @@ sleep 5s
 xdotool key c d space p r o g r a m s Return
 sleep 2s
 
-xdotool key x w o s underscore s e l f t e s t . l u a Return
+xdotool key x w o s underscore s e l f t e s t period l u a Return
 sleep 10s
 
 xdotool key s h u t d o w n Return
