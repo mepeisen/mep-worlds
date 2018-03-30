@@ -13,7 +13,7 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Executing selftest'
-                wrap([$class: 'Xvfb', screen: '1024x768x32']) {
+                wrap([$class: 'Xvnc', useXauthority: true]) {
                 	sh "chmod 755 selftest.sh && ./selftest.sh"
                 }
             }

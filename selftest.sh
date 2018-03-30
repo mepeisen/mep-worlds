@@ -8,14 +8,17 @@ mkdir ccemu
 
 HOME=$PWD/bin/ccemu	
 
+python flvrec.py -o record.flv -r 60 &
+THE_PID=$!
+
 # Xvfb :99 -screen 0 1024x768x24 &
 # THE_PID=$!
 # DISPLAY=:99
 sleep 0.5s
 love /srv/lua/cclite/1.7/cclite-latest-beta.love &
-import -window root screenshot_001.png
+#import -window root screenshot_001.png
 sleep 1s
-import -window root screenshot_002.png
+#import -window root screenshot_002.png
 
 xdotool key c
 xdotool key d
@@ -29,9 +32,9 @@ xdotool key a
 xdotool key m
 xdotool key s
 xdotool key RETURN
-import -window root screenshot_010.png
+#import -window root screenshot_010.png
 sleep 0.1s
-import -window root screenshot_011.png
+#import -window root screenshot_011.png
 
 xdotool key x
 xdotool key w
@@ -47,27 +50,27 @@ xdotool key e
 xdotool key s
 xdotool key t
 xdotool key RETURN
-import -window root screenshot_100.png
+#import -window root screenshot_100.png
 sleep 0.1s
-import -window root screenshot_101.png
+#import -window root screenshot_101.png
 sleep 0.1s
-import -window root screenshot_102.png
+#import -window root screenshot_102.png
 sleep 0.1s
-import -window root screenshot_103.png
+#import -window root screenshot_103.png
 sleep 0.1s
-import -window root screenshot_104.png
+#import -window root screenshot_104.png
 sleep 0.1s
-import -window root screenshot_105.png
+#import -window root screenshot_105.png
 sleep 0.1s
-import -window root screenshot_106.png
+#import -window root screenshot_106.png
 sleep 0.3s
-import -window root screenshot_107.png
+#import -window root screenshot_107.png
 sleep 0.3s
-import -window root screenshot_108.png
+#import -window root screenshot_108.png
 sleep 0.3s
-import -window root screenshot_109.png
+#import -window root screenshot_109.png
 sleep 0.3s
-import -window root screenshot_110.png
+#import -window root screenshot_110.png
 
 xdotool key s
 xdotool key h
@@ -78,10 +81,10 @@ xdotool key o
 xdotool key w
 xdotool key n
 xdotool key RETURN
-import -window root screenshot_200.png
+#import -window root screenshot_200.png
 sleep 0.3s
-import -window root screenshot_201.png
+#import -window root screenshot_201.png
 sleep 0.3s
-import -window root screenshot_202.png
+#import -window root screenshot_202.png
 
-# kill -15 $THE_PID
+kill -4 $THE_PID
