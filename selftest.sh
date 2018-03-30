@@ -33,3 +33,5 @@ xdotool key s h u t d o w n Return
 sleep 2s
 
 kill -4 $THE_PID
+
+cp "/var/lib/jenkins/.local/share/love/ccemu/data/0/programs/junit.xml" .
