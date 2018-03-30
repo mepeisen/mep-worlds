@@ -17,6 +17,7 @@ pipeline {
                 	sh "chmod 755 selftest.sh && ./selftest.sh"
                 }
                 archiveArtifacts artifacts: 'bin/record.flv', fingerprint:true
+                junit 'bin/junit.xml'
             }
         }
 
