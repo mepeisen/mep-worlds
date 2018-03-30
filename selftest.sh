@@ -9,7 +9,8 @@ if [ -d "/var/lib/jenkins/.local/share/love/ccemu/data/0" ]; then
 	rm -rf "/var/lib/jenkins/.local/share/love/ccemu/data/0"
 fi
 mkdir "/var/lib/jenkins/.local/share/love/ccemu/data/0"
-cp -r "../src/assets/computercraft/lua/rom" "/var/lib/jenkins/.local/share/love/ccemu/data/0"
+cp -r "../src/assets/computercraft/lua/rom/programs" "/var/lib/jenkins/.local/share/love/ccemu/data/0"
+cp -r "../src/assets/computercraft/lua/rom/xwos" "/var/lib/jenkins/.local/share/love/ccemu/data/0"
 
 echo "using Display: $DISPLAY"
 flvrec.py -o record.flv -P ../vnc-pass.txt localhost$DISPLAY &
