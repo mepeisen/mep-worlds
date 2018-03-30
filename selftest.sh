@@ -4,9 +4,12 @@ if [ -d "bin" ]; then
 fi
 mkdir bin
 cd bin
-mkdir ccemu
 
-HOME=$PWD/bin/ccemu	
+if [ -d "~/.local/share/love/ccemu/data/0" ]; then
+	rm -rf "~/.local/share/love/ccemu/data/0"
+fi
+mkdir "~/.local/share/love/ccemu/data/0"
+cp -r "../src/assets/computercraft/lua/rom" "~/.local/share/love/ccemu/data/0"
 
 echo "using Display: $DISPLAY"
 flvrec.py -o record.flv -P ../vnc-pass.txt localhost$DISPLAY &
