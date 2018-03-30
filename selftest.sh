@@ -8,7 +8,8 @@ mkdir ccemu
 
 HOME=$PWD/bin/ccemu	
 
-flvrec.py -o record.flv -r 60 &
+echo "using Display: $DISPLAY"
+flvrec.py -o record.flv -r 60 localhost$DISPLAY &
 THE_PID=$!
 
 # Xvfb :99 -screen 0 1024x768x24 &
