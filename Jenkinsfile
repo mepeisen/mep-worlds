@@ -33,7 +33,10 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying'
-                // TODO
+                sh "cp bin/xwos.zip /srv/ftp-mounts/xworlds/httpdocs/xwos"
+                sh "cp bin/record.flv /srv/ftp-mounts/xworlds/httpdocs/xwos"
+                sh "cp -r docs /srv/ftp-mounts/xworlds/httpdocs/xwos"
+                sh "xsltproc -o /srv/ftp-mounts/xworlds/docs/junit.html junit.xslt bin/junit.xml"
             }
 
         }
