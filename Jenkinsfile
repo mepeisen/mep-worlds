@@ -13,7 +13,7 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Executing selftest'
-                // TODO
+                sh "selftest.sh"
             }
         }
 
@@ -21,8 +21,8 @@ pipeline {
         stage('Package') {
             steps {
             	echo 'Creating resource pack'
-                sh "mkdir -p output"
-                zip "output/xwos.zip" true "src"
+                sh "cd src && zip -9r ../bin/xwos.zip *"
+                archiveArtifacts artifacts: 'bin/xwos.zip', fingerprint:true
             }
         }
         
