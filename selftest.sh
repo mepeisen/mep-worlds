@@ -8,9 +8,9 @@ mkdir ccemu
 
 HOME=$PWD/bin/ccemu	
 
-Xvfb :99 -screen 0 1024x768x24 &
-THE_PID=$!
-DISPLAY=:99
+# Xvfb :99 -screen 0 1024x768x24 &
+# THE_PID=$!
+# DISPLAY=:99
 sleep 0.5s
 love /srv/lua/cclite/1.7/cclite-latest-beta.love &
 import -window root screenshot_001.png
@@ -84,4 +84,4 @@ import -window root screenshot_201.png
 sleep 0.3s
 import -window root screenshot_202.png
 
-kill -15 $THE_PID
+# kill -15 $THE_PID

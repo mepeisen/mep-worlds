@@ -13,7 +13,9 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Executing selftest'
-                sh "chmod 755 selftest.sh && ./selftest.sh"
+                wrap([$class: 'Xvfb', screen: '1024x768x32']) {
+                	sh "chmod 755 selftest.sh && ./selftest.sh"
+                }
             }
         }
 
