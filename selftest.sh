@@ -9,7 +9,7 @@ mkdir ccemu
 HOME=$PWD/bin/ccemu	
 
 echo "using Display: $DISPLAY"
-flvrec.py -o record.flv -r 60 localhost$DISPLAY &
+flvrec.py -o record.flv -r 60 -P ../vnc-pass.txt localhost$DISPLAY &
 THE_PID=$!
 
 # Xvfb :99 -screen 0 1024x768x24 &
