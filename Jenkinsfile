@@ -13,7 +13,7 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Executing selftest'
-                sh "selftest.sh"
+                sh "chmod 755 selftest.sh && ./selftest.sh"
             }
         }
 
