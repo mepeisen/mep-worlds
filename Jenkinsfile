@@ -17,6 +17,8 @@ pipeline {
                 	sh "chmod 755 selftest.sh && ./selftest.sh"
                 }
                 archiveArtifacts artifacts: 'bin/record.flv', fingerprint:true
+                sh "ffmpeg -i bin/record.flv bin/record.mp4"
+                archiveArtifacts artifacts: 'bin/record.mp4', fingerprint:true
                 junit 'bin/junit.xml'
             }
         }
@@ -34,7 +36,7 @@ pipeline {
             steps {
                 echo 'Deploying'
                 sh "cp bin/xwos.zip /srv/ftp-mounts/xworlds/httpdocs/xwos/latest"
-                sh "cp bin/record.flv /srv/ftp-mounts/xworlds/httpdocs/xwos/latest"
+                sh "cp bin/record.mp4 /srv/ftp-mounts/xworlds/httpdocs/xwos/latest"
                 sh "cp docs/*.html /srv/ftp-mounts/xworlds/httpdocs/xwos"
                 sh "cp docs/*.css /srv/ftp-mounts/xworlds/httpdocs/xwos"
                 sh "cp -r docs/img /srv/ftp-mounts/xworlds/httpdocs/xwos"
@@ -42,7 +44,7 @@ pipeline {
                 // sh "cp -r docs/dist /srv/ftp-mounts/xworlds/httpdocs/xwos"
                 // sh "cp -r docs/plugins /srv/ftp-mounts/xworlds/httpdocs/xwos"
                 sh "cp -r docs/manual/* /srv/ftp-mounts/xworlds/httpdocs/xwos/latest"
-                sh "xsltproc -o /srv/ftp-mounts/xworlds/latest/junit.html junit.xslt bin/junit.xml"
+                sh "xsltproc -o /srv/ftp-mounts/xworlds/httpdocs/xwos/latest/junit.html junit.xslt bin/junit.xml"
                 sh "date \"+%Y-%m-%d %H:%M:%S\" > /srv/ftp-mounts/xworlds/httpdocs/xwos/parts_snapshot.html"
             }
 
