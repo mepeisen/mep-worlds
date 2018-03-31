@@ -29,6 +29,8 @@ pipeline {
             	echo 'Creating resource pack'
                 sh "cd src && zip -9r ../bin/xwos.zip *"
                 archiveArtifacts artifacts: 'bin/xwos.zip', fingerprint:true
+                sh "java -cp lua-packager-0.0.1-SNAPSHOT.jar eu.xworlds.xwos.tools.luapkg.MkInstaller src/assets/computercraft/lua/rom bin/package.lua"
+                archiveArtifacts artifacts: 'bin/package.lua', fingerprint:true
             }
         }
         
