@@ -3,9 +3,9 @@
   <xsl:output method="text" indent="no"/>
 
   <xsl:template match="/">
-    <pre>
-    <xsl:apply-templates select="testsuite" />
-    </pre>
+    &lt;pre>
+    <xsl:apply-templates />
+    &lt;/pre>
   </xsl:template>
 
   <xsl:template match="testsuite">
