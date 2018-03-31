@@ -3,7 +3,6 @@
   <xsl:output method="text" indent="no"/>
 
   <xsl:template match="/testsuite">
-    &lt;pre>
     Testsuite: <xsl:value-of select="@name" />
     <xsl:text>
     Tests run: </xsl:text>
@@ -21,7 +20,6 @@
     --------- ----------- ---------
     </xsl:text>
     <xsl:apply-templates select="testcase" />
-    &lt;/pre>
   </xsl:template>
 
   <xsl:template match="testcase">
