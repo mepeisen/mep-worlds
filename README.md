@@ -1,4 +1,4 @@
-# XWOS - A ComputerCraft poerating system
+# XWOS - A ComputerCraft operating system
 
 This is the source repository of XWOS.
 
