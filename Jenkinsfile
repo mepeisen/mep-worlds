@@ -37,6 +37,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying'
+                sh "cp bin/package.lua /srv/ftp-mounts/xworlds/httpdocs/xwos/latest"
                 sh "cp bin/xwos.zip /srv/ftp-mounts/xworlds/httpdocs/xwos/latest"
                 sh "cp bin/record.mp4 /srv/ftp-mounts/xworlds/httpdocs/xwos/latest"
                 sh "cp docs/*.html /srv/ftp-mounts/xworlds/httpdocs/xwos"

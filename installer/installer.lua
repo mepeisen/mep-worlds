@@ -31,15 +31,14 @@ end
 local versions = {
     {
       name = "Latest snapshot",
-      key = 'y9ijTpkx'
+      key = 'http://www.xworlds.eu/xwos/latest/package.lua'
     }
 }
 
--- borrowed from program pastebin
-local function get(paste)
-    write( "Connecting to pastebin.com... " )
+local function get(url)
+    write( "Connecting to "..url.." ..." )
     local response = http.get(
-        "https://pastebin.com/raw/"..textutils.urlEncode( paste )
+        url
     )
         
     if response then
