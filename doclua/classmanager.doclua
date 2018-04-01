@@ -138,6 +138,10 @@
 -- @field [parent=#clazz] #table _friends
 
 ---------------
+-- user variables for class objects
+-- @field [parent=#clazz] #table user
+
+---------------
 -- declare a singleton
 -- @function [parent=#clazz] singleton
 -- @param #boolean private true for non-visible singletons; defaults to false

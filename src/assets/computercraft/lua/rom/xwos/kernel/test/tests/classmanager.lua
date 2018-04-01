@@ -276,11 +276,11 @@ function TestClassmanager:testStatics()
     local cmr = cmf(_G) -- classmanager#classmanager
     cmr.class('Foo')
         .sfunc("create", function(val) return "FOO"..val end)
-    local obj = cmr.new('Foo')
     cmr.load('Foo') -- explicit class loading (will define statics)
     lu.assertNotNil(Foo)
     lu.assertNotNil(Foo.create)
     lu.assertEquals("FOOBAR", Foo.create("BAR"))
+    Foo = nil
 end -- testStatics
 
 -- tests private static variables

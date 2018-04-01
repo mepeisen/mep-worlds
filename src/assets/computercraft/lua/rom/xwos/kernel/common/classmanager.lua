@@ -40,6 +40,8 @@ return function(env)
     setmetatable(objects, { __mode = 'k' })
     
      -- TODO security: the local functions may have from env...
+     -- TODO private singletons: Allowing friend classes to access them
+     -- TODO provide some solutions for singletons and inheritance....
     
     ---------------
     -- plain require a file
@@ -467,7 +469,12 @@ return function(env)
             ---------------
             -- the friends allowing to query object privates
             -- @field [parent=#clazz] #table _friends
-            _friends = {}
+            _friends = {},
+            
+            ---------------
+            -- user variables for class objects
+            -- @field [parent=#clazz] #table user
+            user = {}
         }
         classes[name] = clazz
         
