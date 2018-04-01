@@ -75,7 +75,24 @@
     			<section id="overview">
     				<h2 class="page-header"><a href="#overview">Overview</a></h2>
     				<p class="lead">
-    					TODO
+    					Allen is a LUA library for string handling. The source code can be browsed at <a href="moses.https://github.com/Yonaba/Allen">Github</a>.
+    					You can read the official <a href="hhttp://yonaba.github.io/Allen/">documentation</a>. <b>XWOS</b> supports version 1.1 of
+    					allen. The API reference seems to be dead. But you can read the comments directly in source code
+    					<a href="https://github.com/Yonaba/Allen/blob/master/allen.lua#L154">starting with line 154</a>.
+    				</p>
+    				<p>
+    					The functions are loaded into <code>string</code> API. For example the <code>startsWith</code> function is available via
+    					<code>string.startsWith</code>. The following features are <b>NOT</b> (yet) supported because of limitations in LUA version or in
+    					ComputerCraft itself:
+    				</p>
+    				<ul>
+    					<li><a href="http://yonaba.github.io/Allen/#allen-and-the-built-in-string-library">built-in string library</a></li>
+    					<li><a href="http://yonaba.github.io/Allen/#strings-indexing">string indexing</a></li>
+    					<li><a href="http://yonaba.github.io/Allen/#strings-as-functions">strings as functions</a></li>
+    				</ul>
+    				<p class="lead">
+    					If your ComputerCraft supports utf8 there will be a utf8 variant of allen loaded into <code>utf8</code> API. So all functions
+    					of allen will be available there. For details on utf8 support see <a href="manual_enduser_unicode.html">unicode enduser documentation</a>.
     				</p>
     				<p class="lead">
     					<a href="#toc">Back to top</a>

@@ -287,6 +287,7 @@ function(self, clazz, privates, ver, kernelpaths, kernelRoot, cpfactory, oldGlob
     string = {}
     -- TODO allen contains some local functions, may be a security hole because of broken fenv???
     -- TODO support allen aliases
+    -- TODO load special utf8 variant
     for k,v in origpairs(origString) do
         string[k] = v
     end -- for string

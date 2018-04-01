@@ -42,6 +42,7 @@ return function(env)
      -- TODO security: the local functions may have from env...
      -- TODO private singletons: Allowing friend classes to access them
      -- TODO provide some solutions for singletons and inheritance....
+     -- TODO utf8 class variants for clean unicode support
     
     ---------------
     -- plain require a file
