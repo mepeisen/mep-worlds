@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="../dist/css/AdminLTE.min.css">
   <link rel="stylesheet" href="../dist/css/skins/skin-blue.min.css">
   <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="../plugins/highlite/styles/default.css">
   <!--[if lt IE 9]>
   <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
   <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -64,17 +65,146 @@
     				<h2 class="page-header"><a href="#toc">TOC</a></h2>
     				<ul>
     					<li><a href="#overview">Overview</a></li>
+    					<li><a href="#declare_a_class">Declare a class</a></li>
+    					<li><a href="#ctor">Constructors</a></li>
+    					<li><a href="#static">Static functions</a></li>
+    					<li><a href="#factory">Factory methods</a></li>
+    					<li><a href="#pstatic">Private class statics</a></li>
+    					<li><a href="#singleton">Singletons</a></li>
+    					<li><a href="#abstract">Abstract classes and functions</a></li>
+    					<li><a href="#function">Object functions</a></li>
+    					<li><a href="#inheritance">Class inheritance and function overrides</a></li>
+    					<li><a href="#privates">Object privates</a></li>
+    					<li><a href="#delegate">Delegates</a></li>
+    					<li><a href="#mixins">Mixins</a></li>
+    					<li><a href="#friends">Class friendship</a></li>
+    					<li><a href="#annotation">Object annotations</a></li>
     				</ul>
     			</section>
     		</div>
     	</div>
+    	
+    	
     
     	<div class="row">
     		<div class="col-md-12">
     			<section id="overview">
     				<h2 class="page-header"><a href="#overview">Overview</a></h2>
     				<p class="lead">
-    					TODO
+    					<b>XWOS</b> contains a complete class manager. This class manager can be accessed by global <code>_CMR</code>. Classes are well known from many other programming languages.
+    					As an experienced LUA developer You should already be familiar with tables and functions on tables. Let me explain the main difference between LUA tables and <b>XWOS</b> class manager (called <b>CMR</b>).
+    					Before starting You should read the LUA documentation on tables and metatables. Experiment with small tables in your custom program. 
+    				</p>
+    				<p class="lead">
+    					The <b>CMR</b> helps you creating a class descriptor, describing the needs of your class. Let us compare a classic lua table with its <b>CMR</b> variant.
+    					I have taken the code sample from <a href="https://www.lua.org/pil/16.2.html">LUA manual</a>. We have two classes: <code>Account</code> and <code>SepcialAccount extending Account</code>.
+    					We override a method in <code>SpecialAccount</code> and we create and object <code>s</code>.
+    				</p>
+    			</section>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-6">
+	    		<div class="box box-solid box-primary">
+	    			<div class="box-header">
+	    				<h3 class="box-title">Classic LUA</h3>
+	    			</div>
+	    			<div class="box-body">
+	    				<pre class="prettyprint"><code class="lua">Account = {}
+
+function Account:new (o)
+    o = o or {}
+    setmetatable(o, self)
+    self.__index = self
+    return o
+end
+    
+function Account:deposit (v)
+    self.balance = self.balance + v
+end
+    
+function Account:withdraw (v)
+    if v > self.balance then error"insufficient funds" end
+    self.balance = self.balance - v
+end
+
+SpecialAccount = Account:new()
+
+function SpecialAccount:withdraw (v)
+    if v - self.balance >= self:getLimit() then
+        error"insufficient funds"
+    end
+    self.balance = self.balance - v
+end
+    
+function SpecialAccount:getLimit ()
+    return self.limit or 0
+end
+
+s = SpecialAccount:new{limit=1000.00}
+s:deposit(100.00)
+</code></pre>
+	        		</div>
+	      		</div>
+    		</div>
+    		<div class="col-md-6">
+	    		<div class="box box-solid box-primary">
+	    			<div class="box-header">
+	    				<h3 class="box-title">Using CMR</h3>
+	    			</div>
+	    			<div class="box-body">
+	    				<pre class="prettyprint"><code class="lua">_CMR.class("Account")
+
+.sfunc("new", function(defaults)
+    return _CMR.new("Account", defaults)
+end)
+
+.ctor(function(self, clazz, privates, defaults)
+	for k,v in pairs(defaults) do
+	    self[k]=v
+	end
+end)
+    
+.func("deposite", function(self, clazz, privates, v)
+    self.balance = self.balance + v
+end)
+
+.func("withdraw", function(self, clazz, privates, v)
+    if v > self.balance then error"insufficient funds" end
+    self.balance = self.balance - v
+end)
+
+_CMR.class("SpecialAccount").extends("Account")
+
+.sfunc("new", function(defaults)
+    return _CMR.new("SpecialAccount", defaults)
+end)
+
+.func("withdraw", function(self, clazz, privates, v)
+	if v - self.balance >= self:getLimit() then
+        error"insufficient funds"
+    end
+    self.balance = self.balance - v
+end)
+
+.func("getLimit", function(self, clazz, privates)
+    return self.limit or 0
+end)
+
+s = SpecialAccount.new{limit=1000.00}
+s:deposit(100.00)
+</code></pre>
+	        		</div>
+	      		</div>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="overview">
+    				<p class="lead">
+    					Now let us have a look at the details.
     				</p>
     				<p class="lead">
     					<a href="#toc">Back to top</a>
@@ -82,6 +212,888 @@
     			</section>
     		</div>
     	</div>
+    
+    
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="declare_a_class">
+    				<h2 class="page-header"><a href="#declare_a_class">Declare a class</a></h2>
+    			</section>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-6">
+    			<p class="lead">
+    				Creating a new class is fairly simply. You only have to invoke the <code>class</code> method from <code>_CMR</code>.
+    				Give it a nice package and name. In the example above we simply call the classes <code>Account</code> and <code>SepcialAccount</code>.
+    				To reproduce nice code you should choose a nice package name, for example <code>Banking.Account</code> or
+    				<code>org.mydomain.banking.account</code>. Having a package name makes identical to your personal internet domain ensures that
+    				there are no conflicts with other libraries/tools.
+    			</p>
+    			<p class="lead">
+    				After invoking the <code>class</code> method it is ready to be used. However the class is empty and does not contain any functions.
+    				The <code>class</code> method returns the new class descriptor. You can invoke some new methods on the class descriptor to add
+    				class functionality.
+    			</p>
+    		</div>
+    		<div class="col-md-6">
+    				<pre class="prettyprint"><code class="lua">_CMR.class("Account")</code></pre>
+    				<pre class="prettyprint"><code class="lua">_CMR.class("org.mydomain.banking.Account")</code></pre>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<div class="callout callout-danger lead">
+    				<h4>Danger!</h4>
+    				<p>
+    					You should not save the class descriptor to any variable if You do not need it. After declaring a class you should never change it during runtime. Do not add new methods etc.
+    					The class manager will not work correctly if a class is changed after objects are already created. Various functions (f.e. constructors) get three arguments
+    					(<code>self</code>, <code>clazz</code> and <code>privates</code>). The second argument named <code>clazz</code> contains a class descriptor. Do not use
+    					it to change the class during runtime.
+    				</p>
+  				</div>
+    			<p class="lead">
+    				<a href="#toc">Back to top</a>
+    			</p>
+    		</div>
+    	</div>
+    
+    
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="ctor">
+    				<h2 class="page-header"><a href="#ctor">Constructors</a></h2>
+    			</section>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-6">
+    			<p class="lead">
+    				Constructors are invoked during object creation. They are responsible for initializing the newly created objects.
+    			</p>
+    			<p class="lead">
+    				Invoke method <code>ctor</code> to add a new constructor. Pass a function that takes at least three arguments:
+    			</p>
+    			<ul>
+    				<li><code>self</code>: the newly created object</li>
+    				<li><code>clazz</code>: the class descriptor that is constructed</li>
+    				<li><code>privates</code>: A table holding "private" object fields not visible to anybody</li>
+    			</ul>
+    			<p class="lead">
+    				Any parameter passed to the <code>new</code> function of <code>_CMR</code> will be passed to ctor after the <code>privates</code>
+    				parameter. See the second example for details how parameters are passed to functions.
+    			</p>
+    		</div>
+    		<div class="col-md-6">
+    				<pre class="prettyprint"><code class="lua">_CMR.class("MyClass")
+.ctor(function(self, clazz, privates, ...)
+    -- do anything you like
+end)
+</code></pre>
+    				<pre class="prettyprint"><code class="lua">_CMR.class("MyClass")
+.ctor(function(self, clazz, privates, arg1, arg2, ...)
+    assert("value-for-arg1" == arg1)
+    assert("value-for-arg2" == arg2)
+    assert(2 == select('#', ...))
+    assert("some-third-argument", select(1, ...))
+    assert("some-fourth-argument", select(2, ...))
+end)
+
+-- later on
+_CMR.new("MyClass", "value-for-arg1", "value-for-arg2", "some-third-argument", "some-fourth-argument")
+</code></pre>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<p class="lead">
+    				<a href="#toc">Back to top</a>
+    			</p>
+    		</div>
+    	</div>
+    
+    
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="static">
+    				<h2 class="page-header"><a href="#static">Static functions</a></h2>
+    			</section>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-6">
+    			<p class="lead">
+    				Static functions do not use a concrete object. Instead they are placed into the "class" itself. Similar to global functions.
+    			</p>
+    			<p class="lead">
+    				Invoke method <code>sfunc</code> to add a new static function. Pass any function you like. They do not take special arguments.
+    				See the second example for details how parameters are passed.
+    			</p>
+    			<p class="lead">
+    				Static functions are registered to globals. In the second example we see that invoking is intuitive. If you declare a class called
+    				<code>somepackage.subpackage.MyClass</code> with static function <code>staticfunc</code> it is available by invoking
+    				<code>somepackage.subpackage.MyClass.staticfunc</code>.
+    			</p>
+    		</div>
+    		<div class="col-md-6">
+    				<pre class="prettyprint"><code class="lua">_CMR.class("MyClass")
+.sfunc("staticfunc", function(...)
+    -- do anything you like
+end)
+</code></pre>
+    				<pre class="prettyprint"><code class="lua">_CMR.class("somepackage.subpackage.MyClass")
+.sfunc("staticfunc", function(arg1, arg2, ...)
+    assert("value-for-arg1" == arg1)
+    assert("value-for-arg2" == arg2)
+    assert(2 == select('#', ...))
+    assert("some-third-argument", select(1, ...))
+    assert("some-fourth-argument", select(2, ...))
+end)
+
+-- later on
+_CMR.load("somepackage.subpackage.MyClass")
+somepackage.subpackage.MyClass.staticfunc("value-for-arg1", "value-for-arg2", "some-third-argument", "some-fourth-argument")
+</code></pre>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="callout callout-info lead">
+    			<h4>Information!</h4>
+    			<p>
+    				In second example You can see the invocation to <code>_CMR.load</code>. Normally each class need to be loaded before it is used.
+    				Specially statics are not available as long as the class is not loaded. Creating objects via method <code>new</code> always calls
+    				<code>load</code> for you. So there is exactly one situation that needs an explicit call to <code>load</code>: If You want to
+    				call static functions and the class was not used before. After the class was loaded once any other invocation does not have
+    				any effect.
+    			</p>
+  			</div>
+    		<div class="col-md-12">
+    			<p class="lead">
+    				<a href="#toc">Back to top</a>
+    			</p>
+    		</div>
+    	</div>
+    
+    
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="factory">
+    				<h2 class="page-header"><a href="#factory">Factory methods</a></h2>
+    			</section>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-6">
+    			<p class="lead">
+    				There are special variants of static functions: The <a href="https://en.wikipedia.org/wiki/Factory_method_pattern">Factory pattern</a>.
+    			</p>
+    			<p class="lead">
+    				In the first example there was a small factory method simply calling <code>_CMR.new</code>. A factory may be able to decide what object fits the callee needs.
+    				Following this example You may provide two examples for creating banking accounts. See the example for details. It contains a factory for the original
+    				<code>Account</code> class as well as a factory for the derived <code>SpecialAccount</code> class.
+    			</p>
+    		</div>
+    		<div class="col-md-6">
+    				<pre class="prettyprint"><code class="lua">_CMR.class("MyBanking")
+.sfunc("createAccount", function(initialBalance)
+    return _CMR.new("Account", {balance = initialBalance))
+end)
+.sfunc("createAccountWithLimit", function(initialBalance, initialLimit)
+    return _CMR.new("SpecialAccount", {balance = initialBalance, limit = initialLimit))
+end)
+</code></pre>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<p class="lead">
+    				<a href="#toc">Back to top</a>
+    			</p>
+    		</div>
+    	</div>
+    
+    
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="pstatic">
+    				<h2 class="page-header"><a href="#pstatic">Private class statics</a></h2>
+    			</section>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-6">
+    			<p class="lead">
+    				Sometimes You want to declare private static variables inside your class objects. <b>CMR</b> support two ways:
+    			</p>
+    			<p class="lead">
+    				1) On each class descriptor you will find a table, called <code>user</code>. You can put anything inside it you like.
+    				See the first example for a way how to use it.
+    			</p>
+    			<p class="lead">
+    				2) The class descriptor has two methods: <code>pstat</code> and <code>getPstat</code>. They provide a more flexible
+    				way for class statics. The most important difference is supporting class inheritance. The methods <code>pstat</code>
+    				and <code>getPstat</code> are aware of derived classes.
+    			</p>
+    			<p class="lead">
+    				You should always prefer using the <code>pstat</code> way if You have class hierarchies allowing to override the private
+    				class statics.
+    			</p>
+    		</div>
+    		<div class="col-md-6">
+    				<pre class="prettyprint"><code class="lua">_CMR.class("MyClass")
+.func("getFoo", function(self, clazz, privates)
+    return clazz.user.foo -- will return "SomeFooString" only if used inside "MyClass", but not inside derived classes
+end)
+.user = {
+    foo = "SomeFooString"
+}
+</code></pre>
+    				<pre class="prettyprint"><code class="lua">_CMR.class("MyClass")
+.func("getFoo", function(self, clazz, privates)
+    return clazz.getPStat("foo")[1] -- will return "SomeFooString" on "MyClass" and "SomeBarString" on "DerivedClass"
+end)
+.pstat("foo", "SomeFooString")
+
+_CMR.class("DerivedClass").extends("MyClass")
+.pstat("foo", "SomeBarString")
+</code></pre>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="callout callout-warning lead">
+    			<h4>Warning!</h4>
+    			<p>
+    				Remember that the <code>clazz</code> parameter <b>ALWAYS</b> is the class descriptor of the object you are working with. It does never contain 
+    				the class descriptor of the class where you declared the method. That is the reason why accessing the <code>user</code> field of the class
+    				descriptor may produce unwanted results as soon as anyone derives the class. A way to access the correct way will be storing the class
+    				descriptor inside a local variable and access the <code>user</code> variable by accessing this local variable. However this is not a nice
+    				"lua way". The <code>user</code> variable may be important as soon as soon as You want to provide some API across multiple lua files without
+    				putting it to public static functions. Everyone allowed to access the class descriptor can access the <code>user</code> variable.
+    			</p>
+  			</div>
+    		<div class="col-md-12">
+    			<p class="lead">
+    				<a href="#toc">Back to top</a>
+    			</p>
+    		</div>
+    	</div>
+    
+    
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="singleton">
+    				<h2 class="page-header"><a href="#singleton">Singletons</a></h2>
+    			</section>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-6">
+    			<p class="lead">
+    				The <a href="https://en.wikipedia.org/wiki/Singleton_pattern">Singleton pattern</a> ensures to have exactly one object instance
+    				at all.
+    			</p>
+    			<p class="lead">
+    				<b>CMR</b> allows you to declare singletons by invoking the <code>singleton</code> method on class descriptor.
+    				Trying to create more instances of a singleton via <code>new</code> will result in errors. Instead You can retrieve
+    				the instance by invoking <code>get</code>.
+    			</p>
+    			<p class="lead">
+    				We support two type of singletons: private singletons and public singletons. A public singleton can be accessed from anyone.
+    				No Limitation at this point. In difference a private singleton can only be queried exactly once. Multiple invocations to
+    				<code>get</code> for private singletons will result in errors.
+    			</p>
+    			<p class="lead">
+    				Private singletons may be useful if you want to declare regular singletons but only allow limited friend classes access to the
+    				singleton instance.
+    			</p>
+    			<p class="lead">
+    				Look at the third code sample. It shows up a way to give some arguments to the singleton constructor. The example assumes that
+    				you invoke <code>new</code> before any invocation to <code>get</code>. Normally <b>CMR</b> will create the singleton
+    				instance on demand (lazy initialization) as soon as anyone calls <code>get</code> for the singleton. But it will always invoke the
+    				constructor without any parameter. For most singletons this is fairly OK. If you like to pass any argument to
+    				singleton constructor You must invoke <code>new</code> after declaring the singleton class and before any other invocation to
+    				<code>get</code>. Now You are able to pass additional arguments.
+    			</p>
+    		</div>
+    		<div class="col-md-6">
+    				<pre class="prettyprint"><code class="lua">_CMR.class("MyClass").singleton(false) -- a public singleton
+assert(_CMR.get("MyClass") == _CMR.get("MyClass")) -- multiple invocations will return the same instance
+_CMR.new("MyClass") -- error; object creation is illegal
+</code></pre>
+    				<pre class="prettyprint"><code class="lua">_CMR.class("MyClass").singleton(true) -- a private singleton
+local myinstance = _CMR.get("MyClass") -- first invocation works
+_CMR.get("MyClass") -- error; second invocation is illegal
+_CMR.new("MyClass") -- error; object creation is illegal
+</code></pre>
+    				<pre class="prettyprint"><code class="lua">_CMR.class("MyClass").singleton(false)
+local myinstance = _CMR.new("MyClass", someArg, secondArg) -- works, we "preinitialize" the singleton with some arguments given to ctor
+assert(myinstance == _CMR.get("MyClass")) -- get returns the previous instance
+</code></pre>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<p class="lead">
+    				<a href="#toc">Back to top</a>
+    			</p>
+    		</div>
+    	</div>
+    
+    
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="abstract">
+    				<h2 class="page-header"><a href="#abstract">Abstract class and functions</a></h2>
+    			</section>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-6">
+    			<p class="lead">
+    				An abstract class must not be created directly. Instead it is used as a base class for inheritance.
+    			</p>
+    			<p class="lead">
+    				Declare abstract classes is simple. Only invoke method <code>abstract</code> on class descriptor. <b>CMR</b> ensures
+    				that no one will be able to create instances of abstract classes.
+    			</p>
+    			<p class="lead">
+    				Adding abstract functions can be done by invoking <code>afunc</code> on class descriptor. As parameters pass the function
+    				name to be abstract. You can provide multiple strings to create multiple abstract functions if You like.
+    			</p>
+    			<p class="lead">
+    				However the <b>CMR</b> does not check if any regular class contains abstract functions. This may change in future versions.
+    				At the moment it is up to you ensuring that classes will be declared abstract as soon as they contain <i>any</i> abstract
+    				function.
+    			</p>
+    			<p class="lead">
+    				Inherit abstract classes without overriding abstract functions will result in errors for methods invocations on methods still
+    				being abstract. See last example for details.
+    			</p>
+    		</div>
+    		<div class="col-md-6">
+    				<pre class="prettyprint"><code class="lua">_CMR.class("MyClass").abstract()
+_CMR.new("MyClass") -- error; object creation is illegal
+</code></pre>
+    				<pre class="prettyprint"><code class="lua">_CMR.class("MyClass").afunc("getFoo", "getBar")
+local obj = _CMR.new("MyClass")
+obj:getFoo() -- error; not allowed to call abstract function
+obj:getBar() -- error; not allowed to call abstract function
+</code></pre>
+    				<pre class="prettyprint"><code class="lua">_CMR.class("MyClass").abstract()
+_CMR.class("OtherClass").extends("MyClass")
+_CMR.new("OtherClass") -- allowed
+</code></pre>
+    				<pre class="prettyprint"><code class="lua">_CMR.class("MyClass").afunc("getFoo", "getBar")
+_CMR.class("OtherClass").extends("MyClass")
+.func("getFoo", function(self, clazz, privates)
+    return "FOO"
+end)
+local obj = _CMR.new("OtherClass")
+obj:getFoo() -- ok, we provided an implementation for "getFoo"
+obj:getBar() -- error; still no implementation for "getBar"
+</code></pre>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<p class="lead">
+    				<a href="#toc">Back to top</a>
+    			</p>
+    		</div>
+    	</div>
+    
+    
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="function">
+    				<h2 class="page-header"><a href="#function">Object functions</a></h2>
+    			</section>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-6">
+    			<p class="lead">
+    				Creating object functions is similar to creating a constructor.
+    			</p>
+    			<p class="lead">
+    				Call <code>func</code> with function name and a function body that takes at least three arguments:
+    			</p>
+    			<ul>
+    				<li><code>self</code>: the local object</li>
+    				<li><code>clazz</code>: the class descriptor that self was made of</li>
+    				<li><code>privates</code>: A table holding "private" object fields not visible to anybody</li>
+    			</ul>
+    			<p class="lead">
+    				Using the function is done in the lua way: <code>obj:funcName(...)</code>. Any parameter passed to the function will be passed to function body after the <code>privates</code>
+    				parameter. See the second example for details how parameters are passed to functions.
+    			</p>
+    			<p class="lead">
+    				<b>CMR</b> ensures that functions are available to the objects of given class and to any other objects extending this class.
+    			</p>
+    		</div>
+    		<div class="col-md-6">
+    				<pre class="prettyprint"><code class="lua">_CMR.class("MyClass")
+.func("funcname", function(self, clazz, privates, ...)
+    -- do anything you like
+end)
+</code></pre>
+    				<pre class="prettyprint"><code class="lua">_CMR.class("MyClass")
+.func("myfunc", function(self, clazz, privates, arg1, arg2, ...)
+    assert("value-for-arg1" == arg1)
+    assert("value-for-arg2" == arg2)
+    assert(2 == select('#', ...))
+    assert("some-third-argument", select(1, ...))
+    assert("some-fourth-argument", select(2, ...))
+end)
+
+-- later on
+local obj = _CMR.new("MyClass")
+obj:myfunc("value-for-arg1", "value-for-arg2", "some-third-argument", "some-fourth-argument")
+</code></pre>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<p class="lead">
+    				<a href="#toc">Back to top</a>
+    			</p>
+    		</div>
+    	</div>
+    
+    
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="inheritance">
+    				<h2 class="page-header"><a href="#inheritance">Class inheritance and function overrides</a></h2>
+    			</section>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-6">
+    			<p class="lead">
+    				In the previous examples we already used some class inheritance. I am no explaining some details.
+    			</p>
+    			<p class="lead">
+    				CReating a derived class is done by calling <code>extends</code> on class descriptors. There will only be exactly
+    				<b>ONE or NULL</b> super classes for each class. The <b>CMR</b> does not directly support multi inheritance.
+    				If you like to use more than one base class look at the chapter about <a href="#mixins">Mixins</a>.
+    			</p>
+    			<p class="lead">
+    				Extending a class means to inherit the following elements from class descriptor:
+    			</p>
+    			<ul>
+    				<li>constructors (<code>ctor</code>)</li>
+    				<li>public methods (<code>func</code>, <code>afunc</code> and <code>delegate</code>)</li>
+    				<li>private methods (<code>pfunc</code>)</li>
+    				<li>mixins (<code>mixin</code>)</li>
+    			</ul>
+    			<p class="lead">
+    				Once you declare a method You already got from a base class it means You want to override it
+    				and provide a new implementation.
+    			</p>
+    			<p class="lead">
+    				Calling <code>super</code> on given class descriptor will invoke the implementation from your base class.
+    				See the last example for details.
+    			</p>
+    		</div>
+    		<div class="col-md-6">
+    				<pre class="prettyprint"><code class="lua">_CMR.class("Hello")
+.func("hello", function(self, clazz, privates)
+    print("Hello")
+end)
+</code></pre>
+    				<pre class="prettyprint"><code class="lua">_CMR.class("Hello")
+.func("hello", function(self, clazz, privates, name)
+    print("Hello ", name)
+end)
+
+_CMR.class("Greet").extends("Hello")
+.func("hello", function(self, clazz, privates, name)
+    print("Greetings ", name)
+end)
+
+local obj = _CMR.new("Hello")
+obj:hello("player 07") -- prints "Hello player07"
+obj = _CMR.new("Greet")
+obj:hello("player 07") -- prints "Greetings player07"
+</code></pre>
+    				<pre class="prettyprint"><code class="lua">_CMR.class("Hello")
+.func("hello", function(self, clazz, privates, name)
+    print("Hello ", name)
+end)
+
+_CMR.class("Greet").extends("Hello")
+.func("hello", function(self, clazz, privates, name)
+    clazz.super("'" .. name .. "'")
+end)
+
+local obj = _CMR.new("Hello")
+obj:hello("player 07") -- prints "Hello player07"
+obj = _CMR.new("Greet")
+obj:hello("player 07") -- prints "Hello 'player07'"
+</code></pre>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="callout callout-warning lead">
+    			<h4>Warning!</h4>
+    			<p>
+    				Remember that the <code>clazz</code> parameter <b>ALWAYS</b> is the class descriptor of the object you are working with. It does never contain 
+    				the class descriptor of the class where you declared the method. Even when calling <code>super</code> You will always get the class descriptor
+    				of the object you are working on.
+    			</p>
+  			</div>
+    		<div class="callout callout-info lead">
+    			<h4>Information!</h4>
+    			<p>
+    				Invoking <code>super</code> will work on private functions, public functions and constructors. The <b>CMR</b> will provide the correct implementation
+    				to find the correct super method. If there is no super method (f.e. your class does not extend anything) the super call will do silently nothing.
+    			</p>
+  			</div>
+    		<div class="col-md-12">
+    			<p class="lead">
+    				<a href="#toc">Back to top</a>
+    			</p>
+    		</div>
+    	</div>
+    
+    
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="privates">
+    				<h2 class="page-header"><a href="#privates">Object privates</a></h2>
+    			</section>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-6">
+    			<p class="lead">
+    				Each object has a private table not being visible to anyone from outside. It is passed as third parameter to constructors and object functions.
+    			</p>
+    			<p class="lead">
+    				You can place any variable inside this private table. Each object has is own private table. The this example we are hiding the balance of
+    				the Account class so that now one is able to directly manipulate it.
+    			</p>
+    		</div>
+    		<div class="col-md-6">
+    				<pre class="prettyprint"><code class="lua">_CMR.class("Account")
+
+.ctor(function(self, clazz, privates, initialBalance)
+	privates.balance = initialBalance
+end)
+    
+.func("getBalance", function(self, clazz, privates)
+    return privates.balance
+end)
+    
+.func("deposite", function(self, clazz, privates, v)
+    privates.balance = privates.balance + v
+end)
+
+.func("withdraw", function(self, clazz, privates, v)
+    if v > privates.balance then error"insufficient funds" end
+    privates.balance = privates.balance - v
+end)
+
+local obj = _CMR.new("Account", 1000.00)
+s:deposit(100.00)
+print(s.balance) -- prints nil
+print(s:getBalance()) -- prints 1100.00
+</code></pre>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<p class="lead">
+    				<a href="#toc">Back to top</a>
+    			</p>
+    		</div>
+    	</div>
+    
+    
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="delegate">
+    				<h2 class="page-header"><a href="#elegate">Delegates</a></h2>
+    			</section>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-6">
+    			<p class="lead">
+    				The <a href="https://en.wikipedia.org/wiki/Delegation_pattern">delegator pattern</a> allows us to create inherit functions from other objects.
+    			</p>
+    			<p class="lead">
+    				Creating a delegator function is done by calling the <code>delegate</code> function with a property name and one or more function names.
+    				The <b>CMR</b> will create s simple function bypassing all parameters to the function with equal name on given property.
+    			</p>
+    			<p class="lead">
+    				The two examples are behaving the same. Internally the <code>delegate</code> call does exactly the same: It adds a public function invoking
+    				the function on private "property" object.
+    			</p>
+    		</div>
+    		<div class="col-md-6">
+    				<pre class="prettyprint"><code class="lua">_CMR.class("MyClass")
+.delegate("property", "getFoo", "getBar")
+</code></pre>
+    				<pre class="prettyprint"><code class="lua">_CMR.class("MyClass")
+.func("getFoo", function(self, clazz, privates, ...)
+    return privates.property:getFoo(...)
+end)
+.func("getBar", function(self, clazz, privates, ...)
+    return privates.property:getBar(...)
+end)
+</code></pre>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<p class="lead">
+    				<a href="#toc">Back to top</a>
+    			</p>
+    		</div>
+    	</div>
+    
+    
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="mixins">
+    				<h2 class="page-header"><a href="#mixins">Mixins</a></h2>
+    			</section>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-6">
+    			<p class="lead">
+    				<b>CMR</b> allows multiple inheritance via <b>mixins</b>. A mixin is a set of functionally added to a class.
+    				See <a href="https://en.wikipedia.org/wiki/Mixin">Wikipedia</a> for some more explanation on this pattern.
+    			</p>
+    			<p class="lead">
+    				Mixins are realized by creating a private property of given mixin class. Each public function of that object
+    				is added to your class by delegator pattern (see above). The mixin object has its own <code>self</code> and its
+    				own <code>privates</code> table.
+    			</p>
+    			<p class="lead">
+    				Add a mixin by invoking method <code>mixin</code> on class descriptor. You can add as many mixins as You like.
+    				If there are multiple functions having the same name always the first mixin is used. You can even override any
+    				function got from mixin with your own implementation if You like by invoking <code>func</code>.
+    			</p>
+    			<p class="lead">
+    				Each mixin is created lazy after object constructor if and only if You did not add the mixin property to object
+    				<code>privates</code>. In other words: You are free to create the mixin manually and save it <code>privates</code>
+    				early within your constructor. That allows You to add pass some parameters during mixin construction or to use it
+    				early within constructors.
+    			</p>
+    		</div>
+    		<div class="col-md-6">
+    				<pre class="prettyprint"><code class="lua">_CMR.class("MyMixin")
+
+.func("getFoo", function(self, clazz, privates)
+    return "FOO"
+end)
+
+_CMR.class("MyClass").mixin("somemixin", "MyMixin")
+
+.func("getFoo2", function(self, clazz, privates)
+    return privates.somemixin:getFoo()
+end)
+
+local obj = _CMR.new("MyClass")
+print(obj:getFoo()) -- prints "FOO"
+print(obj:getFoo2()) -- prints "FOO"; does exactly the same than getFoo
+</code></pre>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<p class="lead">
+    				<a href="#toc">Back to top</a>
+    			</p>
+    		</div>
+    	</div>
+    
+    
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="friends">
+    				<h2 class="page-header"><a href="#friends">Class friendship</a></h2>
+    			</section>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-6">
+    			<p class="lead">
+    				In object orientated programming sometimes a functionality is spread over multiple classes. You may require to allow another class
+    				access to some of object variables and functions but You do not want to add those functions and variables to the public (<code>self</code>).
+    				This is done via declaring <a href="https://en.wikipedia.org/wiki/Friend_function">special friends.</a>
+    			</p>
+    			<p class="lead">
+    				Some languages provide access levels (protected functions, package functions etc.). Within LUA there is no such support.
+    				Instead <b>CMR</b> helps you by invoking method <code>friend</code> on Your class descriptor. 
+    			</p>
+    			<p class="lead">
+    				If You want class <code>AHelper</code> to access the privates of class <code>ASecret</code> you have to declare
+    				<code>AHelper</code> being the friend of <code>ASecret</code>. There is no direct way to become a friend of <code>ASecret</code>
+    				after the class was declared.
+    			</p>
+    			<p class="lead">
+    				See the given example for details.
+    			</p>
+    		</div>
+    		<div class="col-md-6">
+    				<pre class="prettyprint"><code class="lua">_CMR.class("AHelper")
+
+.func("getSecretPass", function(self, clazz, privates, aSecret)
+    return clazz.privates(aSecret).password
+end)
+
+_CMR.class("ASecret").friend("AHelper")
+
+.func("changePass", function(self, clazz, privates, oldValue, newValue)
+    if privates.password ~= oldValue then
+        error("Wrong password!")
+    end
+    privates.password = newValue
+end)
+
+.func("checkPass", function(self, clazz, privates, pass)
+    return privates.password == pass
+end)
+
+local obj = _CMR.new("ASecret")
+obj:changePassword(nil, "secretpass") -- change from nil to secretpass
+obj:checkPass("otherpass") -- return false...
+local helper = _CMR.new("AHelper")
+print(helper:getSecretPass(aSecret)) -- prints "secretpass"; helper class is allowed to query secret password privates
+</code></pre>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<p class="lead">
+    				<a href="#toc">Back to top</a>
+    			</p>
+    		</div>
+    	</div>
+    
+    
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="annotation">
+    				<h2 class="page-header"><a href="#annotation">Object annotations</a></h2>
+    			</section>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-6">
+    			<p class="lead">
+    				Explaining object annotations is best done by giving a simple example. Think of a linked list.
+    				Adding any object to the linked list requires You to save some properties <code>next</code>, <code>prev</code>
+    				and maybe <code>owner</code> to the list member object. But what to do if the object does not support these
+    				properties?
+    			</p>
+    			<p class="lead">
+    				The solution is simple for You: Add some small annotation to the object. This annotation can be retrieved later on. 
+    			</p>
+    			<p class="lead">
+    				See the given example for details.
+    			</p>
+    		</div>
+    		<div class="col-md-6">
+    				<pre class="prettyprint"><code class="lua">_CMR.class("ListMember") -- maybe some methods: getPrev etc.
+
+_CMR.class("List")
+
+.func("add", function(self, clazz, privates, member)
+    local annot = clazz.getAnnot(member, "ListMember")
+    if annot ~= nil then
+        error("new member already contained in list ", annot.owner)
+    end
+    annot = clazz.annot(member, "ListMember") -- maybe passing some parameters to ListMember constructor
+    annot.prev = privates.last
+    annot.owner = self
+    local lastannot = clazz.getAnnot(privates.last, "ListMember")
+    lastannot.next = member
+    privates.last = member
+end)
+
+.func("remove", function(self, clazz, privates, member)
+    local annot = clazz.getAnnot(member, "ListMember")
+    if annot == nil then
+        error("member not contained in any list")
+    end
+    if annot.owner ~= self then
+        error("member not contained in this list")
+    end
+    if member == privates.first then
+        privates.first = annot.next
+    end
+    if member == privates.last then
+        privates.last = annot.prev
+    end
+    if annot.prev ~= nil then
+        local prevannot = clazz.getAnnot(annot.prev, "ListMember")
+        prevannot.next = annot.next
+    end
+    if annot.next ~= nil then
+        local nextannot = clazz.getAnnot(annot.next, "ListMember")
+        prevannot.prev = annot.prev
+    end
+end)
+</code></pre>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<p class="lead">
+    				<a href="#toc">Back to top</a>
+    			</p>
+    		</div>
+    	</div>
+    
+    
     </section>
   </div>
 
@@ -96,12 +1108,14 @@
 <script src="../plugins/jQuery/jquery-2.2.3.min.js"></script>
 <script src="../bootstrap/js/bootstrap.min.js"></script>
 <script src="../dist/js/app.min.js"></script>
+<script src="../plugins/highlite/highlight.pack.js"></script>
 
 <script type="text/javascript">
 $(function(){
 	$("#sidebar").load("parts_menu.html")
 	$("#navbar-custom-menu").load("../parts_nav.html")
 });
+hljs.initHighlightingOnLoad();
 </script>
 </body>
 </html>

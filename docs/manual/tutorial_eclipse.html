@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="../dist/css/AdminLTE.min.css">
   <link rel="stylesheet" href="../dist/css/skins/skin-blue.min.css">
   <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="../plugins/highlite/styles/default.css">
   <!--[if lt IE 9]>
   <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
   <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -141,12 +142,14 @@
 <script src="../plugins/jQuery/jquery-2.2.3.min.js"></script>
 <script src="../bootstrap/js/bootstrap.min.js"></script>
 <script src="../dist/js/app.min.js"></script>
+<script src="../plugins/highlite/highlight.pack.js"></script>
 
 <script type="text/javascript">
 $(function(){
 	$("#sidebar").load("parts_menu.html")
 	$("#navbar-custom-menu").load("../parts_nav.html")
 });
+hljs.initHighlightingOnLoad();
 </script>
 </body>
 </html>
