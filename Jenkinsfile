@@ -14,7 +14,7 @@ pipeline {
             steps {
                 echo 'Executing selftest for 1.7'
                 wrap([$class: 'Xvnc', useXauthority: true]) {
-                	sh "chmod 755 selftest_17.sh && ./selftest.sh"
+                	sh "chmod 755 selftest_17.sh && ./selftest_17.sh"
                 }
                 archiveArtifacts artifacts: 'bin/record_17.flv', fingerprint:true
                 sh "ffmpeg -i bin/record_17.flv bin/record_17.mp4"
@@ -24,7 +24,7 @@ pipeline {
                 
                 echo 'Executing selftest for 1.8'
                 wrap([$class: 'Xvnc', useXauthority: true]) {
-                	sh "chmod 755 selftest_18.sh && ./selftest.sh"
+                	sh "chmod 755 selftest_18.sh && ./selftest_18.sh"
                 }
                 archiveArtifacts artifacts: 'bin/record_18.flv', fingerprint:true
                 sh "ffmpeg -i bin/record_18.flv bin/record_18.mp4"
