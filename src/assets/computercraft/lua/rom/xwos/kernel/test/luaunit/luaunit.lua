@@ -2712,21 +2712,24 @@ end
         -- if classInstance is nil, this is just a function call
         -- else, it's method of a class being called.
 
+        -- error handling fixed for ComputerCraft
+        local err = {
+            status = NodeStatus.ERROR,
+            msg = "NIL",
+            trace = "?" -- string.sub(debug.traceback("", 3), 2) CCraft fix
+        }
         local function err_handler(e)
-            -- transform error into a table, adding the traceback information
-            return {
-                status = NodeStatus.ERROR,
-                msg = e,
-                trace = "?" -- string.sub(debug.traceback("", 3), 2) CCraft fix
-            }
+            err.msg = e
+            err.trace = boot.trace(true)
+            return e
         end
 
-        local ok, err
+        local ok, err2
         if classInstance then
             -- stupid Lua < 5.2 does not allow xpcall with arguments so let's use a workaround
-            ok, err = xpcall( function () methodInstance(classInstance) end, err_handler )
+            ok, err2 = xpcall( function () methodInstance(classInstance) end, err_handler )
         else
-            ok, err = xpcall( function () methodInstance() end, err_handler )
+            ok, err2 = xpcall( function () methodInstance() end, err_handler )
         end
         if ok then
             return {status = NodeStatus.PASS}

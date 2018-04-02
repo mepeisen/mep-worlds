@@ -21,7 +21,7 @@ TestClassmanager = {}
 
 -- tests a simple class with object creation
 function TestClassmanager:testSimple()
-    local cmr = cmf(_G) -- classmanager#classmanager
+    local cmr = cmf(boot.newglob()) -- classmanager#classmanager
     cmr.class('Foo')
     local obj = cmr.new('Foo')
     lu.assertNotNil(obj)
@@ -29,13 +29,13 @@ end -- testSimple
 
 -- tests error throwing on unknown classes
 function TestClassmanager:testUnkown()
-    local cmr = cmf(_G) -- classmanager#classmanager
+    local cmr = cmf(boot.newglob()) -- classmanager#classmanager
     lu.assertErrorMsgContains("class Foo not found", cmr.new, 'Foo')
 end -- testUnkown
 
 -- tests loading simple class from classpath
 function TestClassmanager:testSimpleCp()
-    local cmr = cmf(_G) -- classmanager#classmanager
+    local cmr = cmf(boot.newglob()) -- classmanager#classmanager
     _CMR = cmr
     cmr.addcp(boot.kernelRoot()..'/kernel/test/tests/classmanager')
     cmr.new('SimpleClass')
@@ -44,7 +44,7 @@ end -- testSimpleCp
 
 -- tests cmr require
 function TestClassmanager:testRequire()
-    local cmr = cmf(_G) -- classmanager#classmanager
+    local cmr = cmf(boot.newglob()) -- classmanager#classmanager
     _CMR = cmr
     cmr.addcp(boot.kernelRoot()..'/kernel/test/tests/classmanager')
     cmr.require('SimpleClassInvalid')
@@ -54,7 +54,7 @@ end -- testRequire
 
 -- tests errors if class file does not declare needed class
 function TestClassmanager:testSimpleCp2()
-    local cmr = cmf(_G) -- classmanager#classmanager
+    local cmr = cmf(boot.newglob()) -- classmanager#classmanager
     _CMR = cmr
     cmr.addcp(boot.kernelRoot()..'/kernel/test/tests/classmanager')
     lu.assertErrorMsgContains("SimpleClassInvalid did not declare class SimpleClassInvalid", cmr.new, 'SimpleClassInvalid')
@@ -63,7 +63,7 @@ end -- testSimpleCp2
 
 -- tests class lists
 function TestClassmanager:testList()
-    local cmr = cmf(_G) -- classmanager#classmanager
+    local cmr = cmf(boot.newglob()) -- classmanager#classmanager
     _CMR = cmr
     cmr.addcp(boot.kernelRoot()..'/kernel/test')
     local res = {}
@@ -77,7 +77,7 @@ end -- testList
 
 -- tests class lists
 function TestClassmanager:testList2()
-    local cmr = cmf(_G) -- classmanager#classmanager
+    local cmr = cmf(boot.newglob()) -- classmanager#classmanager
     _CMR = cmr
     cmr.addcp(boot.kernelRoot()..'/kernel/test')
     local res = {}
@@ -91,7 +91,7 @@ end -- testList
 
 -- tests simple singleton
 function TestClassmanager:testSingleton()
-    local cmr = cmf(_G) -- classmanager#classmanager
+    local cmr = cmf(boot.newglob()) -- classmanager#classmanager
     cmr.class('Foo').singleton(false)
     lu.assertErrorMsgContains("Cannot create new instance of singleton Foo", cmr.new, 'Foo')
     local obj = cmr.get('Foo')
@@ -101,14 +101,14 @@ end -- testSingleton
 
 -- tests simple abstract class
 function TestClassmanager:testAbstract()
-    local cmr = cmf(_G) -- classmanager#classmanager
+    local cmr = cmf(boot.newglob()) -- classmanager#classmanager
     cmr.class('Foo').abstract()
     lu.assertErrorMsgContains("Cannot create new instance of abstract Foo", cmr.new, 'Foo')
 end -- testAbstract
 
 -- tests simple abstract class
 function TestClassmanager:testAbstract2()
-    local cmr = cmf(_G) -- classmanager#classmanager
+    local cmr = cmf(boot.newglob()) -- classmanager#classmanager
     cmr.class('Foo').aFunc("getFoo")
     local obj = cmr.new('Foo')
     lu.assertErrorMsgContains("method not supported", function() obj:getFoo() end)
@@ -116,7 +116,7 @@ end -- testAbstract
 
 -- tests load class
 function TestClassmanager:testLoadAll()
-    local cmr = cmf(_G) -- classmanager#classmanager
+    local cmr = cmf(boot.newglob()) -- classmanager#classmanager
     _CMR = cmr
     cmr.addcp(boot.kernelRoot()..'/kernel/test/tests')
     lu.assertFalse(cmr.defined('classmanager2.SimpleClass'))
@@ -127,7 +127,7 @@ end -- testLoadAll
 
 -- tests load class
 function TestClassmanager:testLoad()
-    local cmr = cmf(_G) -- classmanager#classmanager
+    local cmr = cmf(boot.newglob()) -- classmanager#classmanager
     _CMR = cmr
     cmr.addcp(boot.kernelRoot()..'/kernel/test/tests')
     lu.assertFalse(cmr.defined('classmanager2.SimpleClass'))
@@ -138,14 +138,14 @@ end -- testLoad
 
 -- tests simple non singleton
 function TestClassmanager:testNonSingleton()
-    local cmr = cmf(_G) -- classmanager#classmanager
+    local cmr = cmf(boot.newglob()) -- classmanager#classmanager
     cmr.class('Foo')
     lu.assertErrorMsgContains("Cannot retrieve non-singleton Foo", cmr.get, 'Foo')
 end -- testNonSingleton
 
 -- tests public functions with public fields
 function TestClassmanager:testPublic()
-    local cmr = cmf(_G) -- classmanager#classmanager
+    local cmr = cmf(boot.newglob()) -- classmanager#classmanager
     cmr.class('Foo')
         .func("setBar", function(self, clazz, privates, val) self.bar = val end)
         .func("getBar", function(self, clazz, privates) return self.bar end)
@@ -161,7 +161,7 @@ end -- testPublic
 
 -- tests private fields
 function TestClassmanager:testPrivates()
-    local cmr = cmf(_G) -- classmanager#classmanager
+    local cmr = cmf(boot.newglob()) -- classmanager#classmanager
     cmr.class('Foo')
         .func("setBar", function(self, clazz, privates, val) privates.bar = val end)
         .func("getBar", function(self, clazz, privates) return privates.bar end)
@@ -177,7 +177,7 @@ end -- testPrivates
 
 -- tests constructor invocations
 function TestClassmanager:testCtor()
-    local cmr = cmf(_G) -- classmanager#classmanager
+    local cmr = cmf(boot.newglob()) -- classmanager#classmanager
     cmr.class('Foo')
         .ctor(function(self, clazz, privates, val)
             self.foo = val
@@ -205,7 +205,7 @@ end -- testCtor
 
 -- tests constructor invocations (extensions)
 function TestClassmanager:testCtorExtends()
-    local cmr = cmf(_G) -- classmanager#classmanager
+    local cmr = cmf(boot.newglob()) -- classmanager#classmanager
     cmr.class('Foo')
         .ctor(function(self, clazz, privates, val)
             self.foo = val
@@ -237,7 +237,7 @@ end -- testCtor
 
 -- tests private functions (sharing self)
 function TestClassmanager:testPrivates2()
-    local cmr = cmf(_G) -- classmanager#classmanager
+    local cmr = cmf(boot.newglob()) -- classmanager#classmanager
     cmr.class('Foo')
         .pfunc("setFoo", function(self, clazz, privates, val) self.foo = val end)
         .func("setBar", function(self, clazz, privates, val) privates:setFoo(val) end)
@@ -255,7 +255,7 @@ end -- testPrivates2
 
 -- tests private functions (sharing privates)
 function TestClassmanager:testPrivates3()
-    local cmr = cmf(_G) -- classmanager#classmanager
+    local cmr = cmf(boot.newglob()) -- classmanager#classmanager
     cmr.class('Foo')
         .pfunc("setFoo", function(self, clazz, privates, val) privates.foo = val end)
         .func("setBar", function(self, clazz, privates, val) privates:setFoo(val) end)
@@ -273,7 +273,7 @@ end -- testPrivates3
 
 -- tests static functions
 function TestClassmanager:testStatics()
-    local cmr = cmf(_G) -- classmanager#classmanager
+    local cmr = cmf(boot.newglob()) -- classmanager#classmanager
     cmr.class('Foo')
         .sfunc("create", function(val) return "FOO"..val end)
     cmr.load('Foo') -- explicit class loading (will define statics)
@@ -285,7 +285,7 @@ end -- testStatics
 
 -- tests private static variables
 function TestClassmanager:testStatics2()
-    local cmr = cmf(_G) -- classmanager#classmanager
+    local cmr = cmf(boot.newglob()) -- classmanager#classmanager
     cmr.class('Foo')
         .pstat("foo", "BAR")
         .func("getFoo", function(self, clazz, privates) return clazz.getPstat("foo")[1] end)
@@ -295,7 +295,7 @@ end -- testStatics2
 
 -- tests simple class inheritance
 function TestClassmanager:testExtends()
-    local cmr = cmf(_G) -- classmanager#classmanager
+    local cmr = cmf(boot.newglob()) -- classmanager#classmanager
     cmr.class('Foo')
         .pstat("foo", "BAR")
         .func("getFoo", function(self, clazz, privates) return clazz.getPstat("foo")[1] end)
@@ -306,7 +306,7 @@ end -- testExtends
 
 -- tests simple class inheritance with multiple statics
 function TestClassmanager:testExtendsSt()
-    local cmr = cmf(_G) -- classmanager#classmanager
+    local cmr = cmf(boot.newglob()) -- classmanager#classmanager
     cmr.class('Foo')
         .pstat("foo", "BAR")
         .func("getFoo", function(self, clazz, privates, val) return clazz.getPstat("foo")[val] end)
@@ -319,7 +319,7 @@ end -- testExtendsSt
 
 -- tests simple class inheritance (override)
 function TestClassmanager:testOverride()
-    local cmr = cmf(_G) -- classmanager#classmanager
+    local cmr = cmf(boot.newglob()) -- classmanager#classmanager
     cmr.class('Foo')
         .pstat("foo", "BAR")
         .func("getFoo", function(self, clazz, privates) return clazz.getPstat("foo")[1] end)
@@ -331,7 +331,7 @@ end -- testOverride
 
 -- tests simple class inheritance (override)
 function TestClassmanager:testOverride2()
-    local cmr = cmf(_G) -- classmanager#classmanager
+    local cmr = cmf(boot.newglob()) -- classmanager#classmanager
     cmr.class('Foo')
         .pstat("foo", "BAR")
         .func("getFoo", function(self, clazz, privates) return clazz.getPstat("foo")[1] end)
@@ -343,7 +343,7 @@ end -- testOverride2
 
 -- tests simple class inheritance (override two times)
 function TestClassmanager:testOverride3()
-    local cmr = cmf(_G) -- classmanager#classmanager
+    local cmr = cmf(boot.newglob()) -- classmanager#classmanager
     cmr.class('Foo')
         .pstat("foo", "BAR")
         .func("getFoo", function(self, clazz, privates) return clazz.getPstat("foo")[1] end)
@@ -357,7 +357,7 @@ end -- testOverride3
 
 -- tests simple class inheritance (override one time but over two super classes)
 function TestClassmanager:testOverride4()
-    local cmr = cmf(_G) -- classmanager#classmanager
+    local cmr = cmf(boot.newglob()) -- classmanager#classmanager
     cmr.class('Foo')
         .pstat("foo", "BAR")
         .func("getFoo", function(self, clazz, privates) return clazz.getPstat("foo")[1] end)
@@ -370,7 +370,7 @@ end -- testOverride4
 
 -- tests simple class mixin
 function TestClassmanager:testMixin()
-    local cmr = cmf(_G) -- classmanager#classmanager
+    local cmr = cmf(boot.newglob()) -- classmanager#classmanager
     cmr.class('Foo')
         .func("getBar", function(self, clazz, privates) return "FOO" end)
         .func("getFoo", function(self, clazz, privates) return self:getBar() end)
@@ -383,7 +383,7 @@ end -- testMixin
 
 -- tests friend classes
 function TestClassmanager:testFriend()
-    local cmr = cmf(_G) -- classmanager#classmanager
+    local cmr = cmf(boot.newglob()) -- classmanager#classmanager
     cmr.class('Foo').friends('Bar')
         .func("setBar", function(self, clazz, privates, val) privates.bar = val end)
         .func("getBar", function(self, clazz, privates) return privates.bar end)
@@ -397,7 +397,7 @@ end -- testFriend
 
 -- tests friend classes
 function TestClassmanager:testFriend1()
-    local cmr = cmf(_G) -- classmanager#classmanager
+    local cmr = cmf(boot.newglob()) -- classmanager#classmanager
     cmr.class('Foo')
         .func("setBar", function(self, clazz, privates, val) privates.bar = val end)
         .func("getBar", function(self, clazz, privates) return privates.bar end)
@@ -411,7 +411,7 @@ end -- testFriend1
 
 -- tests friend classes
 function TestClassmanager:testAnnot()
-    local cmr = cmf(_G) -- classmanager#classmanager
+    local cmr = cmf(boot.newglob()) -- classmanager#classmanager
     cmr.class('Annot')
         .ctor(function(self, clazz, privates, val) privates.bar = val end)
         .func("setBar", function(self, clazz, privates, val) privates.bar = val end)
@@ -443,6 +443,6 @@ function TestClassmanager:testAnnot()
     lu.assertEquals("ANNOT-SET", bar:getBar(foo))
     bar:clearBar(foo)
     lu.assertEquals("FOO-CLEAR", foo:getBar())
-    lu.assertErrorMsgContains("attempt to index a nil value", function() bar:getBar(foo) end)
+    lu.assertErrorMsgContains("nil value", function() bar:getBar(foo) end)
 end -- testAnnot
 

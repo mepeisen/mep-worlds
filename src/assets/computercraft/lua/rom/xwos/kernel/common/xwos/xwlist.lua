@@ -100,17 +100,21 @@ end) -- ctor
 -- @param #xwoslistitem t
 -- @return #xwoslistitem
 function (self, clazz, privates, t)
-    -- TODO t privates
+    local ta = clazz.getAnnot(t, "xwos.xwlistitem")
+    if ta ~= nil then
+        error("element already contained in list")
+    end
+    ta = clazz.annot(t, "xwos.xwlistitem")
     if privates._last then
         privates._last._next = t
-        t._prev = privates._last
+        ta._prev = privates._last
         privates._last = t
     else -- if privates._last
         privates._first = t
         privates._last = t
     end -- if not privates._last
     privates._length = privates._length + 1
-    t._container = self
+    ta._container = self
     return t
 end) -- function push
 
@@ -181,16 +185,21 @@ end) -- function first
 -- @param #xwoslistitem t
 -- @return #xwoslistitem
 function (self, clazz, privates, t)
+    local ta = clazz.getAnnot(t, "xwos.xwlistitem")
+    if ta ~= nil then
+        error("element already contained in list")
+    end
+    ta = clazz.annot(t, "xwos.xwlistitem")
     if privates._first then
-        privates._first._prev = t
-        t._next = privates._first
+        clazz.annot(privates._first, "xwos.xwlistitem")._prev = t
+        ta._next = privates._first
         privates._first = t
     else -- if privates._first
         privates._first = t
         privates._last = t
     end -- i f not privates._first
     privates._length = privates._length + 1
-    t._container = self
+    ta._container = self
     return t
 end) -- function unshift
 
@@ -212,21 +221,31 @@ end) -- function unshift
 -- @param #xwoslistitem after
 -- @return #xwoslistitem
 function (self, clazz, privates, t, after)
+    local ta = clazz.getAnnot(t, "xwos.xwlistitem")
+    if ta ~= nil then
+        error("element already contained in list")
+    end
     if after then
-        if after._next then
-            after._next._prev = t
-            t._next = after._next
+        local tafter = clazz.getAnnot(t, "xwos.xwlistitem")
+        if tafter == nill or tafter._container ~= self then
+            error("after not contained in this list")
+        end
+        if tafter._next then
+            clazz.getAnnot(tafter._next, "xwos.xwlistitem")._prev = t
+            ta._next = tafter._next
         else -- if after.next
             privates._last = t
         end -- if not after.next
-        t._prev = after
-        after._next = t
+        ta._prev = after
+        tafter._next = t
         privates._length = privates._length + 1
     elseif not privates._first then
         privates._first = t
         privates._last = t
+    else
+        self:push(t)
     end -- if not after
-    t._container = self
+    ta._container = self
     return t
 end) -- function insert
 
@@ -247,16 +266,16 @@ function (self, clazz, privates)
     if not privates._last then return end -- if not last
     
     local ret = privates._last
-    if ret._prev then
-        ret._prev._next = nil
-        privates._last = ret._prev
-        ret._prev = nil
+    local tret = clazz.getAnnot(ret, "xwos.xwlistitem")
+    if tret._prev then
+        clazz.getAnnot(tret._prev, "xwos.xwlistitem")._next = nil
+        privates._last = tret._prev
     else -- if ret.prev
         privates._first = nil
         privates._last = nil
     end -- if not ret.prev
     privates._length = privates._length - 1
-    ret._container = nil
+    clazz.clearAnnot(ret, "xwos.xwlistitem")
     return ret
 end) -- function pop
 
@@ -278,16 +297,16 @@ function (self, clazz, privates)
     if not privates._first then return end -- if not first
     
     local ret = privates._first
-    if ret._next then
-        ret._next._prev = nil
-        privates._first = ret._next
-        ret._next = nil
+    local tret = clazz.getAnnot(ret, "xwos.xwlistitem")
+    if tret._next then
+        clazz.getAnnot(tret._next, "xwos.xwlistitem")._prev = nil
+        privates._first = tret._next
     else -- if ret.next
         privates._first = nil
         privates._last = nil
     end -- if not ret.next
     privates._length = privates._length - 1
-    ret._container = nil
+    clazz.clearAnnot(ret, "xwos.xwlistitem")
     return ret
 end) -- function shift
 
@@ -304,25 +323,27 @@ end) -- function shift
 -- @param classmanager#clazz clazz
 -- @param #xwlistprivates privates
 -- @param #xwoslistitem t
-function (self, class, privates, t)
-    if t._next then
-        if t._prev then
-            t._next._prev = t._prev
-            t._prev._next = t._next
+function (self, clazz, privates, t)
+    local ta = clazz.getAnnot(t, "xwos.xwlistitem")
+    if ta == nil or ta._container ~= self then
+        error("element not contained in this list")
+    end
+    if ta._next then
+        if ta._prev then
+            clazz.getAnnot(ta._next, "xwos.xwlistitem")._prev = ta._prev
+            clazz.getAnnot(ta._prev, "xwos.xwlistitem")._next = ta._next
         else -- if t.prev
-            t._next._prev = nil
-            privates._first = t._next
+            clazz.getAnnot(ta._next, "xwos.xwlistitem")._prev = nil
+            privates._first = ta._next
         end -- if not t.prev
-    elseif t._prev then
-        t._prev._next = nil
-        privates._last = t._prev
+    elseif ta._prev then
+        clazz.getAnnot(ta._prev, "xwos.xwlistitem")._next = nil
+        privates._last = ta._prev
     else --
         privates._first = nil
         privates._last = nil
     end
-    t._next = nil
-    t._prev = nil
-    t._container = nil
+    clazz.clearAnnot(t, "xwos.xwlistitem")
     privates._length = privates._length - 1
 end) -- function remove
 
@@ -339,7 +360,7 @@ end) -- function remove
 -- @param classmanager#clazz clazz
 -- @param #xwlistprivates privates
 -- @return #function
-function (self, class, privates)
+function (self, clazz, privates)
     ------------------------
     -- iterator function
     -- TODO security (fenv)
@@ -347,12 +368,14 @@ function (self, class, privates)
         if not current then
             current = privates._first
         elseif current then
-            current = current._next
+            current = clazz.getAnnot(current, "xwos.xwlistitem")._next
         end
         return current
     end -- function iterate
         
     return iterate, self, nil
 end) -- function iterate
+
+_CMR.class("xwos.xwlistitem")
 
 return nil

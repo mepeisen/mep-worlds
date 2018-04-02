@@ -24,12 +24,17 @@ local getfenv = getfenv
 local pcall = pcall
 local pairs = pairs
 local fsexists = fs.exists
+local tinsert = table.insert
+local slines = string.lines
+local ssub = string.sub
+local startsWith = function(str, starts)
+    return (str:find('^'..starts)) and true or false
+end
 
 local osvs = os.version()
 local osvIter = string.gmatch(osvs, "%S+")
 local osn = osvIter()
 local osv = osvIter()
-
 
 local arg0 = shell.getRunningProgram()
 local isunsecure = false
@@ -69,37 +74,18 @@ local newGlob = {}
 for k, v in pairs(oldGlob) do
     newGlob[k] = v
 end -- for _G
+newGlob._G = newGlob
 
--- TODO CCLite does not have require??? Or is it a 1.7 ccraft problem?
-if oldGlob.require == nil and cclite ~= nil then
-    local oldload = loadfile
-    oldGlob.require = function(path)
-        local res, err = oldload(path..".lua")
-        if res then
-            return res()
-        else -- if res
-            error(err)
-        end -- if not res
-    end -- function require
-    oldGlob.debug = {
-        getinfo = function(n)
-            -- TODO find a way to detect file and line in cclite
-            return {
-                source = "@?",
-                short_src = "?",
-                currentline = -1,
-                linedefined = -1,
-                what = "C",
-                name = "?",
-                namewhat = "",
-                nups = 0,
-                func = nil
-            }
-        end -- function debug.getinfo
-    }
-    newGlob.require = oldGlob.require
-    newGlob.debug = oldGlob.debug
-end -- if not require
+local oldload = loadfile
+oldGlob.require = function(path)
+    local res, err = oldload(path..".lua", newGlob)
+    if res then
+        return res()
+    else -- if res
+        error(err)
+    end -- if not res
+end -- function require
+newGlob.require = oldGlob.require
 
 
 
@@ -171,8 +157,55 @@ function M.oldglob()
     return oldGlob
 end -- function oldglob
 
+function M.newglob()
+    return newGlob
+end -- function newglob
+
 function M.kernelRoot()
     return kernelRoot
 end -- function kernelRoot
+
+function M.trace(asString)
+    if oldGlob.cclite ~= nil then
+        -- cclite debug traces
+        local trace = oldGlob.cclite.traceback()
+        local res = {}
+        for v in slines(trace) do
+            if startsWith(v, " [C]") then
+                -- TODO parse "[C]: in function ´pcall´"
+                tinsert(res, { hr=v, type="B" })
+            elseif startsWith(v, " ") then
+                -- TODO parse "test.lua:2: in function ´foo´
+                tinsert(res, { hr=v, type="F" })
+            end -- if trace
+        end -- for lines
+        return res
+    end -- cclite
+    
+    -- classic way
+    local res = {}
+    local level = 1
+    while level < 30 do -- TODO configure max depth
+        local state, err = pcall(error, "$$$", level + 2)
+        if err == "$$$" then break end
+        -- TODO parse: "test.lua:15:"
+        tinsert(res, { hr=ssub(err, 0, -6), type="F" })
+        level = level + 1
+    end
+    if asString then
+        local str = ""
+        for _,v in pairs(res) do
+            str = str .. "["..v.type.."] "..v.hr .. "\n"
+        end
+        return str
+    end
+    return res
+end -- function trace
+
+for _,v in pairs(M) do
+    if type(v) == "function" then setfenv(v, newGlob) end
+end
+
+oldGlob.boot = M
 
 return M

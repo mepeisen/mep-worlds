@@ -54,7 +54,7 @@ return function(env)
         for k,v in pairs(classpath) do
             local path = v.."/"..file..".lua"
             if fsexists(path) and not fsisdir(path) then
-                local res, err = loadfile(path)
+                local res, err = loadfile(path, env)
                 if res then
                     return res()
                 else -- if res

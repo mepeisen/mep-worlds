@@ -24,7 +24,12 @@ if arg0:sub(0, 4) ~= "rom/" then
     kernelRoot = "/xwos" -- TODO get path from arg0, relative to start script
 end -- if not secured
 
-local boot = dofile(kernelRoot.."/kernel/common/boot.lua");
+local boot
+if require then
+    boot = require(kernelRoot:gsub("/", ".")..".kernel.common.boot"); -- 1.8
+else
+    boot = dofile(kernelRoot.."/kernel/common/boot.lua"); -- 1.7 (cclite)
+end
 
 local tArgs = {...}
 
@@ -69,7 +74,7 @@ if boot.isUnknownHostOst() then
 end -- if valid
 
 boot.runSandbox(function()
-    local cpfactory = boot.require("classmanager.lua")
+    local cpfactory = boot.krequire("classmanager")
     local newGlob = getfenv(1)
     local cmr = cpfactory(newGlob) -- #classmanager
     newGlob._CMR = cmr

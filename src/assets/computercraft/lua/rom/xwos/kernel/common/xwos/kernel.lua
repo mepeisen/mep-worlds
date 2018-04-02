@@ -455,38 +455,15 @@ function(self, clazz, privates, ver, kernelpaths, kernelRoot, cpfactory, oldGlob
         bit32={bxor=true},
         redstone={getBundledOutput=true}
     }
-    -- hack for cclite emu
-    if cclite ~= nil then
-        blacklist.loadstring = true
-        blacklist.tostring = true -- TODO problem for ccraft 1.7 or for cclite? in ccraft 1.8 this works...
-        blacklist.os = "*"
-    end -- if cclite debugger
-    
-    --------------------------------
-    -- the old fenv for global functions
-    -- @field [parent=#xwos.kernel] #table oldfenv
-    self.oldfenv = wrapfenv(oldGlob, self.nenv, blacklist)
-    -- hack for cclite emu
-    if cclite ~= nil then
-        self.nenv.debug = debug
-        self.nenv.cclite = cclite
-    end -- if cclite debugger
-    
---    print("installing kernel classes...")
--- TODO
---    -- TODO check security
---    xwlist = krequire("xwos/xwlist")
---    xwgui = krequire("xwos/xwgui")
---    xwgcomponent = krequire("xwos/xwgui/component")
---    xwgcontainer = krequire("xwos/xwgui/container")
---    xwgstage = krequire("xwos/xwgui/stage")
---    xwgtext = krequire("xwos/xwgui/text")
---    self.oldGlob.xwlist = xwlist
---    self.oldGlob.xwgui = xwgui
---    self.oldGlob.xwgcomponent = xwgcomponent
---    self.oldGlob.xwgcontainer = xwgcontainer
---    self.oldGlob.xwgstage = xwgstage
---    self.oldGlob.xwgtext = xwgtext
+    -- hack for cclite emu: no wrap...
+    if cclite == nil then
+        --------------------------------
+        -- the old fenv for global functions
+        -- @field [parent=#xwos.kernel] #table oldfenv
+        self.oldfenv = wrapfenv(oldGlob, self.nenv, blacklist)
+    else
+        self.oldfenv = {} -- TODO check why cclite has such problems...
+    end -- if cclite
     
     self:debug("boot finished")
 end) -- function boot
@@ -521,7 +498,7 @@ function(self, clazz, privates)
     local function unwrapfenv(table, old)
         for k,v in origpairs(table) do
             local t = origtype(v)
-            if old[k] ~= nil then
+            if old ~= nil and old[k] ~= nil then
                 if t == "function" then
                     -- print("setfenv", k, old[k])
                     origpcall(origSetfenv, v, old[k]) -- pcall because changing internal functions will fail (silently ingore it)
@@ -706,33 +683,7 @@ end -- function readSecureData
 -- @param #xwkernelprivates privates
 -- @return #list<#traceitem>
 function(self, clazz, privates)
-    if self.oldGlob.cclite ~= nil then
-        -- cclite debug traces
-        local trace = self.oldGlob.cclite.traceback()
-        local res = {}
-        for v in string.lines(trace) do
-            if string.startsWith(v, " [C]") then
-                -- TODO parse "[C]: in function ´pcall´"
-                originsert(res, { hr=v, type="B" })
-            elseif string.startsWith(v, " ") then
-                -- TODO parse "test.lua:2: in function ´foo´
-                originsert(res, { hr=v, type="F" })
-            end -- if trace
-        end -- for lines
-        return res
-    end -- cclite
-    
-    -- classic way
-    local res = {}
-    local level = 1
-    while level < 30 do -- TODO configure max depth
-        local state, err = origpcall(origerror, "$$$", level + 2)
-        if err == "$$$" then break end
-        -- TODO parse: "test.lua:15:"
-        originsert(res, { hr=string.sub(err, 0, -6), type="F" })
-        level = level + 1
-    end
-    return res
+    return self.oldGlob.boot.trace(false)
 end -- function trace
 )
 
