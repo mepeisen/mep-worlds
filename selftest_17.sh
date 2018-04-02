@@ -1,8 +1,4 @@
 #/bin/bash
-if [ -d "bin" ]; then
-	rm -rf bin
-fi
-mkdir bin
 cd bin
 
 if [ -d "/var/lib/jenkins/.local/share/love/ccemu/data/0" ]; then

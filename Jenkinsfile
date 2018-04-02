@@ -12,6 +12,8 @@ pipeline {
         
         stage('Test') {
             steps {
+            	sh "chmod 755 clean.sh && ./clean.sh"
+            
                 echo 'Executing selftest for 1.7'
                 wrap([$class: 'Xvnc', useXauthority: true]) {
                 	sh "chmod 755 selftest_17.sh && ./selftest_17.sh"
