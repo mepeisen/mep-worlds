@@ -68,7 +68,7 @@ _CMR.class("xwos.xwlist")
 -- @param ...
 -- @return #xwos.xwlist
 function(...)
-    return _CMR.new("xwlist", ...)
+    return _CMR.new("xwos.xwlist", ...)
 end) -- function create
 
 .ctor(
@@ -81,7 +81,10 @@ end) -- function create
 -- @param ... initial objects
 function (self, clazz, privates, ...)
     privates._length = 0
-    for _, v in ipairs{...} do self:push(v) end
+    local l = select('#', ...)
+    for i=1, l do
+        self:push(select(i, ...))
+    end
 end) -- ctor
 
 ------------------------
@@ -106,7 +109,7 @@ function (self, clazz, privates, t)
     end
     ta = clazz.annot(t, "xwos.xwlistitem")
     if privates._last then
-        privates._last._next = t
+        clazz.getAnnot(privates._last, "xwos.xwlistitem")._next = t
         ta._prev = privates._last
         privates._last = t
     else -- if privates._last
@@ -191,7 +194,7 @@ function (self, clazz, privates, t)
     end
     ta = clazz.annot(t, "xwos.xwlistitem")
     if privates._first then
-        clazz.annot(privates._first, "xwos.xwlistitem")._prev = t
+        clazz.getAnnot(privates._first, "xwos.xwlistitem")._prev = t
         ta._next = privates._first
         privates._first = t
     else -- if privates._first
@@ -226,7 +229,8 @@ function (self, clazz, privates, t, after)
         error("element already contained in list")
     end
     if after then
-        local tafter = clazz.getAnnot(t, "xwos.xwlistitem")
+        ta = clazz.annot(t, "xwos.xwlistitem")
+        local tafter = clazz.getAnnot(after, "xwos.xwlistitem")
         if tafter == nill or tafter._container ~= self then
             error("after not contained in this list")
         end
@@ -239,13 +243,16 @@ function (self, clazz, privates, t, after)
         ta._prev = after
         tafter._next = t
         privates._length = privates._length + 1
+        ta._container = self
     elseif not privates._first then
+        ta = clazz.annot(t, "xwos.xwlistitem")
         privates._first = t
         privates._last = t
+        privates._length = privates._length + 1
+        ta._container = self
     else
-        self:push(t)
+        self:unshift(t)
     end -- if not after
-    ta._container = self
     return t
 end) -- function insert
 
@@ -315,6 +322,7 @@ end) -- function shift
 -- @function [parent=#xwos.xwlist] remove
 -- @param #xwos.xwlist self self
 -- @param #xwoslistitem t element to remove
+-- @param #xwoslistitem the removed element (t)
 
 .func("remove",
 ------------------------
@@ -323,6 +331,7 @@ end) -- function shift
 -- @param classmanager#clazz clazz
 -- @param #xwlistprivates privates
 -- @param #xwoslistitem t
+-- @return #xwoslistitem
 function (self, clazz, privates, t)
     local ta = clazz.getAnnot(t, "xwos.xwlistitem")
     if ta == nil or ta._container ~= self then
@@ -345,6 +354,7 @@ function (self, clazz, privates, t)
     end
     clazz.clearAnnot(t, "xwos.xwlistitem")
     privates._length = privates._length - 1
+    return t
 end) -- function remove
 
 ------------------------

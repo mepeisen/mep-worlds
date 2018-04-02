@@ -200,6 +200,26 @@
 -- @param #any value
 
 ---------------
+-- Fail test
+-- @function [parent=#lu] fail
+-- @param #string msg
+
+---------------
+-- Fail test
+-- @function [parent=#lu] failIf
+-- @param #boolean condition
+-- @param #string msg
+
+---------------
+-- Success test
+-- @function [parent=#lu] success
+
+---------------
+-- Success test
+-- @function [parent=#lu] successIf
+-- @param #boolean condition
+
+---------------
 -- Assert that two tables contain the same items, irrespective of their keys.
 -- This function is practical for example if you want to compare two lists but where items are not in the same order:
 -- <pre>luaunit.assertItemsEquals( {1,2,3}, {3,2,1} ) -- assertion succeeds</pre>

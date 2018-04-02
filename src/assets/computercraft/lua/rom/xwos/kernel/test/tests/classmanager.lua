@@ -68,10 +68,10 @@ function TestClassmanager:testList()
     cmr.addcp(boot.kernelRoot()..'/kernel/test')
     local res = {}
     for k,v in pairs(cmr.findClasses("tests.classmanager")) do table.insert(res, k) end
-    lu.assertItemsEquals({
+    lu.assertItemsEquals(res, {
         "tests.classmanager.SimpleClass",
         "tests.classmanager.SimpleClassInvalid"
-        }, res)
+        })
     _CMR = nil
 end -- testList
 
@@ -82,10 +82,10 @@ function TestClassmanager:testList2()
     cmr.addcp(boot.kernelRoot()..'/kernel/test')
     local res = {}
     for k,v in pairs(cmr.findPackages("tests")) do table.insert(res, k) end
-    lu.assertItemsEquals({
+    lu.assertItemsEquals(res, {
         "tests.classmanager",
         "tests.classmanager2"
-        }, res)
+        })
     _CMR = nil
 end -- testList
 
@@ -155,8 +155,8 @@ function TestClassmanager:testPublic()
     lu.assertIsNil(obj:getBar())
     lu.assertIsNil(obj.bar)
     obj:setBar("BAZ")
-    lu.assertEquals("BAZ", obj:getBar())
-    lu.assertEquals("BAZ", obj.bar)
+    lu.assertEquals(obj:getBar(), "BAZ")
+    lu.assertEquals(obj.bar, "BAZ")
 end -- testPublic
 
 -- tests private fields
@@ -171,7 +171,7 @@ function TestClassmanager:testPrivates()
     lu.assertIsNil(obj:getBar())
     lu.assertIsNil(obj.bar)
     obj:setBar("BAZ")
-    lu.assertEquals("BAZ", obj:getBar())
+    lu.assertEquals(obj:getBar(), "BAZ")
     lu.assertNil(obj.bar)
 end -- testPrivates
 
@@ -192,15 +192,15 @@ function TestClassmanager:testCtor()
     local obj = cmr.new('Foo', "BAZ")
     lu.assertIsFunction(obj.setBar)
     lu.assertIsFunction(obj.getBar)
-    lu.assertEquals("BAZ", obj:getBar())
-    lu.assertEquals("BAZ", obj:getFoo())
+    lu.assertEquals(obj:getBar(), "BAZ")
+    lu.assertEquals(obj:getFoo(), "BAZ")
     lu.assertIsNil(obj.bar)
-    lu.assertEquals("BAZ", obj.foo)
+    lu.assertEquals(obj.foo, "BAZ")
     obj:setBar("BAZ2")
-    lu.assertEquals("BAZ2", obj:getBar())
-    lu.assertEquals("BAZ2", obj:getFoo())
+    lu.assertEquals(obj:getBar(), "BAZ2")
+    lu.assertEquals(obj:getFoo(), "BAZ2")
     lu.assertIsNil(obj.bar)
-    lu.assertEquals("BAZ2", obj.foo)
+    lu.assertEquals(obj.foo, "BAZ2")
 end -- testCtor
 
 -- tests constructor invocations (extensions)
@@ -224,15 +224,15 @@ function TestClassmanager:testCtorExtends()
     local obj = cmr.new('Bar', "BAZ")
     lu.assertIsFunction(obj.setBar)
     lu.assertIsFunction(obj.getBar)
-    lu.assertEquals("FOOBAZ", obj:getBar())
-    lu.assertEquals("FOOBAZ", obj:getFoo())
+    lu.assertEquals(obj:getBar(), "FOOBAZ")
+    lu.assertEquals(obj:getFoo(), "FOOBAZ")
     lu.assertIsNil(obj.bar)
-    lu.assertEquals("FOOBAZ", obj.foo)
+    lu.assertEquals(obj.foo, "FOOBAZ")
     obj:setBar("BAZ2")
-    lu.assertEquals("BAZ2", obj:getBar())
-    lu.assertEquals("BAZ2", obj:getFoo())
+    lu.assertEquals(obj:getBar(), "BAZ2")
+    lu.assertEquals(obj:getFoo(), "BAZ2")
     lu.assertIsNil(obj.bar)
-    lu.assertEquals("BAZ2", obj.foo)
+    lu.assertEquals(obj.foo, "BAZ2")
 end -- testCtor
 
 -- tests private functions (sharing self)
@@ -249,8 +249,8 @@ function TestClassmanager:testPrivates2()
     lu.assertIsNil(obj:getBar())
     lu.assertIsNil(obj.foo)
     obj:setBar("BAZ")
-    lu.assertEquals("BAZ", obj:getBar())
-    lu.assertEquals("BAZ", obj.foo)
+    lu.assertEquals(obj:getBar(), "BAZ")
+    lu.assertEquals(obj.foo, "BAZ")
 end -- testPrivates2
 
 -- tests private functions (sharing privates)
@@ -267,7 +267,7 @@ function TestClassmanager:testPrivates3()
     lu.assertIsNil(obj:getBar())
     lu.assertIsNil(obj.foo)
     obj:setBar("BAZ")
-    lu.assertEquals("BAZ", obj:getBar())
+    lu.assertEquals(obj:getBar(), "BAZ")
     lu.assertIsNil(obj.foo)
 end -- testPrivates3
 
@@ -279,7 +279,7 @@ function TestClassmanager:testStatics()
     cmr.load('Foo') -- explicit class loading (will define statics)
     lu.assertNotNil(Foo)
     lu.assertNotNil(Foo.create)
-    lu.assertEquals("FOOBAR", Foo.create("BAR"))
+    lu.assertEquals(Foo.create("BAR"), "FOOBAR")
     Foo = nil
 end -- testStatics
 
@@ -290,7 +290,7 @@ function TestClassmanager:testStatics2()
         .pstat("foo", "BAR")
         .func("getFoo", function(self, clazz, privates) return clazz.getPstat("foo")[1] end)
     local obj = cmr.new('Foo')
-    lu.assertEquals("BAR", obj:getFoo())
+    lu.assertEquals(obj:getFoo(), "BAR")
 end -- testStatics2
 
 -- tests simple class inheritance
@@ -301,7 +301,7 @@ function TestClassmanager:testExtends()
         .func("getFoo", function(self, clazz, privates) return clazz.getPstat("foo")[1] end)
     cmr.class('Bar').extends('Foo')
     local obj = cmr.new('Bar')
-    lu.assertEquals("BAR", obj:getFoo())
+    lu.assertEquals(obj:getFoo(), "BAR")
 end -- testExtends
 
 -- tests simple class inheritance with multiple statics
@@ -313,8 +313,8 @@ function TestClassmanager:testExtendsSt()
     cmr.class('Bar').extends('Foo')
         .pstat("foo", "BAZ")
     local obj = cmr.new('Bar')
-    lu.assertEquals("BAZ", obj:getFoo(1))
-    lu.assertEquals("BAR", obj:getFoo(2))
+    lu.assertEquals(obj:getFoo(1), "BAZ")
+    lu.assertEquals(obj:getFoo(2), "BAR")
 end -- testExtendsSt
 
 -- tests simple class inheritance (override)
@@ -326,7 +326,7 @@ function TestClassmanager:testOverride()
     cmr.class('Bar').extends('Foo')
         .func("getFoo", function(self, clazz, privates) return "BAZ" end)
     local obj = cmr.new('Bar')
-    lu.assertEquals("BAZ", obj:getFoo())
+    lu.assertEquals(obj:getFoo(), "BAZ")
 end -- testOverride
 
 -- tests simple class inheritance (override)
@@ -338,7 +338,7 @@ function TestClassmanager:testOverride2()
     cmr.class('Bar').extends('Foo')
         .func("getFoo", function(self, clazz, privates) return clazz.super().."BAZ" end)
     local obj = cmr.new('Bar')
-    lu.assertEquals("BARBAZ", obj:getFoo())
+    lu.assertEquals(obj:getFoo(), "BARBAZ")
 end -- testOverride2
 
 -- tests simple class inheritance (override two times)
@@ -352,7 +352,7 @@ function TestClassmanager:testOverride3()
     cmr.class('Baz').extends('Bar')
         .func("getFoo", function(self, clazz, privates) return clazz.super().."FOO" end)
     local obj = cmr.new('Baz')
-    lu.assertEquals("BARBAZFOO", obj:getFoo())
+    lu.assertEquals(obj:getFoo(), "BARBAZFOO")
 end -- testOverride3
 
 -- tests simple class inheritance (override one time but over two super classes)
@@ -365,7 +365,7 @@ function TestClassmanager:testOverride4()
     cmr.class('Baz').extends('Bar')
         .func("getFoo", function(self, clazz, privates) return clazz.super().."FOO" end)
     local obj = cmr.new('Baz')
-    lu.assertEquals("BARFOO", obj:getFoo())
+    lu.assertEquals(obj:getFoo(), "BARFOO")
 end -- testOverride4
 
 -- tests simple class mixin
@@ -377,8 +377,8 @@ function TestClassmanager:testMixin()
     cmr.class('Bar').mixin("foo", "Foo")
         .func("getBar", function(self, clazz, privates) return "BAR" end)
     local obj = cmr.new('Bar')
-    lu.assertEquals("BAR", obj:getBar())
-    lu.assertEquals("FOO", obj:getFoo())
+    lu.assertEquals(obj:getBar(), "BAR")
+    lu.assertEquals(obj:getFoo(), "FOO")
 end -- testMixin
 
 -- tests friend classes
@@ -392,7 +392,7 @@ function TestClassmanager:testFriend()
     local foo = cmr.new('Foo')
     local bar = cmr.new('Bar')
     foo:setBar("BAZ")
-    lu.assertEquals("BAZ", bar:getFooBar(foo))
+    lu.assertEquals(bar:getFooBar(foo), "BAZ")
 end -- testFriend
 
 -- tests friend classes
@@ -436,13 +436,13 @@ function TestClassmanager:testAnnot()
     local foo = cmr.new('Foo')
     local bar = cmr.new('Bar')
     bar:initBar(foo)
-    lu.assertEquals("FOO-INIT", foo:getBar())
-    lu.assertEquals("ANNOT-INIT", bar:getBar(foo))
+    lu.assertEquals(foo:getBar(), "FOO-INIT")
+    lu.assertEquals(bar:getBar(foo), "ANNOT-INIT")
     bar:setBar(foo)
-    lu.assertEquals("FOO-SET", foo:getBar())
-    lu.assertEquals("ANNOT-SET", bar:getBar(foo))
+    lu.assertEquals(foo:getBar(), "FOO-SET")
+    lu.assertEquals(bar:getBar(foo), "ANNOT-SET")
     bar:clearBar(foo)
-    lu.assertEquals("FOO-CLEAR", foo:getBar())
+    lu.assertEquals(foo:getBar(), "FOO-CLEAR")
     lu.assertErrorMsgContains("nil value", function() bar:getBar(foo) end)
 end -- testAnnot
 
