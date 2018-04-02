@@ -52,7 +52,7 @@ _CMR.class("xwos.gui.container").extends("xwos.gui.component")
 -- @param #table styles
 -- @param ... initial children
 function(self, clazz, privates, styles, ...)
-    clazz._superctor(self, privates, styles)
+    clazz.super(styles)
     privates._children = _CMR.new("xwos.xwlist", ...)
     for k in privates._children:iterate() do k._container = self end -- TODO find a better solution; non private field, do not override container (xwlist) etc.
 end) -- ctor

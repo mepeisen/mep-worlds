@@ -55,9 +55,10 @@ _CMR.class("xwos.gui.stage").extends("xwos.gui.container")
 -- @param ... initial children
 function(self, clazz, privates, window, styles, ...)
     if window == nil then
-        clazz._superctor(self, privates, styles, ...)
+        clazz.super(styles, ...)
     else -- if not window
         privates._window = window
+        styles = styles or {}
         if window.getPosition ~= nil then
             styles.x, styles.y = window.getPosition()
         else -- if window
@@ -65,7 +66,7 @@ function(self, clazz, privates, window, styles, ...)
             styles.y = 0
         end -- if window
         styles.width, styles.height = window.getSize()
-        clazz._superctor(self, privates, styles, ...)
+        clazz.super(styles, ...)
     end -- if window
 end) -- ctor
 

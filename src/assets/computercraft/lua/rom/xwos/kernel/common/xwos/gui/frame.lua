@@ -111,7 +111,7 @@ _CMR.class("xwos.gui.frame").extends("xwos.gui.component")
 -- @param #table styles
 -- @param ... initial objects
 function(self, clazz, privates, styles, ...)
-    clazz._superctor(self, privates, styles)
+    clazz.super(styles)
     
     privates._content = _CMR.new(
         "xwos.gui.stage",

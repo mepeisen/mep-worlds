@@ -52,7 +52,7 @@ _CMR.class("xwos.gui.text").extends("xwos.gui.component")
 -- @param #string text
 -- @param #table styles
 function(self, clazz, privates, text, styles)
-    clazz._superctor(self, privates, styles)
+    clazz.super(styles)
     privates._content = text or ""
 end) -- ctor
 
