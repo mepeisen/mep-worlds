@@ -78,6 +78,23 @@ return function(env)
         return classmanager
     end -- function addcp
     
+    ---------------
+    -- removes a path from classpath
+    -- TODO security: do not allow invocation from child threads
+    -- @function [parent=#classmanager] removecp
+    -- @param ... classpath elements to be removed
+    -- @return #classmanager self for chaining
+    function classmanager.removecp(...)
+        for k,v in pairs({...}) do
+            for i, v2 in pairs(classpath) do
+                if v2 == v then
+                    classpath[i] = nil
+                end
+            end
+        end -- for ...
+        return classmanager
+    end -- function removecp
+    
     local function errClass(name, err)
         local errfunc = function()
             error(err)

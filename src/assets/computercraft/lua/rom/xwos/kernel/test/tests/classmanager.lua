@@ -84,7 +84,8 @@ function TestClassmanager:testList2()
     for k,v in pairs(cmr.findPackages("tests")) do table.insert(res, k) end
     lu.assertItemsEquals(res, {
         "tests.classmanager",
-        "tests.classmanager2"
+        "tests.classmanager2",
+        "tests.modulesmgr"
         })
     _CMR = nil
 end -- testList

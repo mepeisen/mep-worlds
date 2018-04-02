@@ -73,7 +73,7 @@ end) -- ctor
 
 .func("preboot",
 --------------------------------
--- @function [parent=#xwos.kernel.modulesmgr] preboot
+-- @function [parent=#xwmodsintern] preboot
 -- @param #xwos.kernel.modulesmgr self
 -- @param classmanager#clazz clazz
 -- @param #xwmodsprivates privates
@@ -91,7 +91,7 @@ function(self, clazz, privates)
     end -- for moduleOrder
     for i, v in pairs(self.instances) do
         if not tcontains(privates.moduleOrder, i) then
-            privates.kernel:debug("preboot kernel module",v)
+            privates.kernel:debug("preboot kernel module",i)
             v:preboot()
         end -- if not contains
     end -- for modules
@@ -104,7 +104,7 @@ end) -- function preboot
 
 .func("boot",
 --------------------------------
--- @function [parent=#xwos.kernel.modulesmgr] boot
+-- @function [parent=#xwmodsintern] boot
 -- @param #xwos.kernel.modulesmgr self
 -- @param classmanager#clazz clazz
 -- @param #xwmodsprivates privates
@@ -117,7 +117,7 @@ function(self, clazz, privates)
     end -- for moduleOrder
     for i, v in pairs(self.instances) do
         if not tcontains(privates.moduleOrder, i) then
-            privates.kernel:debug("boot kernel module",v)
+            privates.kernel:debug("boot kernel module",i)
             v:boot()
         end -- if not contains
     end -- for modules

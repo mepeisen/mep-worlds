@@ -32,6 +32,12 @@
 -- @return #classmanager self for chaining
 
 ---------------
+-- removes a path from classpath
+-- @function [parent=#classmanager] removecp
+-- @param ... classpath elements to be removed
+-- @return #classmanager self for chaining
+
+---------------
 -- Retrieves singleton instance
 -- @function [parent=#classmanager] get
 -- @param #string name the class name

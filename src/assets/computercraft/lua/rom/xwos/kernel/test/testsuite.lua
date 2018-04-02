@@ -21,6 +21,7 @@ return function(boot)
     
     boot.krequire('tests/classmanager')
     boot.krequire('tests/xwos_xwlist')
+    boot.krequire('tests/xwos_kernel_modulesmgr')
     
     local junit_stdout = ""
     local junit_stderr = ""
