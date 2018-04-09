@@ -53,7 +53,7 @@ pipeline {
         stage('Luadoc') {
             steps {
             	echo 'Creating luadoc'
-            	sh "java -cp build/lua-doc/*.jar eu.xworlds.xwos.tools.luadoc.LuaDoc bin/luadoc \"Last snapshot\" doclua src/assets/computercraft/lua/rom/xwos"
+            	sh "java -cp build/lua-doc/commons-lang3-3.7.jar:build/lua-doc/commons-text-1.3.jar:build/lua-doc/lua-doc-0.0.1-SNAPSHOT.jar:build/lua-doc/markdownj-core-0.4.jar eu.xworlds.xwos.tools.luadoc.LuaDoc bin/luadoc \"Last snapshot\" doclua src/assets/computercraft/lua/rom/xwos"
             }
         }
         
