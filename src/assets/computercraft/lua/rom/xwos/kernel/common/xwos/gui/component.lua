@@ -17,7 +17,7 @@
 
 --------------------------------
 -- gui component base class
--- @type xwos.gui.component
+-- @module xwos.gui.component
 _CMR.class("xwos.gui.component").abstract()
 
 ------------------------
@@ -273,7 +273,7 @@ end) -- function show
 
 ------------------------
 -- hide this component
--- @function [parent=#xwos.gui.component] show
+-- @function [parent=#xwos.gui.component] hide
 -- @param #xwos.gui.component self self
 -- @return #xwos.gui.component self for chaining
 

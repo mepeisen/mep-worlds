@@ -69,7 +69,7 @@ function(self, clazz, privates)
 
     --------------------------------
     -- thw processes by id
-    -- @field [parent=#xwprocsprivates] #map<#number,#xwos.kernel.process> procs
+    -- @field [parent=#xwprocsprivates] #map<#number,xwos.kernel.process#xwos.kernel.process> procs
     privates.procs = {}
 end) -- ctor
 
@@ -77,7 +77,7 @@ end) -- ctor
 -- creates a new process
 -- @function [parent=#xwos.kernel.processes] create
 -- @param #xwos.kernel.processes self self
--- @param #xwos.kernel.process p the parent process
+-- @param xwos.kernel.process#xwos.kernel.process p the parent process
 -- @param xwos.kernel#xwos.kernel k the kernel table
 -- @param global#global env the global process environment
 -- @param #table factories functions with signature (proc, env) to initialize the new process or environment
@@ -89,7 +89,7 @@ end) -- ctor
 -- @param #xwos.kernel.processes self
 -- @param classmanager#clazz clazz
 -- @param #xwprocsprivates privates
--- @param #xwos.kernel.process p
+-- @param xwos.kernel.process#xwos.kernel.process p
 -- @param xwos.kernel#xwos.kernel k
 -- @param global#global env
 -- @param #table factories

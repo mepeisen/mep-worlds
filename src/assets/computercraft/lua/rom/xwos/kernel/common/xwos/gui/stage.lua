@@ -17,7 +17,7 @@
 
 --------------------------------
 -- gui component that works on a ccraft terminal window
--- @type xwos.gui.stage
+-- @module xwos.gui.stage
 -- @extends xwos.gui.container#xwos.gui.container
 _CMR.class("xwos.gui.stage").extends("xwos.gui.container")
 
@@ -47,7 +47,7 @@ _CMR.class("xwos.gui.stage").extends("xwos.gui.container")
 .ctor(
 ------------------------
 -- @function [parent=#xwcintern] ctor
--- @param #xwos.gui.text self
+-- @param #xwos.gui.stage self
 -- @param classmanager#clazz clazz
 -- @param #xwcprivates privates
 -- @param window#windowObject window window object
@@ -183,7 +183,7 @@ end) -- function x
 
 .func("y",
 ------------------------
--- @function [parent=#xwcintern] height
+-- @function [parent=#xwcintern] y
 -- @param #xwos.gui.stage self
 -- @param classmanager#clazz clazz
 -- @param #xwcprivates privates

@@ -72,7 +72,7 @@
 -- @param #string command
 -- @param #string args1 optional
 -- @param #string args2 optional
--- @param #... args
+-- @param ... args
 -- @return #boolean success
  
 -------------------------------------------------------------------------------
@@ -81,7 +81,7 @@
 -- @param #string command 
 -- @param #string args1 optional
 -- @param #string args2 optional
--- @param #... args 
+-- @param ... args 
 -- @return #number tabID
  
 -------------------------------------------------------------------------------

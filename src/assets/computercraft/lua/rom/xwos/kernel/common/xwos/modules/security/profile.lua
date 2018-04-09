@@ -55,7 +55,7 @@ end) -- ctor
 -- @param #xwos.modules.security.profile self
 -- @param classmanager#clazz clazz
 -- @param #xwsecpprivates privates
--- @return string
+-- @return #string
 function(self, clazz, privates)
     return privates.name
 end) -- function name

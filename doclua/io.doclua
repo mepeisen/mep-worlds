@@ -38,7 +38,7 @@
 -- In case of errors this function raises the error, instead of returning an
 -- error code.
 -- @function [parent=#io] input
--- @param file a filename or a file handle which will used as default input. (optional)
+-- @param #any file a filename or a file handle which will used as default input. (optional)
 -- @return #file the default input file handle.
 
 -------------------------------------------------------------------------------
@@ -55,7 +55,7 @@
 -- `io.input():lines()`; that is, it iterates over the lines of the default
 -- input file. In this case it does not close the file when the loop ends.
 -- @function [parent=#io] lines
--- @param a filename or a file handle. (default value is `io.input()`)
+-- @param #any a filename or a file handle. (default value is `io.input()`)
 
 -------------------------------------------------------------------------------
 -- This function opens a file, in the mode specified in the string `mode`. It
@@ -81,7 +81,7 @@
 -------------------------------------------------------------------------------
 -- Similar to `io.input`, but operates over the default output file.
 -- @function [parent=#io] output
--- @param file a filename or a file handle which will used as default output. (optional)
+-- @param #any file a filename or a file handle which will used as default output. (optional)
 -- @return #file the default ouput file handle.
 
 -------------------------------------------------------------------------------
@@ -175,8 +175,8 @@
 --   empty string, or nil on end of file.
 -- @function [parent=#file] read
 -- @param self
--- @param format _"*n"_, _"*a"_, _"*l"_ or a number.
--- @return A string (or a number) with the characters read, or nil if it cannot read data with the specified format.
+-- @param #any format _"*n"_, _"*a"_, _"*l"_ or a number.
+-- @return #any A string (or a number) with the characters read, or nil if it cannot read data with the specified format.
  
 -------------------------------------------------------------------------------
 -- Sets and gets the file position. It is measured from the beginning of the

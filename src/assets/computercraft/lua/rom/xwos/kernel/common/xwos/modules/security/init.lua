@@ -61,7 +61,7 @@ end) -- ctor
 .pfunc("createProfile",
 ------------------------
 -- create new profile with given name
--- @function [parent=#xwsecintern] createProfile
+-- @function [parent=#xwsecpintern] createProfile
 -- @param #xwos.modules.security self self
 -- @param classmanager#clazz clazz security class
 -- @param #xwsecprivates privates
@@ -95,7 +95,7 @@ end) -- function preboot
 
 .func("boot",
 ---------------------------------
--- @function [parent=#xwsecintern] preboot
+-- @function [parent=#xwsecintern] boot
 -- @param #xwos.modules.security self self
 -- @param classmanager#clazz clazz security class
 -- @param #xwsecprivates privates

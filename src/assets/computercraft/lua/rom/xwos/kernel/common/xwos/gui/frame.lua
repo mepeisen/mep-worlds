@@ -15,11 +15,11 @@
 --    You should have received a copy of the GNU General Public License
 --    along with xwos.  If not, see <http://www.gnu.org/licenses/>.
 
-_CMR.load("xwos.gui.stage")
+_CMR.load("xwos.gui.frame")
 
 --------------------------------
 -- gui component displaying a frame
--- @type xwos.gui.frame
+-- @module xwos.gui.frame
 -- @extends xwos.gui.component#xwos.gui.component
 _CMR.class("xwos.gui.frame").extends("xwos.gui.component")
 
@@ -266,7 +266,7 @@ end) -- function setPos
 
 .func("paint",
 ------------------------
--- @function [parent=#xwcintern] setPos
+-- @function [parent=#xwcintern] paint
 -- @param #xwos.gui.frame self
 -- @param classmanager#clazz clazz
 -- @param #xwcprivates privates

@@ -38,7 +38,7 @@ _CMR.class("xwos.kernel.modulesmgr")
 -- @function [parent=#xwprocsintern] __ctor
 -- @param #xwos.kernel.modulesmgr self self
 -- @param classmanager#clazz clazz proc class
--- @param #xwprocsprivates privates
+-- @param #xwmodsprivates privates
 -- @param xwos.kernel#xwos.kernel kernel
 function(self, clazz, privates, kernel)
     --------------------------------

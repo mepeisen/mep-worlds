@@ -9,7 +9,7 @@ cp -r "../src/assets/computercraft/lua/rom/programs" "/var/lib/jenkins/.local/sh
 cp -r "../src/assets/computercraft/lua/rom/xwos" "/var/lib/jenkins/.local/share/love/CCLite/data/0"
 
 echo "using Display: $DISPLAY"
-flvrec.py -o record_18.flv -P ../vnc-pass.txt localhost$DISPLAY &
+flvrec.py -o record_18.flv -P ../build/test/vnc-pass.txt localhost$DISPLAY &
 
 # Xvfb :99 -screen 0 1024x768x24 &
 # THE_PID=$!

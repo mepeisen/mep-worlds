@@ -15,7 +15,7 @@
 -- Adds vectorB to vectorA and returns the resulting vector. Can also be used by writing vectorA + vectorB.
 -- @function [parent=#vectorA] add
 -- @param #vectorA vectorB
--- @return vectorA
+-- @return #vectorA
 
 -------------------------------------------------------------------------------
 -- Subtracts vectorB from vectorA and returns the resulting vector. Can also be used by writing vectorA - vectorB.

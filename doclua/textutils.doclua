@@ -33,7 +33,7 @@
 -- @function [parent=#textutils] pagedTabulate
 -- @param #table table/number color
 -- @param #table table2/number color2
--- @param #... 
+-- @param ... 
 
 -------------------------------------------------------------------------------
 -- Prints string text onto the screen, but waits for confirmation (after at least freeLines have been scrolled) before scrolling down further. Default for freeLines is 0. 
@@ -62,7 +62,7 @@
 -- @return #string serializedData 
 
 -------------------------------------------------------------------------------
--- Makes a string safe to encode into a url. Spaces are replaced with +s. Unsafe characters such as '\', '£' and '}' are translated into ASCII code and preceded with a % for transmission. For reference visit: [1]. 
+-- Makes a string safe to encode into a url. Spaces are replaced with +s. Unsafe characters such as '\', 'ï¿½' and '}' are translated into ASCII code and preceded with a % for transmission. For reference visit: [1]. 
 -- @function [parent=#textutils] urlEncode
 -- @param #string urlUnsafeString
 -- @return #string urlSafeString 

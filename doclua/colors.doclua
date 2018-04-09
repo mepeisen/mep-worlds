@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
 -- The Colors API allows you to manipulate sets of colors. This is useful in conjunction with Bundled Cables from the RedPower mod, RedNet Cables from the MineFactory Reloaded mod, and colors on Advanced Computers and Advanced Monitors. 
--- For the non-American English version just replace 'colors' with 'colours' and it will use the other API, colours—which is exactly the same, except in non-American English (e.g. gray is spelt grey and lightGray is spelt lightGrey). 
+-- For the non-American English version just replace 'colors' with 'colours' and it will use the other API, colours which is exactly the same, except in non-American English (e.g. gray is spelt grey and lightGray is spelt lightGrey). 
 -- @module colors
 
 -------------------------------------------------------------------------------

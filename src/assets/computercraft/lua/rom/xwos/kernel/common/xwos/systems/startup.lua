@@ -22,7 +22,7 @@ local M = {}
 
 -------------------
 -- The installer
--- @function [parent=#xwos.startup] run
+-- @function [parent=#xwos.startup] installer
 -- @param xwos.kernel#xwos.kernel kernel the kernel reference
 M.installer = function(kernel)
     local installerData = { lang = nil }
@@ -119,7 +119,7 @@ end -- function installer
 
 -------------------
 -- The login processing
--- @function [parent=#xwos.startup] run
+-- @function [parent=#xwos.startup] login
 -- @param #string installData
 -- @param xwos.kernel#xwos.kernel kernel the kernel reference
 M.login = function(installData, kernel)

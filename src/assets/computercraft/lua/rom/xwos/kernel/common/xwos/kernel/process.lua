@@ -55,10 +55,10 @@ _CMR.class("xwos.kernel.process")
 ------------------------
 -- create new process
 -- @function [parent=#procintern] __ctor
--- @param #xwos.kernel.processes self self
+-- @param #xwos.kernel.process self self
 -- @param classmanager#clazz clazz proc class
 -- @param #procprivates privates
--- @param #xwprocsprivates pprivates
+-- @param xwos.kernel.processes#xwprocsprivates pprivates
 -- @param #xwos.kernel.process p the parent process
 -- @param xwos.kernel#xwos.kernel k the kernel table
 -- @param #number newPid the new pid to be used by this process
@@ -77,7 +77,7 @@ function(self, clazz, privates, pprivates, p, k, newPid, env, factories)
     
     --------------------------------
     -- the process table
-    -- @field [parent=#procprivates] #xwprocsprivates processes
+    -- @field [parent=#procprivates] xwos.kernel.processes#xwprocsprivates processes
     privates.processes = pprivates
     
     --------------------------------------
@@ -102,7 +102,7 @@ function(self, clazz, privates, pprivates, p, k, newPid, env, factories)
     
     --------------------------------
     -- the original process environment given to create function
-    -- @field [parent=#procprivates] #global origenv
+    -- @field [parent=#procprivates] global#global origenv
     privates.origenv = env
     
     --------------------------------
@@ -192,7 +192,7 @@ end) -- function popev
 
 -------------------------------
 -- pop event from event queue
--- @function [parent=#xwos.kernel.process] popev
+-- @function [parent=#xwos.kernel.process] pushev
 -- @param #xwos.kernel.process self the process object
 -- @param #table event
 

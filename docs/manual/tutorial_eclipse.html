@@ -65,8 +65,11 @@
     				<h2 class="page-header"><a href="#toc">TOC</a></h2>
     				<ul>
     					<li><a href="#requirements">Requirements</a></li>
-    					<li><a href="#learning">What You will learn</a></li>
-    					<li><a href="#step1">Step 1 - TODO</a></li>
+    					<li><a href="#learning">What you will learn</a></li>
+    					<li><a href="#step1">Step 1 - Checkout XWOS</a></li>
+    					<li><a href="#step2">Step 2 - Minecraft/ComputerCraft setup</a></li>
+    					<li><a href="#step3">Step 3 - CCLite setup</a></li>
+    					<li><a href="#step4">Step 4 - Project builder</a></li>
     					<li><a href="#conclusion">Conclusion</a></li>
     				</ul>
     			</section>
@@ -78,7 +81,15 @@
     			<section id="requirements">
     				<h2 class="page-header"><a href="#requirements">Requirements</a></h2>
     				<p class="lead">
-    					TODO
+    					Before starting this tutorial you should have a look on the following requirements:
+    				</p>
+    				<ul>
+    					<li>You need a local <a href="https://www.eclipse.org/downloads/">Eclipse</a> installation with installed
+    					<a href="https://projects.eclipse.org/projects/tools.ldt">Lua Development Tools (LDT)</a>.
+    				</ul>
+    				<p class="lead">
+    					Although this tutorial is written for Eclipse you may adapt some of the information to other IDEs. Maybe in
+    					future there will be tutorials for some other IDEs.
     				</p>
     				<p class="lead">
     					<a href="#toc">Back to top</a>
@@ -90,9 +101,11 @@
     	<div class="row">
     		<div class="col-md-12">
     			<section id="learning">
-    				<h2 class="page-header"><a href="#learning">What You will learn</a></h2>
+    				<h2 class="page-header"><a href="#learning">What you will learn</a></h2>
     				<p class="lead">
-    					TODO
+    					Finishing this tutorial you will learn how to setup a project within eclipse and how to run
+    					either Minecraft or ComputerCraft simulator CCLite. You will find a way how to run Your code
+    					within Minecraft or within CCLite.
     				</p>
     				<p class="lead">
     					<a href="#toc">Back to top</a>
@@ -104,10 +117,180 @@
     	<div class="row">
     		<div class="col-md-12">
     			<section id="step1">
-    				<h2 class="page-header"><a href="#step1">Step 1 <small>TODO</small></a></h2>
+    				<h2 class="page-header"><a href="#step1">Step 1 <small>Checkout XWOS</small></a></h2>
+    				<div class="row">
+    					<div class="col-md-6">
+    						<p class="lead">
+    							Within Eclipse open GIT perspective.
+    						</p>
+    					</div>
+    					<div class="col-md-6">
+    						<img src="img/tut/eclipse/open_git_perspective.jpg" width="100%" alt="Open perspective" />
+    						<img src="img/tut/eclipse/open_git_perspective2.jpg" width="100%" alt="Open perspective" />
+    					</div>
+    				</div>
+    				<div class="row">
+    					<div class="col-md-6">
+    						<p class="lead">
+    							Paste the GitHub url of <b>XWOS</b> (Ctrl+V):
+    						</p>
+    						<pre>http://git.xworlds.eu/mepeisen/mep-worlds.git</pre>
+    						<p class="lead">
+    							If you plan to contribute to <b>XWOS</b> itself you should first create a fork at github and
+    							then use your forks url for checkout. However you may add your forks url later on.
+    						</p>
+    						<p class="lead">
+    							The "Clone Git Repository" dialog opens. Enter your Github username/password if you plan to
+    							contribute. Click "next" two times, check the settings and click "finish".
+    						</p>
+    					</div>
+    					<div class="col-md-6">
+    						<img src="img/tut/eclipse/open_git_perspective3.jpg" width="100%" alt="Paste URL" />
+    					</div>
+    				</div>
+    				<div class="row">
+    					<div class="col-md-6">
+    						<p class="lead">
+    							Right click on the git repository workspace and click "Import projects".
+    						</p>
+    						<p class="lead">
+    							Within the import dialog you should see the <b>XWOS</b> source project.
+    							Click "finish".
+    						</p>
+    						<p class="lead">
+    							You can now switch to the <b>LDT</b> perspective to start developing in LUA.
+    						</p>
+    					</div>
+    					<div class="col-md-6">
+    						<img src="img/tut/eclipse/import_projects.jpg" width="100%" alt="Import projects" />
+    					</div>
+    				</div>
     				<p class="lead">
-    					TODO
+    					<a href="#toc">Back to top</a>
     				</p>
+    			</section>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="step2">
+    				<h2 class="page-header"><a href="#step2">Step 2 <small>Minecraft/ComputerCraft setup</small></a></h2>
+    				<div class="row">
+    					<div class="col-md-6">
+    						<p class="lead">
+    							TODO
+    						</p>
+    					</div>
+    					<div class="col-md-6">
+    						TODO
+    					</div>
+    				</div>
+    				<p class="lead">
+    					<a href="#toc">Back to top</a>
+    				</p>
+    			</section>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="step3">
+    				<h2 class="page-header"><a href="#step3">Step 3 <small>CCLite setup</small></a></h2>
+    				<div class="row">
+    					<div class="col-md-6">
+    						<p class="lead">
+    							There are multiple versions of CCLite around. <b>XWOS</b> itself contains some lines of code
+    							to support classic ComputerCraft within Minecraft as well as CCLite. It may not be supported
+    							on a specific installation. If you find versions that do not work please create a
+    							<a href="https://github.com/mepeisen/mep-worlds/issues">GitHub issue</a>. But be aware
+    							that I may decide not supporting your version.
+    						</p>
+    						<p class="lead">
+    							Download and install one of the following versions:
+    						</p>
+    						<ul>
+    							<li>For 1.7.5: <a href="https://github.com/gamax92/cclite">Fork of Gamax92</a>
+    							or <a href="https://github.com/PixelToast/cclite">Fork from PixelToast</a> (the original from Sorroko seems
+    							to be upt of date)</li>
+    							<li>For 1.8: <a href="https://github.com/Wilma456/CCLite/releases">Fork of Wilma456</a></li>
+    						</ul>
+    						<p class="lead">
+    							Create a new external tool within Eclipse. Select the LOVE2D executable and the CCLite LOVE file.
+    						</p>
+    						<p class="lead">
+    							Launch the new external tool and ensure that it starts and can be used.
+    						</p>
+    					</div>
+    					<div class="col-md-6">
+    						<img src="img/tut/eclipse/external_tool.jpg" width="100%" alt="Create external tool" />
+    						TODO Screenshot from cclite launcher
+    					</div>
+    				</div>
+    				<p class="lead">
+    					<a href="#toc">Back to top</a>
+    				</p>
+    			</section>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="step3">
+    				<h2 class="page-header"><a href="#step4">Step 4 <small>Project builder</small></a></h2>
+    				<div class="row">
+    					<div class="col-md-6">
+    						<p class="lead">
+    							There are several ways to create an automatic build setup. In future versions of <b>XWOS</b>
+    							I will add some small eclipse plugin to setup your Minecraft or CCLite in an easy way. For now
+    							I recommend to create a small new project, let us call it <code>build-myapp</code>.
+    						</p>
+    					</div>
+    					<div class="col-md-6">
+    						<img src="img/tut/eclipse/builder_new_project.jpg" />
+    					</div>
+    				</div>
+    				<div class="row">
+    					<div class="col-md-6">
+    						<p class="lead">
+    							Now create new folders linked with CCLite and/or your minecraft resourcepack folders.
+    							Right click on your project and click on "new folder".
+    						</p>
+    						<p>
+    							Select radio button "Link to alternate location" and click "browse" to select
+    							the target folder.
+    						</p>
+    					</div>
+    					<div class="col-md-6">
+    						<img src="img/tut/eclipse/builder_new_folder_1.jpg" />
+    						<img src="img/tut/eclipse/builder_new_folder_2.jpg" />
+    					</div>
+    				</div>
+    				<div class="row">
+    					<div class="col-md-6">
+    						<p class="lead">
+    							Now we can create a small ant <code>build.xml</code>.
+    							This build script will be responsible to copy the project files to your
+    							minecraft or cclite installation.
+    						</p>
+    						<p>
+    							The given example will copy all <b>XWOS</b> files to your local CCLite
+    							installation.
+    						</p>
+    					</div>
+    					<div class="col-md-6">
+    						<pre class="prettyprint"><code class="ant">&lt;project name="MyProject" default="dist" basedir=".">
+	&lt;target name="dist">
+		&lt;copy todir="C:/Users/MyUser/AppData/Roaming/ccemu/data/0">
+			&lt;fileset dir="C:/Users/MyUser/git/mep-worlds/src/assets/computercraft/lua/rom">
+				&lt;include name="**/*"/>
+			&lt;/fileset>
+		&lt;/copy>
+	&lt;/target>
+&lt;/project>
+</code></pre>
+    					</div>
+    				</div>
     				<p class="lead">
     					<a href="#toc">Back to top</a>
     				</p>

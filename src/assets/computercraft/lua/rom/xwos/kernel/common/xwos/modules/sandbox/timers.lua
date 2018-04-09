@@ -53,7 +53,7 @@ end) -- ctor
 -- @function [parent=#xwos.modules.sandbox.timers] create
 -- @param #xwos.modules.sandbox.timers self self
 -- @param #number id the timer number
--- @param xwos.processes#xwos.process proc
+-- @param xwos.kernel.process#xwos.kernel.process proc
 
 .func("create",
 -------------------------------
@@ -62,7 +62,7 @@ end) -- ctor
 -- @param classmanager#clazz clazz event queue class
 -- @param #xwtprivates privates
 -- @param #number id
--- @param xwos.processes#xwos.process proc
+-- @param xwos.kernel.process#xwos.kernel.process proc
 function(self, clazz, privates, id, proc)
     privates.list[id] = proc
 end) -- function create
@@ -72,7 +72,7 @@ end) -- function create
 -- @function [parent=#xwos.modules.sandbox.timers] get
 -- @param #xwos.modules.sandbox.timers self self
 -- @param #number id the timer number
--- @return xwos.processes#xwos.process process or nil if timer with given id was not found
+-- @return xwos.kernel.process#xwos.kernel.process process or nil if timer with given id was not found
 
 .func("get",
 -------------------------------
@@ -81,7 +81,7 @@ end) -- function create
 -- @param classmanager#clazz clazz event queue class
 -- @param #xwtprivates privates
 -- @param #number id
--- @return xwos.processes#xwos.process
+-- @return xwos.kernel.process#xwos.kernel.process
 function(self, clazz, privates, id)
     return privates.list[id]
 end) -- function create

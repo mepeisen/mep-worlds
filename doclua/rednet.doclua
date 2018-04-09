@@ -61,7 +61,7 @@
 -- @param #string hostname
 -- @return #number ID1
 -- @return #number ID2
--- @return #... IDs
+-- @return ... IDs
  
 -------------------------------------------------------------------------------
 -- Internal use function - runs automatically and does not need to be called directly. Waits for modem_message events to appear within the event queue and generates corresponding rednet_message events for use with this API. Also responds to -- @function [parent=#rednet] lookup() requests. 

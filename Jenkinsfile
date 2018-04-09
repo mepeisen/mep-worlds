@@ -12,11 +12,11 @@ pipeline {
         
         stage('Test') {
             steps {
-            	sh "chmod 755 clean.sh && ./clean.sh"
+            	sh "chmod 755 build/clean.sh && build/clean.sh"
             
                 echo 'Executing selftest for 1.7'
                 wrap([$class: 'Xvnc', useXauthority: true]) {
-                	sh "chmod 755 selftest_17.sh && ./selftest_17.sh"
+                	sh "chmod 755 build/test/selftest_17.sh && build/test/selftest_17.sh"
                 }
                 archiveArtifacts artifacts: 'bin/record_17.flv', fingerprint:true
                 sh "ffmpeg -i bin/record_17.flv bin/record_17.mp4"
@@ -26,7 +26,7 @@ pipeline {
                 
                 echo 'Executing selftest for 1.8'
                 wrap([$class: 'Xvnc', useXauthority: true]) {
-                	sh "chmod 755 selftest_18.sh && ./selftest_18.sh"
+                	sh "chmod 755 build/test/selftest_18.sh && build/test/selftest_18.sh"
                 }
                 archiveArtifacts artifacts: 'bin/record_18.flv', fingerprint:true
                 sh "ffmpeg -i bin/record_18.flv bin/record_18.mp4"
@@ -39,15 +39,21 @@ pipeline {
                 junit 'bin/junit_18.xml'
             }
         }
-
         
         stage('Package') {
             steps {
             	echo 'Creating resource pack'
                 sh "cd src && zip -9r ../bin/xwos.zip *"
                 archiveArtifacts artifacts: 'bin/xwos.zip', fingerprint:true
-                sh "java -cp lua-packager-0.0.1-SNAPSHOT.jar eu.xworlds.xwos.tools.luapkg.MkInstaller src/assets/computercraft/lua/rom bin/package.lua"
+                sh "java -cp build/packager/lua-packager-0.0.1-SNAPSHOT.jar eu.xworlds.xwos.tools.luapkg.MkInstaller src/assets/computercraft/lua/rom bin/package.lua"
                 archiveArtifacts artifacts: 'bin/package.lua', fingerprint:true
+            }
+        }
+        
+        stage('Luadoc') {
+            steps {
+            	echo 'Creating luadoc'
+            	sh "java -cp build/lua-doc/*.jar eu.xworlds.xwos.tools.luadoc.LuaDoc bin/luadoc \"Last snapshot\" doclua src/assets/computercraft/lua/rom/xwos"
             }
         }
         
@@ -65,9 +71,11 @@ pipeline {
                 // sh "cp -r docs/dist /srv/ftp-mounts/xworlds/httpdocs/xwos"
                 // sh "cp -r docs/plugins /srv/ftp-mounts/xworlds/httpdocs/xwos"
                 sh "cp -r docs/manual/* /srv/ftp-mounts/xworlds/httpdocs/xwos/latest"
-                sh "xsltproc -o /srv/ftp-mounts/xworlds/httpdocs/xwos/latest/junit_17.html junit.xslt bin/junit_17.xml"
-                sh "xsltproc -o /srv/ftp-mounts/xworlds/httpdocs/xwos/latest/junit_18.html junit.xslt bin/junit_18.xml"
+                sh "cp -r bin/luadoc/* /srv/ftp-mounts/xworlds/httpdocs/xwos/latest"
+                sh "xsltproc -o /srv/ftp-mounts/xworlds/httpdocs/xwos/latest/junit_17.html build/test/junit.xslt bin/junit_17.xml"
+                sh "xsltproc -o /srv/ftp-mounts/xworlds/httpdocs/xwos/latest/junit_18.html build/test/junit.xslt bin/junit_18.xml"
                 sh "date \"+%Y-%m-%d %H:%M:%S\" > /srv/ftp-mounts/xworlds/httpdocs/xwos/parts_snapshot.html"
+                sh "cat docs/manual/parts_menu.html bin/luadoc/parts_luadoc_menu.html > /srv/ftp-mounts/xworlds/httpdocs/xwos/latest/parts_menu.html"
             }
 
         }

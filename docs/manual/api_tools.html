@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>XWOS | Latest snapshot</title>
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+  <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
+  <link rel="stylesheet" href="../dist/css/AdminLTE.min.css">
+  <link rel="stylesheet" href="../dist/css/skins/skin-blue.min.css">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="../plugins/highlite/styles/default.css">
+  <!--[if lt IE 9]>
+  <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+  <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+  <![endif]-->
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+<div class="wrapper">
+
+  <header class="main-header">
+
+    <a href="index.html" class="logo">
+      <span class="logo-mini"><b>XW</b>OS</span>
+      <span class="logo-lg"><b>XW</b>OS</span>
+    </a>
+
+    <nav class="navbar navbar-static-top" role="navigation">
+      <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+        <span class="sr-only">Toggle navigation</span>
+      </a>
+      
+      <div id="navbar-custom-menu" class="navbar-custom-menu">
+      </div>
+    </nav>
+  </header>
+  
+  <aside class="main-sidebar">
+
+    <section id="sidebar" class="sidebar">
+    </section>
+  </aside>
+
+  <div class="content-wrapper">
+    <section class="content-header">
+      <h1>
+        XWOS
+      <small>Latest snapshot</small>
+      </h1>
+      <ol class="breadcrumb">
+        <li><a href="../index.html"><i class="fa fa-home"></i> Home</a></li>
+        <li><a href="index.html"><i class="fa fa-home"></i> Latest snapshot</a></li>
+        <li><a href="manual_appdev.html"><i class="fa fa-save"></i> Application developer</a></li>
+        <li class="active"><i class="fa fa-save"></i> API: Tool classes</li>
+      </ol>
+    </section>
+
+    <section class="content">
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="toc">
+    				<h2 class="page-header"><a href="#toc">TOC</a></h2>
+    				<ul>
+    					<li><a href="#overview">Overview</a></li>
+    					<li><a href="#use_api">Requesting and using an API</a></li>
+    					<li><a href="#classes_xwlist">Core class: xwos.xwlist (doubly linked list)</a></li>
+    				</ul>
+    			</section>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="overview">
+    				<h2 class="page-header"><a href="#overview">Overview</a></h2>
+    				<p class="lead">
+    					<b>XWOS</b> introduces some built-in tools available through <a href="api_cmr.html">class manager</a>. I am dividing tool classes
+    					related to kernel/ kernel modules and tool classes available as optional API (libraries). Kernel related tool classes are always available
+    					without further action. But a certain API may not be available to a specific <b>XWOS</b> installation. 
+    				</p>
+    				<p>
+    					To use a kernel related class simply invoke <code>_CMR.new</code>. To use a specific API you may simply invoke <code>_CMR.new</code>
+    					too. But that may throw errors if a your application is not allowed to work with this API or if it is not even installed.
+    					See the following chapter for a clean way on requesting a specific API.
+    				</p>
+    				<p class="lead">
+    					<a href="#toc">Back to top</a>
+    				</p>
+    			</section>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="use_api">
+    				<h2 class="page-header"><a href="#use_api">Requesting and using an API</a></h2>
+    				<p class="lead">
+    					TODO
+    				</p>
+    				<p class="lead">
+    					<a href="#toc">Back to top</a>
+    				</p>
+    			</section>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="classes_xwlist">
+    				<h2 class="page-header"><a href="#classes_xwlist">Core class: xwos.xwlist (doubly linked list)</a></h2>
+    				<p class="lead">
+    					A <a href="https://en.wikipedia.org/wiki/Doubly_linked_list">doubly linked list</a> is a special list where each list member (node)
+    					holds reference to previous and next node. It has some performance benefits compared to arrays when checking for duplicate entries
+    					or getting the next/previous node.
+    				</p>
+    			</section>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-6">
+   				<p class="lead">
+   					You can use any <b>XWOS</b> object instance created by <b>CMR</b> with <code>xwlist</code>. There is no limitation.
+   					However currently the list only supports each object exactly once. As soon as the object is contained in a list
+   					it must not be added to other lists. This behavior will change in future releases by supporting list
+   					<code>tags</code>. For example, you can create multiple lists for tag <code>"MyUniqueList"</code> and the object
+   					can only be added once to any of this lists but it may be added to some list with other tags.
+   				</p>
+   				<p class="lead">
+   					TODO ref to luadoc
+   				</p>
+    		</div>
+    		<div class="col-md-6">
+   				<pre class="prettyprint"><code class="lua">-- create some items
+local item1 = _CMR.new("MyItemClass")
+local item2 = _CMR.new("MyItemClass")
+-- etc.
+
+-- create a list with initial items
+local list = _CMR.new("xwos.xwlist", item1, item2)
+
+-- playing around
+list:push(item3)
+list:unshift(item4)
+list:remove(item2)
+list:insert(item5, item1)
+
+-- iterate
+for item in list:iterate() do
+    -- do something
+end
+</code></pre>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<p class="lead">
+    				<a href="#toc">Back to top</a>
+    			</p>
+    		</div>
+    	</div>
+    </section>
+  </div>
+
+  <footer class="main-footer">
+    <div class="pull-right hidden-xs">
+      Design by adminLTE
+    </div>
+    <strong>Copyright &copy; 2018 xworlds.eu.</strong> All rights reserved.
+  </footer>
+</div>
+
+<script src="../plugins/jQuery/jquery-2.2.3.min.js"></script>
+<script src="../bootstrap/js/bootstrap.min.js"></script>
+<script src="../dist/js/app.min.js"></script>
+<script src="../plugins/highlite/highlight.pack.js"></script>
+
+<script type="text/javascript">
+$(function(){
+	$("#sidebar").load("parts_menu.html")
+	$("#navbar-custom-menu").load("../parts_nav.html")
+});
+hljs.initHighlightingOnLoad();
+</script>
+</body>
+</html>

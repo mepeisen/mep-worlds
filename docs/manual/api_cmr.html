@@ -92,8 +92,8 @@
     				<h2 class="page-header"><a href="#overview">Overview</a></h2>
     				<p class="lead">
     					<b>XWOS</b> contains a complete class manager. This class manager can be accessed by global <code>_CMR</code>. Classes are well known from many other programming languages.
-    					As an experienced LUA developer You should already be familiar with tables and functions on tables. Let me explain the main difference between LUA tables and <b>XWOS</b> class manager (called <b>CMR</b>).
-    					Before starting You should read the LUA documentation on tables and metatables. Experiment with small tables in your custom program. 
+    					As an experienced LUA developer you should already be familiar with tables and functions on tables. Let me explain the main difference between LUA tables and <b>XWOS</b> class manager (called <b>CMR</b>).
+    					Before starting you should read the LUA documentation on tables and metatables. Experiment with small tables in your custom program. 
     				</p>
     				<p class="lead">
     					The <b>CMR</b> helps you creating a class descriptor, describing the needs of your class. Let us compare a classic lua table with its <b>CMR</b> variant.
@@ -105,6 +105,9 @@
     					utf8 encoding. Class files simply ending with ".lua" are meant to hold a source file written with ASCII or ISO-8859-1 encoding (the classic ComputerCraft charset). If utf8 support is avialable
     					the <b>CMR</b> will preferr loading the utf8 class file and only fall back to ASCII if no utf8 class file is avilable.
     				</p>
+	   				<p class="lead">
+	   					TODO ref to luadoc
+	   				</p>
     			</section>
     		</div>
     	</div>
@@ -254,7 +257,7 @@ s:deposit(100.00)
     			<div class="callout callout-danger lead">
     				<h4>Danger!</h4>
     				<p>
-    					You should not save the class descriptor to any variable if You do not need it. After declaring a class you should never change it during runtime. Do not add new methods etc.
+    					You should <b>NOT</b> save the class descriptor to any variable if you do not need it. After declaring a class you should never change it during runtime. Do not add new methods etc.
     					The class manager will not work correctly if a class is changed after objects are already created. Various functions (f.e. constructors) get three arguments
     					(<code>self</code>, <code>clazz</code> and <code>privates</code>). The second argument named <code>clazz</code> contains a class descriptor. Do not use
     					it to change the class during runtime.
@@ -374,9 +377,9 @@ somepackage.subpackage.MyClass.staticfunc("value-for-arg1", "value-for-arg2", "s
     		<div class="callout callout-info lead">
     			<h4>Information!</h4>
     			<p>
-    				In second example You can see the invocation to <code>_CMR.load</code>. Normally each class needs to be loaded before it is used.
+    				In second example you can see the invocation to <code>_CMR.load</code>. Normally each class needs to be loaded before it is used.
     				Specially statics are not available as long as the class is not loaded. Creating objects via method <code>new</code> always calls
-    				<code>load</code> for you. So there is exactly one situation that needs an explicit call to <code>load</code>: If You want to
+    				<code>load</code> for you. So there is exactly one situation that needs an explicit call to <code>load</code>: If you want to
     				call static functions and the class was not used before. After the class was loaded once any further invocation does not have
     				any effect.
     			</p>
@@ -405,7 +408,7 @@ somepackage.subpackage.MyClass.staticfunc("value-for-arg1", "value-for-arg2", "s
     			</p>
     			<p class="lead">
     				In the first example there was a small factory method simply calling <code>_CMR.new</code>. A factory may be able to decide what object fits the callee needs.
-    				Following this example You may provide two variants for creating banking accounts. See the example for details. It contains a factory for the original
+    				Following this example you may provide two variants for creating banking accounts. See the example for details. It contains a factory for the original
     				<code>Account</code> class as well as a factory for the derived <code>SpecialAccount</code> class.
     			</p>
     		</div>
@@ -442,7 +445,7 @@ end)
     	<div class="row">
     		<div class="col-md-6">
     			<p class="lead">
-    				Sometimes You want to declare private static variables inside your class objects. <b>CMR</b> support two ways:
+    				Sometimes you want to declare private static variables inside your class objects. <b>CMR</b> support two ways:
     			</p>
     			<p class="lead">
     				1) On each class descriptor you will find a table, called <code>user</code>. You can put anything inside it you like.
@@ -454,7 +457,7 @@ end)
     				and <code>getPstat</code> are aware of derived classes.
     			</p>
     			<p class="lead">
-    				You should always prefer using the <code>pstat</code> way if You have class hierarchies allowing to override the private
+    				You should always prefer using the <code>pstat</code> way if you have class hierarchies allowing to override the private
     				class statics.
     			</p>
     		</div>
@@ -487,7 +490,7 @@ _CMR.class("DerivedClass").extends("MyClass")
     				the class descriptor of the class where you declared the method. That is the reason why accessing the <code>user</code> field of the class
     				descriptor may produce unwanted results as soon as anyone derives the class. A way to access the correct class descriptor will be storing the class
     				descriptor inside a local variable and access the <code>user</code> variable by accessing this local variable. However this is not a nice
-    				"lua way" compared to use a local variable on top scope of your class file. The <code>user</code> variable may be important as soon as soon as You want to provide some API across multiple lua files without
+    				"lua way" compared to use a local variable on top scope of your class file. The <code>user</code> variable may be important as soon as soon as you want to provide some API across multiple lua files without
     				putting it to public static functions. Everyone allowed to access the class descriptor can access the <code>user</code> variable.
     			</p>
   			</div>
@@ -516,7 +519,7 @@ _CMR.class("DerivedClass").extends("MyClass")
     			</p>
     			<p class="lead">
     				<b>CMR</b> allows you to declare singletons by invoking the <code>singleton</code> method on class descriptor.
-    				Trying to create more instances of a singleton via <code>new</code> will result in errors. Instead You can retrieve
+    				Trying to create more instances of a singleton via <code>new</code> will result in errors. Instead you can retrieve
     				the instance by invoking <code>get</code>.
     			</p>
     			<p class="lead">
@@ -533,8 +536,8 @@ _CMR.class("DerivedClass").extends("MyClass")
     				you invoke <code>new</code> before any invocation to <code>get</code>. Normally <b>CMR</b> will create the singleton
     				instance on demand (lazy initialization) as soon as anyone calls <code>get</code> for the singleton. But it will always invoke the
     				constructor without any parameter. For most singletons this is fairly OK. If you like to pass any argument to
-    				singleton constructor You must invoke <code>new</code> after declaring the singleton class and before any other invocation to
-    				<code>get</code>. Now You are able to pass additional arguments.
+    				singleton constructor you must invoke <code>new</code> after declaring the singleton class and before any other invocation to
+    				<code>get</code>. Now you are able to pass additional arguments.
     			</p>
     		</div>
     		<div class="col-md-6">
@@ -583,7 +586,7 @@ assert(myinstance == _CMR.get("MyClass")) -- get returns the previous instance
     			</p>
     			<p class="lead">
     				Adding abstract functions can be done by invoking <code>afunc</code> on class descriptor. As parameters pass the function
-    				name to be abstract. You can provide multiple strings to create multiple abstract functions if You like.
+    				name to be abstract. You can provide multiple strings to create multiple abstract functions if you like.
     			</p>
     			<p class="lead">
     				However the <b>CMR</b> does not check if any regular class contains abstract functions. This may change in future versions.
@@ -719,7 +722,7 @@ obj:myfunc("value-for-arg1", "value-for-arg2", "some-third-argument", "some-four
     				<li>mixins (<code>mixin</code>)</li>
     			</ul>
     			<p class="lead">
-    				Once you declare a method You already got from a base class it means You want to override it
+    				Once you declare a method you already got from a base class it means you want to override it
     				and provide a new implementation.
     			</p>
     			<p class="lead">
@@ -771,7 +774,7 @@ obj:hello("player 07") -- prints "Hello 'player07'"
     			<h4>Warning!</h4>
     			<p>
     				Remember that the <code>clazz</code> parameter <b>ALWAYS</b> is the class descriptor of the object you are working with. It does never contain 
-    				the class descriptor of the class where you declared the method. Even when calling <code>super</code> You will always get the class descriptor
+    				the class descriptor of the class where you declared the method. Even when calling <code>super</code> you will always get the class descriptor
     				of the object you are working on.
     			</p>
   			</div>
@@ -914,14 +917,14 @@ end)
     				own <code>privates</code> table.
     			</p>
     			<p class="lead">
-    				Add a mixin by invoking method <code>mixin</code> on class descriptor. You can add as many mixins as You like.
-    				If there are multiple functions having the same name always the first mixin is used. You can even override any
-    				function got from mixin with your own implementation if You like by invoking <code>func</code>.
+    				Add a mixin by invoking method <code>mixin</code> on class descriptor. You can add as many mixins as you like.
+    				If there are multiple functions having the same name always the first mixin is used. you can even override any
+    				function got from mixin with your own implementation if you like by invoking <code>func</code>.
     			</p>
     			<p class="lead">
-    				Each mixin is created lazy after object constructor if and only if You did not add the mixin property to object
+    				Each mixin is created lazy after object constructor if and only if you did not add the mixin property to object
     				<code>privates</code>. In other words: You are free to create the mixin manually and save it to <code>privates</code>
-    				early within your constructor. That allows You to pass some parameters during mixin construction or to use it
+    				early within your constructor. That allows you to pass some parameters during mixin construction or to use it
     				early within constructors.
     			</p>
     		</div>
@@ -967,15 +970,15 @@ print(obj:getFoo2()) -- prints "FOO"; does exactly the same than getFoo
     		<div class="col-md-6">
     			<p class="lead">
     				In object orientated programming sometimes a functionality is spread over multiple classes. You may require to allow another class
-    				access to some of your variables and functions but You do not want to add those functions and variables to the public (<code>self</code>).
+    				access to some of your variables and functions but you do not want to add those functions and variables to the public (<code>self</code>).
     				This is done via declaring <a href="https://en.wikipedia.org/wiki/Friend_function">special friends.</a>
     			</p>
     			<p class="lead">
     				Some languages provide access levels (protected functions, package functions etc.). Within LUA there is no such support.
-    				Instead <b>CMR</b> helps you by invoking method <code>friend</code> on Your class descriptor. 
+    				Instead <b>CMR</b> helps you by invoking method <code>friend</code> on your class descriptor. 
     			</p>
     			<p class="lead">
-    				If You want class <code>AHelper</code> to access the privates of class <code>ASecret</code> you have to declare
+    				If you want class <code>AHelper</code> to access the privates of class <code>ASecret</code> you have to declare
     				<code>AHelper</code> being the friend of <code>ASecret</code>. There is no direct way to become a friend of <code>ASecret</code>
     				after the class was declared.
     			</p>
@@ -1034,12 +1037,12 @@ print(helper:getSecretPass(aSecret)) -- prints "secretpass"; helper class is all
     		<div class="col-md-6">
     			<p class="lead">
     				Explaining object annotations is best done by giving a simple example. Think of a linked list.
-    				Adding any object to the linked list requires You to save some properties <code>next</code>, <code>prev</code>
+    				Adding any object to the linked list requires you to save some properties <code>next</code>, <code>prev</code>
     				and maybe <code>owner</code> to the list member object. But what to do if the object does not support these
     				properties?
     			</p>
     			<p class="lead">
-    				The solution is simple for You: Add some small annotation to the object. This annotation can be retrieved later on. 
+    				The solution is simple for you: Add some small annotation to the object. This annotation can be retrieved later on. 
     			</p>
     			<p class="lead">
     				See the given example for details.

@@ -57,7 +57,7 @@
 -------------------------------------------------------------------------------
 -- Loads a Lua script as an API in its own namespace. It will be available to all programs that run on the terminal.
 -- @function [parent=#os] unloadAPI
--- @param name String
+-- @param #string name String
 
 -------------------------------------------------------------------------------
 -- Blocks until the computer receives an event, or if target-event is specified, will block until an instance of target-event occurs. os.pullEvent(target-event) returns the event and any parameters the event may have. If a target-event is specified, the computer will not break for any other events (except termination). 

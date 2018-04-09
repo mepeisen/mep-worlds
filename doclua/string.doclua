@@ -21,7 +21,7 @@
 -- @param #string s string to handle.
 -- @param #number i start index, default value is 1.
 -- @param #number j end index, default value is `i`.
--- @return the internal numerical codes of the characters `s[i]`, `s[i+1]`,..., `s[j]`
+-- @return ... the internal numerical codes of the characters `s[i]`, `s[i+1]`,..., `s[j]`
 
 -------------------------------------------------------------------------------
 -- Receives zero or more integers. Returns a string with length equal to
@@ -40,7 +40,7 @@
 -- function, so that a later `loadstring` on this string returns a copy of
 -- the function. `function` must be a Lua function without upvalues.
 -- @function [parent=#string] dump
--- @param f the function to dump.
+-- @param #function f the function to dump.
 -- @return #string a string representation of the given function.
 
 -------------------------------------------------------------------------------
@@ -164,7 +164,7 @@
 -- @function [parent=#string] gsub
 -- @param #string s string to handle.
 -- @param #string pattern pattern to search. 
--- @param repl replacement could be a string, a table or a function.
+-- @param #any repl replacement could be a string, a table or a function.
 -- @param #number n number of occurences to replace, default is nil which means all occurences. 
 -- @return #string a modified copy of `s`.
 
@@ -259,7 +259,7 @@
 
 -------------------------------------------------------------------------------
 -- Lowers substring i to j in a given string
--- @function [parent=#string] lower
+-- @function [parent=#string] lowerRange
 -- @param #string str a string
 -- @param #number i the starting index. Defaults to 1 if not given. Can be negative (counting from right to left)
 -- @param #number j the ending index. Default to string length if not given.
@@ -573,7 +573,7 @@
 
 -------------------------------------------------------------------------------
 -- Repeats a given string concatenated with a given separator count times.
--- @function [parent=#string] rep
+-- @function [parent=#string] rep2
 -- @param #string str a string
 -- @param #number count the repetitions count. Defaults to 2 when not given.
 -- @param #string sep a separator. Defaults to space character when not given.

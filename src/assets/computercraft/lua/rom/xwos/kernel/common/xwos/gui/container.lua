@@ -19,7 +19,7 @@ _CMR.load("xwos.xwlist")
 
 --------------------------------
 -- gui component that holds children but does not draw anything from itself; it has no size
--- @type xwos.gui.container
+-- @module xwos.gui.container
 -- @extends xwos.gui.component#xwos.gui.component
 _CMR.class("xwos.gui.container").extends("xwos.gui.component")
 
@@ -45,7 +45,7 @@ _CMR.class("xwos.gui.container").extends("xwos.gui.component")
 
 .ctor(
 ------------------------
--- @function [parent=#xwcintern] width
+-- @function [parent=#xwcintern] _ctor
 -- @param #xwos.gui.container self
 -- @param classmanager#clazz clazz
 -- @param #xwcprivates privates

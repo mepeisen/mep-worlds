@@ -37,7 +37,7 @@ local coKernel -- the kernels boot process
 -- local origStringMeta = getmetatable("")
 --------------------------------
 -- local kernel
--- @type xwos.kernel
+-- @module xwos.kernel
 _CMR.class("xwos.kernel").singleton()
 
 ------------------------
@@ -113,7 +113,7 @@ function(self, clazz, privates, ver, kernelpaths, kernelRoot, cpfactory, oldGlob
     --------------------------------
     -- Require for kernel scripts
     -- @function [parent=#xwos.kernel] cpfactory
-    -- @param table env the environment to use
+    -- @param #table env the environment to use
     self.cpfactory = cpfactory
     
     print("installing extension moses...")
@@ -301,7 +301,7 @@ function(self, clazz, privates, ver, kernelpaths, kernelRoot, cpfactory, oldGlob
     string.capitalizesEach = allen.capitalizesEach
     string.capitalize = allen.capitalize
     string.lowerFirst = allen.lowerFirst
-    string.lower = allen.lower
+    string.lowerRange = allen.lower
     string.isLowerCase = allen.isLowerCase
     string.isUpperCase = allen.isUpperCase
     string.startsLowerCase = allen.startsLowerCase
@@ -344,7 +344,7 @@ function(self, clazz, privates, ver, kernelpaths, kernelRoot, cpfactory, oldGlob
     string.strLeft = allen.strLeft
     string.strLeftBack = allen.strLeftBack
     string.toSentence = allen.toSentence
-    string.rep = allen.rep
+    string.rep2 = allen.rep
     string.surround = allen.surround
     string.quote = allen.quote
     string.bytes = allen.bytes
@@ -412,7 +412,7 @@ function(self, clazz, privates, ver, kernelpaths, kernelRoot, cpfactory, oldGlob
     
     --------------------------------
     -- the new (sandbox) environment for processes
-    -- @field [parent=#xwos.kernel] #global nenv
+    -- @field [parent=#xwos.kernel] global#global nenv
     self.nenv = {}
     self:debug("preparing sandbox for root process", self.nenv)
     local nenvmt = {

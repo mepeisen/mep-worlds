@@ -35,7 +35,7 @@
 -- @function [parent=#table] insert
 -- @param #table table table to modify.
 -- @param #number pos index of insertion.
--- @param value value to insert.
+-- @param #any value value to insert.
 
 -------------------------------------------------------------------------------
 -- Returns the largest positive numerical index of the given table, or
@@ -66,7 +66,7 @@
 -- The sort algorithm is not stable; that is, elements considered equal by the given order may have their relative positions changed by the sort.
 -- @function [parent=#table] sort
 -- @param #table table table to sort.
--- @param comp a function which take to table and returns true when the first is less than the second.
+-- @param #function comp a function which take to table and returns true when the first is less than the second.
 
 
 -- taken from moses.lua
@@ -303,7 +303,7 @@
 
 ------------------------------------------------------------------------------- 
 -- Sorts a table, in-place. If a comparison function is given, it will be used to sort values.
--- @function [parent=#table] sort
+-- @function [parent=#table] sort2
 -- @param #table t a table
 -- @param #function comp a comparison function prototyped as `comp (a, b)`, defaults to <tt><</tt> operator.
 -- @return #table the initial table, sorted.
@@ -659,7 +659,7 @@
 -- @function [parent=#table] interpose
 -- @param #any value a value
 -- @param #table array an array
--- @return a new array
+-- @return #table a new array
 
 ------------------------------------------------------------------------------- 
 -- Produces a flexible list of numbers. If one positive value is passed, will count from 0 to that value,
@@ -718,7 +718,7 @@
 -- passed, it will be used as a separator. Passing `i` and `j` will result in concatenating
 -- only values within `[i, j]` range.
 -- <br/><em>Aliased as `join`</em>
--- @function [parent=#table] concat
+-- @function [parent=#table] concat2
 -- @param #table array a given array
 -- @param #string sep a separator string, defaults to the empty string `''`.
 -- @param #number i the starting index, defaults to 1.

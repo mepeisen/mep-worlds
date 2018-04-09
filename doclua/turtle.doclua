@@ -173,9 +173,9 @@
  
 -------------------------------------------------------------------------------
 -- Compare the current selected slot and the given slot to see if the items are the same. Returns true if they are the same, false if not. 
--- @return #boolean result 
 -- @function [parent=#turtle] compareTo
 -- @param #number slot 
+-- @return #boolean result 
  
 -------------------------------------------------------------------------------
 -- Drops all items in the selected slot, or specified, drops count items.

@@ -17,7 +17,7 @@
 
 --------------------------------
 -- gui component holding a static, colored text
--- @type xwos.gui.text
+-- @module xwos.gui.text
 -- @extends xwos.gui.component#xwos.gui.component
 _CMR.class("xwos.gui.text").extends("xwos.gui.component")
 
@@ -193,7 +193,7 @@ end) -- function setPos
 
 .func("paint",
 ------------------------
--- @function [parent=#xwcintern] setPos
+-- @function [parent=#xwcintern] paint
 -- @param #xwos.gui.text self
 -- @param classmanager#clazz clazz
 -- @param #xwcprivates privates
