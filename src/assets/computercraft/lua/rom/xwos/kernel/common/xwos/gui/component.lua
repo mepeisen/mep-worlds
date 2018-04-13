@@ -321,9 +321,26 @@ end) -- function clearVisible
 -- @param #xwcprivates privates
 -- @return #xwos.gui.component self for chaining
 function (self, clazz, privates)
-    if self._container ~= nil and self:isVisible() then
-        self._container:redraw()
+    if self:container() ~= nil and self:isVisible() then
+        self:container():redraw()
     end -- if container
 end) -- function redraw
+
+------------------------
+-- Returns the gui container
+-- @function [parent=#xwos.gui.component] container
+-- @param #xwos.gui.component self self
+-- @return #xwos.gui.container container of nil if object is not contained in any container
+
+.func("container",
+------------------------
+-- @function [parent=#xwcintern] container
+-- @param #xwos.gui.component self
+-- @param classmanager#clazz clazz
+-- @param #xwcprivates privates
+-- @return #xwos.gui.container container of nil if object is not contained in any container
+function (self, clazz, privates)
+    return self._container
+end) -- function container
 
 return nil

@@ -335,8 +335,8 @@ end) -- function paint
 -- @param #number bg
 -- @return #xwos.gui.container
 function (self, clazz, privates, x, y, str, fg, bg)
-    if self._container ~= nil and self:isVisible() then
-        self._container:str(x + self:x(), y + self:y(), str, fg, bg)
+    if self:container() ~= nil and self:isVisible() then
+        self:container():str(x + self:x(), y + self:y(), str, fg, bg)
     end -- if container and visible
     return self
 end) -- function str
@@ -363,8 +363,8 @@ end) -- function str
 -- @param #number height
 -- @return window#windowObject
 function (self, clazz, privates, x, y, width, height)
-    if self._container ~= nil then
-        return self._container:crwin(x + self:x(), y + self:y(), width, height)
+    if self:container() ~= nil then
+        return self:container():crwin(x + self:x(), y + self:y(), width, height)
     end -- if container
 end) -- function crwin
 
@@ -390,8 +390,8 @@ end) -- function crwin
 -- @param #number height
 -- @param window#windowObject win
 function (self, clazz, privates, x, y, width, height, win)
-    if self._container ~= nil then
-        self._container:movewin(x + self:x(), y + self:y(), width, height, win)
+    if self:container() ~= nil then
+        self:container():movewin(x + self:x(), y + self:y(), width, height, win)
     end -- if container
 end) -- function movewin
 

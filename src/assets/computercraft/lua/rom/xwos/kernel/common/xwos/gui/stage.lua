@@ -140,8 +140,8 @@ end) -- function height
 function (self, clazz, privates, width, height)
     -- generate on demand
     if privates._window == nil then
-        if self._container ~= nil then
-            privates._window = self._container:crwin(self:x(), self:y(), width, height)
+        if self:container() ~= nil then
+            privates._window = self:container():crwin(self:x(), self:y(), width, height)
             return -- is already has the correct position and size
         else
             return -- we have nothing to do yet; resize without known terminal
@@ -149,8 +149,8 @@ function (self, clazz, privates, width, height)
     end -- if not window
     
     -- resize
-    if self._container ~= nil then
-        self._container:movewin(self:x(), self:y(), width, height, privates._window)
+    if self:container() ~= nil then
+        self:container():movewin(self:x(), self:y(), width, height, privates._window)
     else
         privates._window.reposition(self:x(), self:y(), width, height)
     end -- if container
@@ -212,8 +212,8 @@ end) -- function y
 function (self, clazz, privates, x, y)
     -- generate on demand
     if privates._window == nil then
-        if self._container ~= nil then
-            privates._window = self._container:crwin(x, y, self:width(), self:height())
+        if self:container() ~= nil then
+            privates._window = self:container():crwin(x, y, self:width(), self:height())
             return -- is already has the correct position and size
         else
             return -- we have nothing to do yet; resize without known terminal
@@ -221,8 +221,8 @@ function (self, clazz, privates, x, y)
     end -- if not window
     
     -- resize
-    if self._container ~= nil then
-        self._container:movewin(x, y, self:width(), self:height(), privates._window)
+    if self:container() ~= nil then
+        self:container():movewin(x, y, self:width(), self:height(), privates._window)
     else
         privates._window.reposition(x, y, self:width(), self:height())
     end -- if container
@@ -246,15 +246,15 @@ end) -- function setPos
 function (self, clazz, privates)
     if privates._visible then
         if privates._window == nil then
-            if self._container ~= nil then
-                privates._window = self._container:crwin(self:x(), self:y(), self:width(), self:height())
+            if self:container() ~= nil then
+                privates._window = self:container():crwin(self:x(), self:y(), self:width(), self:height())
             else
                 return -- we have nothing to do yet
             end -- if container
         end -- if not window
     
-        if self._container ~= nil then
-            self._container:redraw()
+        if self:container() ~= nil then
+            self:container():redraw()
         else
             self:paint()
         end -- if container
@@ -276,8 +276,8 @@ end) -- function redraw
 -- @return #xwos.gui.stage
 function (self, clazz, privates)
     if privates._window == nil then
-        if self._container ~= nil then
-            privates._window = self._container:crwin(self:x(), self:y(), self:width(), self:height())
+        if self:container() ~= nil then
+            privates._window = self:container():crwin(self:x(), self:y(), self:width(), self:height())
         else
             return -- we have nothing to do yet
         end -- if container
@@ -314,8 +314,8 @@ end) -- function paint
 function (self, clazz, privates, x, y, str, fg, bg)
     -- generate on demand TODO: Duplicate code
     if privates._window == nil then
-        if self._container ~= nil then
-            privates._window = self._container:crwin(self:x(), self:y(), self:width(), self:height())
+        if self:container() ~= nil then
+            privates._window = self:container():crwin(self:x(), self:y(), self:width(), self:height())
         else
             return -- we have nothing to do yet
         end -- if container
@@ -353,8 +353,8 @@ end) -- function str
 function (self, clazz, privates, x, y, width, height)
     -- generate on demand TODO: Duplicate code
     if privates._window == nil then
-        if self._container ~= nil then
-            privates._window = self._container:crwin(self:x(), self:y(), self:width(), self:height())
+        if self:container() ~= nil then
+            privates._window = self:container():crwin(self:x(), self:y(), self:width(), self:height())
         else
             return -- we have nothing to do yet
         end -- if container

@@ -22,6 +22,12 @@ return function(boot)
     boot.krequire('tests/classmanager')
     boot.krequire('tests/xwos_xwlist')
     boot.krequire('tests/xwos_kernel_modulesmgr')
+    boot.krequire('tests/xwos_kernel_process')
+    -- boot.krequire('tests/xwos_gui_component')
+    -- boot.krequire('tests/xwos_gui_container')
+    -- boot.krequire('tests/xwos_gui_frame')
+    -- boot.krequire('tests/xwos_gui_stage')
+    -- boot.krequire('tests/xwos_gui_text')
     
     local junit_stdout = ""
     local junit_stderr = ""

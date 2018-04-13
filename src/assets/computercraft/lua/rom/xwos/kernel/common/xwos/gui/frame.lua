@@ -272,18 +272,18 @@ end) -- function setPos
 -- @param #xwcprivates privates
 -- @return #xwos.gui.frame
 function (self, clazz, privates)
-    if self._container ~= nil and self:isVisible() then
-        self._container:str(self:x(), self:y(), self:getStyle("tl"), self:getStyle("ffg"), self:getStyle("fbg"))
-        self._container:str(self:x() + 1, self:y(), privates._top, self:getStyle("ffg"), self:getStyle("fbg"))
-        self._container:str(self:x() + self:width() - 1, self:y(), self:getStyle("tr"), self:getStyle("ffg"), self:getStyle("fbg"))
+    if self:container() ~= nil and self:isVisible() then
+        self:container():str(self:x(), self:y(), self:getStyle("tl"), self:getStyle("ffg"), self:getStyle("fbg"))
+        self:container():str(self:x() + 1, self:y(), privates._top, self:getStyle("ffg"), self:getStyle("fbg"))
+        self:container():str(self:x() + self:width() - 1, self:y(), self:getStyle("tr"), self:getStyle("ffg"), self:getStyle("fbg"))
         for i=1, self:height() - 1, 1 do
-            self._container:str(self:x(), self:y() + i, privates._l, self:getStyle("ffg"), self:getStyle("fbg"))
-            self._container:str(self:x() + 1, self:y() + i, privates._mid, colors.black, self:getStyle("bbg"))
-            self._container:str(self:x() + self:width() - 1, self:y() + i, self:getStyle("r"), self:getStyle("ffg"), self:getStyle("fbg"))
+            self:container():str(self:x(), self:y() + i, privates._l, self:getStyle("ffg"), self:getStyle("fbg"))
+            self:container():str(self:x() + 1, self:y() + i, privates._mid, colors.black, self:getStyle("bbg"))
+            self:container():str(self:x() + self:width() - 1, self:y() + i, self:getStyle("r"), self:getStyle("ffg"), self:getStyle("fbg"))
         end -- for height
-        self._container:str(self:x(), self:y() + self:height() - 1, self:getStyle("bl"), self:getStyle("ffg"), self:getStyle("fbg"))
-        self._container:str(self:x() + 1, self:y() + self:height() - 1, privates._bottom, self:getStyle("ffg"), self:getStyle("fbg"))
-        self._container:str(self:x() + self:width() - 1, self:y() + self:height() - 1, self:getStyle("br"), self:getStyle("ffg"), self:getStyle("fbg"))
+        self:container():str(self:x(), self:y() + self:height() - 1, self:getStyle("bl"), self:getStyle("ffg"), self:getStyle("fbg"))
+        self:container():str(self:x() + 1, self:y() + self:height() - 1, privates._bottom, self:getStyle("ffg"), self:getStyle("fbg"))
+        self:container():str(self:x() + self:width() - 1, self:y() + self:height() - 1, self:getStyle("br"), self:getStyle("ffg"), self:getStyle("fbg"))
         privates._content:paint()
     end -- if container and visible
     return self
@@ -356,8 +356,8 @@ end) -- function paint
 -- @param #number bg
 -- @return #xwos.gui.container
 function (self, clazz, privates, x, y, str, fg, bg)
-    if self._container ~= nil and self:isVisible() then
-        self._container:str(x + self:x(), y + self:y(), str, fg, bg)
+    if self:container() ~= nil and self:isVisible() then
+        self:container():str(x + self:x(), y + self:y(), str, fg, bg)
     end -- if container and visible
     return self
 end) -- function str
@@ -384,8 +384,8 @@ end) -- function str
 -- @param #number height
 -- @return window#windowObject
 function (self, clazz, privates, x, y, width, height)
-    if self._container ~= nil then
-        return self._container:crwin(x + self:x(), y + self:y(), width, height)
+    if self:container() ~= nil then
+        return self:container():crwin(x + self:x(), y + self:y(), width, height)
     end -- if container
 end) -- function crwin
 
@@ -411,8 +411,8 @@ end) -- function crwin
 -- @param #number height
 -- @param window#windowObject win
 function (self, clazz, privates, x, y, width, height, win)
-    if self._container ~= nil then
-        self._container:movewin(x + self:x(), y + self:y(), width, height, win)
+    if self:container() ~= nil then
+        self:container():movewin(x + self:x(), y + self:y(), width, height, win)
     end -- if container
 end) -- function movewin
 

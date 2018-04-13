@@ -34,6 +34,7 @@ local origyield = coroutine.yield
 local originsert = table.insert
 local origqueue = os.queueEvent
 local unpack = unpack
+local tpop = table.pop
 
 -- TODO hide xwos.kernel.process constructor (only allow instantiation from xwos.kernel.processes functions) 
 
@@ -153,7 +154,7 @@ end) -- ctor
 -- @param #procprivates privates
 -- @return #boolean
 function(self, clazz, privates)
-    -- TODO
+    return privates.procstate == "finished"
 end) -- function isFinished
 
 -------------------------------
@@ -170,7 +171,7 @@ end) -- function isFinished
 -- @param #procprivates privates
 -- @return #boolean
 function(self, clazz, privates)
-    -- TODO
+    return privates.joined > 0
 end) -- function hasJoined
 
 -------------------------------
@@ -187,7 +188,7 @@ end) -- function hasJoined
 -- @param #procprivates privates
 -- @return #table
 function(self, clazz, privates)
-    -- TODO
+    return tpop(privates.evqueue, 1)
 end) -- function popev
 
 -------------------------------
@@ -204,7 +205,7 @@ end) -- function popev
 -- @param #procprivates privates
 -- @param #table
 function(self, clazz, privates, event)
-    -- TODO
+    originsert(privates.evqueue, event)
 end) -- function pushev
 
 -------------------------------
@@ -410,7 +411,7 @@ end) -- function spawnClass
 function(self, clazz, privates, func, ...)
     local env0 = privates.kernel.nenv
     self:debug("prepare spawn")
-    -- TODO ... may contain functions and objects with metatables; this may cause problems by mxing environments
+    -- TODO ... may contain functions and objects with metatables; this may cause problems by mixing environments
     -- establish an alternative for IPC (inter process communication)
     local res = {pcall(origser, {...})}-- this will cause an error if serializing forbidden types (functions etc.)
     if not res[1] then

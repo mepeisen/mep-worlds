@@ -199,8 +199,8 @@ end) -- function setPos
 -- @param #xwcprivates privates
 -- @return #xwos.gui.text
 function (self, clazz, privates)
-    if self._container ~= nil and self:isVisible() then
-        self._container:str(self:x(), self:y(), privates._content, self:getStyle("fg"), self:getStyle("bg"))
+    if self:container() ~= nil and self:isVisible() then
+        self:container():str(self:x(), self:y(), privates._content, self:getStyle("fg"), self:getStyle("bg"))
     end -- if container and visible
     return self
 end) -- function paint
