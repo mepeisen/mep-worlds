@@ -64,6 +64,10 @@ function(self, clazz, privates, kernel)
     -------------------------------
     -- security kernel module
     -- @field [parent=#mminstances] xwos.modules.security#xwos.modules.security security
+    
+    -------------------------------
+    -- user kernel module
+    -- @field [parent=#mminstances] xwos.modules.user#xwos.modules.user user
 end) -- ctor
 
 --------------------------------

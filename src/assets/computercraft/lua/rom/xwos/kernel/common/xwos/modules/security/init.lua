@@ -15,6 +15,11 @@
 --    You should have received a copy of the GNU General Public License
 --    along with xwos.  If not, see <http://www.gnu.org/licenses/>.
 
+local ser = textutils.serialize
+local unser = textutils.unserialize
+local pairs = pairs
+local tins = table.insert
+
 -----------------------
 -- @module xwos.modules.security
 _CMR.class("xwos.modules.security")
@@ -41,14 +46,39 @@ function (self, clazz, privates, kernel)
     -- kernel reference
     -- @field [parent=#xwsecprivates] xwos.kernel#xwos.kernel kernel
     privates.kernel = kernel
+    
     ------------------
     -- the known profiles by name
     -- @field [parent=#xwsecprivates] #map<#string,xwos.modules.security.profile#xwos.modules.security.profile> profiles
     privates.profiles = {}
-    privates:createProfile("root")
-    privates:createProfile("admin")
-    privates:createProfile("user")
-    privates:createProfile("guest")
+    
+    ------------------
+    -- next id being available for profiles
+    -- @field [parent=#xwsecprivates] #number nextId
+    privates.nextId = 1
+    
+    local d = kernel:readSecureData("core/security.dat")
+    if d then
+        d = unser(d)
+        privates.nextId = d.nextId
+        for k,v in pairs(d.profiles) do
+            local p = _CMR.new("xwos.modules.security.profile", v.name, privates.kernel, v.id)
+            privates.profiles[v.name] = p
+            p:load()
+        end -- for profiles
+    else -- if secure data
+        local root = privates:createProfile("root")
+        root:setApi("*", nil, "g")
+        root:setAccess("*", "g")
+        local admin = privates:createProfile("admin")
+        -- TODO useful grant rights
+        root:setApi("*", nil, "a")
+        root:setAccess("*", "a")
+        local user = privates:createProfile("user")
+        -- TODO useful user rights
+        local guest = privates:createProfile("guest")
+        -- TODO useful guest rights
+    end -- if secure data
 end) -- ctor
 
 ------------------------
@@ -68,10 +98,32 @@ end) -- ctor
 -- @param #string name
 -- @return xwos.modules.security.profile#xwos.modules.security.profile
 function (self, clazz, privates, name)
-    local res = _CMR.new("xwos.modules.security.profile", name)
+    local res = _CMR.new("xwos.modules.security.profile", name, privates.kernel, privates.nextId)
     privates.profiles[name] = res
+    privates.nextId = privates.nextId + 1
+    self:save()
+    res:save()
     return res
 end) -- createProfile
+
+---------------------------------
+-- Save security to secure kernel storage
+-- @function [parent=#xwos.modules.security] save
+-- @param #xwos.modules.security self self
+
+.func("save",
+---------------------------------
+-- @function [parent=#xwsecintern] save
+-- @param #xwos.modules.security self
+-- @param classmanager#clazz clazz
+-- @param #xwsecprivates privates
+function(self, clazz, privates)
+    local d = { nextId = privates.nextId, profiles = {} }
+    for k, v in pairs(privates.profiles) do
+        tins(d.profiles, {id = v:id(), name = v:name()})
+    end -- for profiles
+    privates.kernel:writeSecureData("core/security.dat", ser(d))
+end) -- function save
 
 ---------------------------------
 -- Pre-Boot sandbox module
@@ -138,7 +190,6 @@ end) -- function profile
 -- @param #string name
 -- @return xwos.modules.security.profile#xwos.modules.security.profile
 function(self, clazz, privates, name)
-    -- TODO some meaningful implementation
     local res = privates.profiles[name]
     if res == nil then
         res = privates:createProfile(name)

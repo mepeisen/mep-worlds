@@ -17,5 +17,6 @@
 
 return {
  "sandbox",
- "security"
+ "security",
+ "user"
 }

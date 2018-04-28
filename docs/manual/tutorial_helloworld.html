@@ -66,7 +66,14 @@
     				<ul>
     					<li><a href="#requirements">Requirements</a></li>
     					<li><a href="#learning">What you will learn</a></li>
-    					<li><a href="#step1">Step 1 - TODO</a></li>
+    					<li><a href="#step1">Step 1 - Project layout</a></li>
+    					<li><a href="#step2">Step 2 - Declare your app</a></li>
+    					<li><a href="#step3">Step 3 - Print hello world</a></li>
+    					<li><a href="#step4">Step 4 - Deploy your app</a></li>
+    					<li><a href="#step5">Step 5 - Starting your app</a></li>
+    					<li><a href="#step6">Step 6 - Using some small gui</a></li>
+    					<li><a href="#step7">Step 7 - Creating an installer</a></li>
+    					<li><a href="#step8">Step 8 - Using app installers</a></li>
     					<li><a href="#conclusion">Conclusion</a></li>
     				</ul>
     			</section>
@@ -78,7 +85,8 @@
     			<section id="requirements">
     				<h2 class="page-header"><a href="#requirements">Requirements</a></h2>
     				<p class="lead">
-    					TODO
+    					Before starting you should be familiar with <b>XWOS</b>. You should not start writing apps without having some
+    					user experience.
     				</p>
     				<p class="lead">
     					<a href="#toc">Back to top</a>
@@ -92,7 +100,12 @@
     			<section id="learning">
     				<h2 class="page-header"><a href="#learning">What you will learn</a></h2>
     				<p class="lead">
-    					TODO
+    					Within this tutorial you will learn how to write a basic application. It is a "simple" hello world application.
+    					You will find some useful links for getting more deeper inside <b>XWOS</b> architecture.
+    				</p>
+    				<p class="lead">
+    					After writing a simple console "hello world" application I will show you how to use the <b>XWOS</b> gui. At the end
+    					you will learn how to create some installer for installing your application on computers/turtles running <b>XWOS</b>.
     				</p>
     				<p class="lead">
     					<a href="#toc">Back to top</a>
@@ -104,10 +117,334 @@
     	<div class="row">
     		<div class="col-md-12">
     			<section id="step1">
-    				<h2 class="page-header"><a href="#step1">Step 1 <small>TODO</small></a></h2>
+    				<h2 class="page-header"><a href="#step1">Step 1 <small>Project layout</small></a></h2>
+    				<div class="row">
+    					<div class="col-md-6">
+    						<p class="lead">
+    							Create a new eclipse LUA project. Let us call it <code>myapp</code>.
+    							We select LUA 5.1 as target execution environment and as grammar.
+    							Click on "next" to change the project a little bit.
+    						</p>
+    					</div>
+    					<div class="col-md-6">
+    						<img src="img/tut/hello-world/new-project-1.jpg" width="100%" alt="New Project" />
+    					</div>
+    				</div>
+    				<div class="row">
+    					<div class="col-md-6">
+    						<p class="lead">
+    							I recommend to use some layout for installing the app into the ComputerCraft ROM.
+    							However this is not required. You may choose any custom layout as long as the files
+    							inside your source folder are using the standard <b>XWOS</b> application layout.
+    						</p>
+    						<p class="lead">
+    							On "Projects" tab add the <b>XWOS</b> core project as a reference. This will allow
+    							eclipse supporting code completion and luadoc of all the core classes.
+    						</p>
+    					</div>
+    					<div class="col-md-6">
+    						<img src="img/tut/hello-world/new-project-4.jpg" width="100%" alt="New Project" />
+    					</div>
+    				</div>
+    				<div class="row">
+    					<div class="col-md-6">
+    						<p class="lead">
+    							On "Libraries" tab remove the lua system library. This will not break the functionality.
+    							It only helps eclipse to hide the original lua libraries from code completion. As you
+    							already should know ComputerCraft does not support the whole lua library. Instead it hides
+    							some tables (f.e. <code>debug</code>) for a very good reason. As an application developer
+    							you should not see those tables.
+    						</p>
+    					</div>
+    					<div class="col-md-6">
+    						<img src="img/tut/hello-world/new-project-5.jpg" width="100%" alt="New Project" />
+    					</div>
+    				</div>
     				<p class="lead">
-    					TODO
+    					You are mostly finished with this step. Eclipse will start with some <code>main.lua</code>.
+    					Simply delete it. We do not need a main script.
     				</p>
+    				<p class="lead">
+    					<a href="#toc">Back to top</a>
+    				</p>
+    			</section>
+    		</div>
+    	</div>
+    	
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="step2">
+    				<h2 class="page-header"><a href="#step2">Step 2 <small>Declare your app</small></a></h2>
+    				<div class="row">
+    					<div class="col-md-6">
+    						<p class="lead">
+    							Within this step you will learn how to create a simple app layout. I won't explain the
+    							background behind this layout. However the theoretical background is covered by
+    							some <a href="manual_kerneldev.html">kernel articles</a>.
+    						</p>
+    						<p class="lead">
+    							If you already own an internet domain you should choose it as your applications
+    							group name. Starting with top level domain. If you only play around you can choose
+    							<code>eu_xworlds_samples</code> as your applications group name. But please do not
+    							publish your app using this samples group name.
+    						</p>
+    						<p class="lead">
+    							Now create the following folders and files within your source directory:
+    						</p>
+    						<ul>
+    							<li><code>classes</code></li>
+    							<li><code>classes/main.lua</code> (the content is created in next step)</li>
+    							<li><code>data</code></li>
+    							<li><code>manifest.txt</code> (sample content on the right sight)</li>
+    						</ul>
+    					</div>
+    					<div class="col-md-6">
+    						<pre class="prettyprint"><code class="txt">
+# human readable app name
+name = My sample application
+# technical info
+group = eu_xworlds_sample
+artifact = myapp
+version = 0.0.1-SNAPSHOT
+# author information
+author = Your name
+email = Your mail address
+url = http://your-domain/your-app.html
+# dependencies
+dependencies = XWOS@[0.0.4
+# hardware information
+hardware = ANY
+# classes and runtime information
+namespace = eu.xworlds.samples.myapp
+main = eu.xworlds.samples.myapp.main
+    						</code></pre>
+    					</div>
+    				</div>
+    		<div class="callout callout-info lead">
+    			<h4>Information!</h4>
+    			<p>
+    				The application manifest (<code>manifest.txt</code>) is explained in article <a href="TODO">the application manifest</a>.
+    				The details won't be explained here because within this tutorial we focus on the hello world sample. All your
+    				classes are located inside the <code>classes</code> folder. You may change the classes folder within <code>manifest.txt</code>.
+    				The <code>data</code> folder contains static data files. I will explain details in article <a href="TODO">data files</a>. 
+    			</p>
+  			</div>
+    				<p class="lead">
+    					<a href="#toc">Back to top</a>
+    				</p>
+    			</section>
+    		</div>
+    	</div>
+    	
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="step3">
+    				<h2 class="page-header"><a href="#step3">Step 3 <small>Print hello world</small></a></h2>
+    				<div class="row">
+    					<div class="col-md-6">
+    						<p class="lead">
+    							Now we create the <code>main</code> class. This class is the main entry point for <b>XWOS</b>
+    							to control your application.
+    						</p>
+    						<p class="lead">
+    							The class will extend <code>xwos.app.base</code> and implement all needed methods. <b>XWOS</b>
+    							will normally only create exactly one instance for each user session (=unique login
+    							of a user). However it is not guaranteed that there will only be one instance per user session.
+    							If you need some persistent data for each user session you can use the <code>user session object</code>
+    							given to each function.
+    						</p>
+    						<p class="lead">
+    							Each minimal application will override function <code>onStart</code> and create some meaningful
+    							code. Our hello world sample will create a console window (if needed) and simply output the text
+    							<code>hello world</code>.
+    						</p>
+    					</div>
+    					<div class="col-md-6">
+    						<pre class="prettyprint"><code class="lua">-------------------------------------------
+-- @module eu.xworlds.samples.myapp.main
+-- @extends xwos.app.base#xwos.app.base
+_CMR.class("eu.xworlds.samples.myapp.main").extend("xwos.app.base")
+
+------------------------
+-- the object privates
+-- @type myappprivates
+
+------------------------
+-- the internal class
+-- @type myappintern
+-- @extends #eu.xworlds.samples.myapp.main
+
+------------------------
+-- @function [parent=#eu.xworlds.samples.myapp.main] onStart
+-- @param #eu.xworlds.samples.myapp.main self self
+-- @param xwos.app.env#xwos.app.env env the user/app environment
+.func("onStart",
+
+------------------------
+-- @function [parent=#myappintern] onStart
+-- @param #eu.xworlds.samples.myapp.main self self
+-- @param classmanager#clazz clazz
+-- @param #myappprivates privates
+-- @param xwos.app.env#xwos.app.env env the user/app environment
+function(self, clazz, privates, env)
+	env.acquireConsole().print("hello world")
+end)
+    						</code></pre>
+    					</div>
+    				</div>
+    		<div class="callout callout-info lead">
+    			<h4>Information!</h4>
+    			<p>
+    				Each time the application is "executed" the framework invokes <code>onStart</code>. Within article
+    				<a href="TODO">startup scenarios</a> I will explain some common scenarios, for example applications that are
+    				managing a single instance. You may divide several execution contexts, for example behaving different from
+    				black/gray console windows than in a colored GUI. At this point we only call <code>acquireConsole</code> to
+    				get access to <i>ANY</i> console window (ComputerCraft term) object and let the operating system control
+    				it. It is the most simple way to print our hello world.
+    			</p>
+  			</div>
+    				<p class="lead">
+    					<a href="#toc">Back to top</a>
+    				</p>
+    			</section>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="step4">
+    				<h2 class="page-header"><a href="#step4">Step 4 <small>Deploy your app</small></a></h2>
+    				<div class="row">
+    					<div class="col-md-6">
+    						<p class="lead">
+    							This step assumes a working build script, as described in <a href="tutorial_eclipse.html">eclipse tutorial.</a>
+    							Right click on the "target" project and select the builder properties. Within tab "Build Options" select button
+    							"Specify Resources" and enable the myapp source folder. This lets eclipse invoke the build script as soon as you
+    							change a file within the application.
+    						</p>
+    					</div>
+    					<div class="col-md-6">
+    						<img src="img/tut/hello-world/builder-1.jpg" width="100%" alt="Project properties" />
+    					</div>
+    				</div>
+    				<div class="row">
+    					<div class="col-md-6">
+    						<p class="lead">
+    							Now edit the <code>build.xml</code> file and add the new steps for deploying the app
+    							into your computer.
+    						</p>
+    					</div>
+    					<div class="col-md-6">
+    						<pre class="prettyprint"><code class="ant">&lt;copy todir="C:/Users/MyUser/AppData/Roaming/ccemu/data/0/xwos/apps/eu_xworlds_sample/myapp/0.0.1-SNAPSHOT">
+	&lt;fileset dir="C:/my-project-path/src">
+		&lt;include name="**/*"/>
+	&lt;/fileset>
+&lt;/copy>
+</code></pre>
+    					</div>
+    				</div>
+    		<div class="callout callout-warning lead">
+    			<h4>Warning!</h4>
+    			<p>
+    				<b>XWOS</b> automatically scans for applications in folder <code>&lt;xwos-root&gt;/apps</code>. If you use the resource pack
+    				it will scan for apps in folder <code>/rom/xwos/apps</code>. But you may already know that it is impossible to override
+    				anything in <code>/rom</code> subfolders except building your own resource packs. If you follow the
+    				<a href="tutorial_eclipse.html">eclipse tutorial</a> and checkout <b>XWOS</b> from git it will be installed in folder
+    				<code>/xwos</code> and thus it will find your app automatically inside <code>/xwos/apps</code>.
+    			</p>
+  			</div>
+    		<div class="callout callout-info lead">
+    			<h4>Information!</h4>
+    			<p>
+    				Applications inside the <code>apps</code> folders are multi versioned. So we have the following folder layout:
+    				<code>apps/&lt;group&gt;/&lt;app&gt;/&lt;version&gt;</code>.
+    			</p>
+  			</div>
+    				<p class="lead">
+    					<a href="#toc">Back to top</a>
+    				</p>
+    			</section>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="step5">
+    				<h2 class="page-header"><a href="#step5">Step 5 <small>Starting your app</small></a></h2>
+    				<div class="row">
+    					<div class="col-md-6">
+    						<p class="lead">
+    							After starting <b>XWOS</b> invoke the "control menu". Select "applications" and you will find your
+    							brand new app. Start this app and see the console window printing "hello world". That's it.
+    						</p>
+    					</div>
+    					<div class="col-md-6">
+    						TODO screenshot
+    					</div>
+    				</div>
+    				<p class="lead">
+    					<a href="#toc">Back to top</a>
+    				</p>
+    			</section>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="step6">
+    				<h2 class="page-header"><a href="#step6">Step 6 <small>Using some small gui</small></a></h2>
+    				<div class="row">
+    					<div class="col-md-6">
+    						<p class="lead">
+    							TODO
+    						</p>
+    					</div>
+    					<div class="col-md-6">
+    						TODO screenshot/code
+    					</div>
+    				</div>
+    				<p class="lead">
+    					<a href="#toc">Back to top</a>
+    				</p>
+    			</section>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="step7">
+    				<h2 class="page-header"><a href="#step7">Step 7 <small>Creating an installer</small></a></h2>
+    				<div class="row">
+    					<div class="col-md-6">
+    						<p class="lead">
+    							TODO
+    						</p>
+    					</div>
+    					<div class="col-md-6">
+    						TODO screenshot/code
+    					</div>
+    				</div>
+    				<p class="lead">
+    					<a href="#toc">Back to top</a>
+    				</p>
+    			</section>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="step8">
+    				<h2 class="page-header"><a href="#step8">Step 8 <small>Using app installers</small></a></h2>
+    				<div class="row">
+    					<div class="col-md-6">
+    						<p class="lead">
+    							TODO
+    						</p>
+    					</div>
+    					<div class="col-md-6">
+    						TODO screenshot/code
+    					</div>
+    				</div>
     				<p class="lead">
     					<a href="#toc">Back to top</a>
     				</p>

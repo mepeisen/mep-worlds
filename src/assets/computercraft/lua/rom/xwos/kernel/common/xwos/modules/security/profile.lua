@@ -15,6 +15,41 @@
 --    You should have received a copy of the GNU General Public License
 --    along with xwos.  If not, see <http://www.gnu.org/licenses/>.
 
+local ser = textutils.serialize
+local unser = textutils.unserialize
+local split = string.gmatch
+local pairs = pairs
+
+local function addacl(tgt, src)
+    for n, val in pairs(src) do
+        local cur = tgt
+        for v in split(n, "[^%.]+") do
+            if cur[v] == nil then
+                cur[v] = {}
+            end -- if cur
+            cur = cur[v]
+        end -- split
+        cur.VAL = val
+    end -- for src
+end -- function addacl
+
+local function checkacl(tgt, key, level)
+    local cur = tgt
+    for v in split(key, "[^%.]+") do
+        local l = cur["*"]
+        if l ~= nil and (l.VAL == level or (l.VAL == "g" and level == "a")) then
+            return true
+        end -- if access(*)
+        
+        if cur[v] == nil then
+            return false
+        end -- if cur
+        
+        cur = cur[v]
+    end -- for aclKey
+    return cur ~=nil and (cur.VAL == level or (cur.VAL == "g" and level == "a"))
+end -- function checkacl
+
 -----------------------
 -- @module xwos.modules.security.profile
 _CMR.class("xwos.modules.security.profile")
@@ -36,11 +71,33 @@ _CMR.class("xwos.modules.security.profile")
 -- @param classmanager#clazz clazz security profile class
 -- @param #xwsecpprivates privates
 -- @param #string name
-function (self, clazz, privates, name)
+-- @param #number id
+-- @param xwos.kernel#xwos.kernel kernel
+function (self, clazz, privates, name, kernel, id)
     ---------------
     -- profile name
     -- @field [parent=#xwsecpprivates] #string name
     privates.name = name
+    
+    ---------------
+    -- the kernel reference
+    -- @field [parent=#xwsecpprivates] xwos.kernel#xwos.kernel kernel
+    privates.kernel = kernel
+    
+    ---------------
+    -- the unique profile id
+    -- @field [parent=#xwsecpprivates] #number id
+    privates.id = id
+    
+    ---------------
+    -- the acl nodes
+    -- @field [parent=#xwsecpprivates] #table acl
+    privates.acl = { api = {}, func = {}}
+    local d = privates.kernel:readSecureData("core/security/"..privates.id..".dat")
+    if d then
+        d = unser(d)
+        privates.acl = d.acl
+    end -- if data
 end) -- ctor
 
 ---------------------------------
@@ -60,12 +117,58 @@ function(self, clazz, privates)
     return privates.name
 end) -- function name
 
+---------------------------------
+-- Returns profile id
+-- @function [parent=#xwos.modules.security.profile] id
+-- @param #xwos.modules.security.profile self self
+-- @return #number profile id
+
+.func("id",
+---------------------------------
+-- @function [parent=#xwsecpintern] id
+-- @param #xwos.modules.security.profile self
+-- @param classmanager#clazz clazz
+-- @param #xwsecpprivates privates
+-- @return #number
+function(self, clazz, privates)
+    return privates.id
+end) -- function id
+
+-----------------------
+-- Sets api access level
+-- @function [parent=#xwos.modules.security.profile] setApi
+-- @param #xwos.modules.security.profile self self
+-- @param #string api
+-- @param #string method
+-- @param #string level one of "g" (grant) or "a" (access) or "d" (denied)
+
+.func("setApi",
+-----------------------
+-- @function [parent=#xwsecpintern] setApi
+-- @param #xwos.modules.security.profile self
+-- @param classmanager#clazz clazz
+-- @param #xwsecpprivates privates
+-- @param #string api
+-- @param #string method
+-- @param #string level
+function(self, clazz, privates, api, method, level)
+    local data = {}
+    local key = api
+    if method ~= nil then
+        key = api.."."..method
+    end -- if method
+    data[key] = level
+    addacl(privates.acl.api, data)
+    self:save()
+end) -- function setApi
+
 -----------------------
 -- Checks if access to given api method is granted
 -- @function [parent=#xwos.modules.security.profile] checkApi
 -- @param #xwos.modules.security.profile self self
--- @return #string api
--- @return #string method
+-- @param #string api
+-- @param #string method
+-- @return #boolean true for granting access and false for disallow access
 
 .func("checkApi",
 -----------------------
@@ -73,17 +176,68 @@ end) -- function name
 -- @param #xwos.modules.security.profile self
 -- @param classmanager#clazz clazz
 -- @param #xwsecpprivates privates
--- @return #string api
--- @return #string method
+-- @param #string api
+-- @param #string method
+-- @return #boolean
 function(self, clazz, privates, api, method)
-    return true -- TODO some meaningful implementation
+    return self:checkApiLevel(api, method, "a")
 end) -- function checkApi
+
+-----------------------
+-- Checks if access to given api method is granted
+-- @function [parent=#xwos.modules.security.profile] checkApiLevel
+-- @param #xwos.modules.security.profile self self
+-- @param #string api
+-- @param #string method
+-- @param #string level
+-- @return #boolean true for granting access and false for disallow access
+
+.func("checkApiLevel",
+-----------------------
+-- @function [parent=#xwsecpintern] checkApiLevel
+-- @param #xwos.modules.security.profile self
+-- @param classmanager#clazz clazz
+-- @param #xwsecpprivates privates
+-- @param #string api
+-- @param #string method
+-- @param #string level
+-- @return #boolean
+function(self, clazz, privates, api, method, level)
+    local key = api
+    if method ~= nil then
+        key = api.."."..method
+    end -- if method
+    return checkacl(privates.acl.api, key, level)
+end) -- function checkApiLevel
+
+-----------------------
+-- Sets access level (removes any existing acl nodes)
+-- @function [parent=#xwos.modules.security.profile] setAccess
+-- @param #xwos.modules.security.profile self self
+-- @param #string aclKey
+-- @param #string level one of "g" (grant) or "a" (access) or "d" (denied)
+
+.func("setAccess",
+-----------------------
+-- @function [parent=#xwsecpintern] setAccess
+-- @param #xwos.modules.security.profile self
+-- @param classmanager#clazz clazz
+-- @param #xwsecpprivates privates
+-- @param #string aclKey
+-- @param #string level
+function(self, clazz, privates, aclKey, level)
+    local data = {}
+    data[aclKey] = level
+    addacl(privates.acl.func, data)
+    self:save()
+end) -- function setAccess
 
 -----------------------
 -- Checks if access to given acl node is granted
 -- @function [parent=#xwos.modules.security.profile] checkAccess
 -- @param #xwos.modules.security.profile self self
--- @return #string aclKey
+-- @param #string aclKey
+-- @return #boolean true for granting access and false for disallow access
 
 .func("checkAccess",
 -----------------------
@@ -91,9 +245,49 @@ end) -- function checkApi
 -- @param #xwos.modules.security.profile self
 -- @param classmanager#clazz clazz
 -- @param #xwsecpprivates privates
--- @return #string aclKey
+-- @param #string aclKey
+-- @return #boolean
 function(self, clazz, privates, aclKey)
-    return true -- TODO some meaningful implementation
-end) -- function checkApi
+    return self:checkAccessLevel(aclKey, "a")
+end) -- function checkAccess
+
+-----------------------
+-- Checks if access to given acl node is granted
+-- @function [parent=#xwos.modules.security.profile] checkAccessLevel
+-- @param #xwos.modules.security.profile self self
+-- @param #string aclKey
+-- @param #string level
+-- @return #boolean true for granting access and false for disallow access
+
+.func("checkAccessLevel",
+-----------------------
+-- @function [parent=#xwsecpintern] checkAccessLevel
+-- @param #xwos.modules.security.profile self
+-- @param classmanager#clazz clazz
+-- @param #xwsecpprivates privates
+-- @param #string aclKey
+-- @param #string level
+-- @return #boolean
+function(self, clazz, privates, aclKey, level)
+    return checkacl(privates.acl.func, aclKey, level)
+end) -- function checkAccessLevel
+
+---------------------------------
+-- Save profile to secure kernel storage
+-- @function [parent=#xwos.modules.security.profile] save
+-- @param #xwos.modules.security.profile self self
+
+.func("save",
+---------------------------------
+-- @function [parent=#xwsecpintern] save
+-- @param #xwos.modules.security.profile self
+-- @param classmanager#clazz clazz
+-- @param #xwsecpprivates privates
+function(self, clazz, privates)
+    local data = {
+        acl = privates.acl
+    }
+    privates.kernel:writeSecureData("core/security/"..privates.id..".dat", ser(data))
+end) -- function save
 
 return nil
