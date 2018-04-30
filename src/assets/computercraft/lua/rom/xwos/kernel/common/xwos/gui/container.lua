@@ -25,17 +25,17 @@ _CMR.class("xwos.gui.container").extends("xwos.gui.component")
 
 ------------------------
 -- the object privates
--- @type xwcprivates
--- @extends xwos.gui.component#xwcprivates
+-- @type privates
+-- @extends xwos.gui.component#privates
 
 ------------------------
 -- the internal class
--- @type xwcintern
+-- @type intern
 -- @extends #xwos.gui.component
 
 ------------------------
 -- the children; do not manipulate directly without care; instead call the methods add etc.
--- @field [parent=#xwcprivates] xwos.xwlist#xwos.xwlist _children
+-- @field [parent=#privates] xwos.xwlist#xwos.xwlist _children
 
 -- default stylesheet
 .pstat('style', {
@@ -45,10 +45,10 @@ _CMR.class("xwos.gui.container").extends("xwos.gui.component")
 
 .ctor(
 ------------------------
--- @function [parent=#xwcintern] _ctor
+-- @function [parent=#intern] _ctor
 -- @param #xwos.gui.container self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @param #table styles
 -- @param ... initial children
 function(self, clazz, privates, styles, ...)
@@ -79,10 +79,10 @@ end) -- function create
 
 .func("push",
 ------------------------
--- @function [parent=#xwcintern] push
+-- @function [parent=#intern] push
 -- @param #xwos.gui.container self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @param xwos.gui.component#xwos.gui.component t
 -- @return xwos.gui.component#xwos.gui.component
 function (self, clazz, privates, t)
@@ -101,10 +101,10 @@ end) -- function push
 
 .func("unshift",
 ------------------------
--- @function [parent=#xwcintern] unshift
+-- @function [parent=#intern] unshift
 -- @param #xwos.gui.container self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @param xwos.gui.component#xwos.gui.component t
 -- @return xwos.gui.component#xwos.gui.component
 function (self, clazz, privates, t)
@@ -124,10 +124,10 @@ end) -- function unshift
 
 .func("insert",
 ------------------------
--- @function [parent=#xwcintern] insert
+-- @function [parent=#intern] insert
 -- @param #xwos.gui.container self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @param xwos.gui.component#xwos.gui.component t
 -- @return xwos.gui.component#xwos.gui.component
 function (self, clazz, privates, t, after)
@@ -145,10 +145,10 @@ end) -- function insert
 
 .func("pop",
 ------------------------
--- @function [parent=#xwcintern] pop
+-- @function [parent=#intern] pop
 -- @param #xwos.gui.container self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @return xwos.gui.component#xwos.gui.component
 function (self, clazz, privates)
     local R = privates._children:pop()
@@ -165,10 +165,10 @@ end) -- function pop
 
 .func("shift",
 ------------------------
--- @function [parent=#xwcintern] shift
+-- @function [parent=#intern] shift
 -- @param #xwos.gui.container self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @return xwos.gui.component#xwos.gui.component
 function (self, clazz, privates)
     local R = privates._children:shift()
@@ -186,10 +186,10 @@ end) -- function shift
 
 .func("remove",
 ------------------------
--- @function [parent=#xwcintern] remove
+-- @function [parent=#intern] remove
 -- @param #xwos.gui.container self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @param xwos.gui.component#xwos.gui.component t
 -- @return xwos.gui.component#xwos.gui.component
 function (self, clazz, privates, t)
@@ -207,10 +207,10 @@ end) -- function remove
 
 .func("width",
 ------------------------
--- @function [parent=#xwcintern] width
+-- @function [parent=#intern] width
 -- @param #xwos.gui.container self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @return #number
 function (self, clazz, privates)
     return 0
@@ -224,10 +224,10 @@ end) -- function width
 
 .func("height",
 ------------------------
--- @function [parent=#xwcintern] height
+-- @function [parent=#intern] height
 -- @param #xwos.gui.container self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @return #number
 function (self, clazz, privates)
     return 0
@@ -241,10 +241,10 @@ end) -- function height
 
 .func("x",
 ------------------------
--- @function [parent=#xwcintern] x
+-- @function [parent=#intern] x
 -- @param #xwos.gui.container self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @return #number
 function (self, clazz, privates)
     return self:getStyle("x")
@@ -258,10 +258,10 @@ end) -- function x
 
 .func("y",
 ------------------------
--- @function [parent=#xwcintern] y
+-- @function [parent=#intern] y
 -- @param #xwos.gui.container self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @return #number
 function (self, clazz, privates)
     return self:getStyle("y")
@@ -277,10 +277,10 @@ end) -- function y
 
 .func("setPos",
 ------------------------
--- @function [parent=#xwcintern] setPos
+-- @function [parent=#intern] setPos
 -- @param #xwos.gui.container self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @param #number x
 -- @param #number y
 -- @return #xwos.gui.container
@@ -297,10 +297,10 @@ end) -- function setPos
 
 .func("paint",
 ------------------------
--- @function [parent=#xwcintern] paint
+-- @function [parent=#intern] paint
 -- @param #xwos.gui.container self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @return #xwos.gui.container
 function (self, clazz, privates)
     if self:isVisible() then
@@ -324,10 +324,10 @@ end) -- function paint
 
 .func("str",
 ------------------------
--- @function [parent=#xwcintern] str
+-- @function [parent=#intern] str
 -- @param #xwos.gui.container self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @param #number x
 -- @param #number y
 -- @param #string str
@@ -353,10 +353,10 @@ end) -- function str
 
 .func("crwin",
 ------------------------
--- @function [parent=#xwcintern] crwin
+-- @function [parent=#intern] crwin
 -- @param #xwos.gui.container self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @param #number x
 -- @param #number y
 -- @param #number width
@@ -380,10 +380,10 @@ end) -- function crwin
 
 .func("movewin",
 ------------------------
--- @function [parent=#xwcintern] movewin
+-- @function [parent=#intern] movewin
 -- @param #xwos.gui.container self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @param #number x
 -- @param #number y
 -- @param #number width

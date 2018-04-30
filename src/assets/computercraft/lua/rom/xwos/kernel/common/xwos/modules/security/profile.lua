@@ -56,42 +56,42 @@ _CMR.class("xwos.modules.security.profile")
 
 ------------------------
 -- the object privates
--- @type xwsecpprivates
+-- @type privates
 
 ------------------------
 -- the internal class
--- @type xwsecpintern
+-- @type intern
 -- @extends #xwos.modules.security.profile
 
 .ctor(
 ------------------------
 -- create new security profile
--- @function [parent=#xwsecpintern] __ctor
+-- @function [parent=#intern] __ctor
 -- @param #xwos.modules.security.profile self self
 -- @param classmanager#clazz clazz security profile class
--- @param #xwsecpprivates privates
+-- @param #privates privates
 -- @param #string name
--- @param #number id
 -- @param xwos.kernel#xwos.kernel kernel
+-- @param #number id
 function (self, clazz, privates, name, kernel, id)
     ---------------
     -- profile name
-    -- @field [parent=#xwsecpprivates] #string name
+    -- @field [parent=#privates] #string name
     privates.name = name
     
     ---------------
     -- the kernel reference
-    -- @field [parent=#xwsecpprivates] xwos.kernel#xwos.kernel kernel
+    -- @field [parent=#privates] xwos.kernel#xwos.kernel kernel
     privates.kernel = kernel
     
     ---------------
     -- the unique profile id
-    -- @field [parent=#xwsecpprivates] #number id
+    -- @field [parent=#privates] #number id
     privates.id = id
     
     ---------------
     -- the acl nodes
-    -- @field [parent=#xwsecpprivates] #table acl
+    -- @field [parent=#privates] #table acl
     privates.acl = { api = {}, func = {}}
     local d = privates.kernel:readSecureData("core/security/"..privates.id..".dat")
     if d then
@@ -108,10 +108,10 @@ end) -- ctor
 
 .func("name",
 ---------------------------------
--- @function [parent=#xwsecpintern] name
+-- @function [parent=#intern] name
 -- @param #xwos.modules.security.profile self
 -- @param classmanager#clazz clazz
--- @param #xwsecpprivates privates
+-- @param #privates privates
 -- @return #string
 function(self, clazz, privates)
     return privates.name
@@ -125,10 +125,10 @@ end) -- function name
 
 .func("id",
 ---------------------------------
--- @function [parent=#xwsecpintern] id
+-- @function [parent=#intern] id
 -- @param #xwos.modules.security.profile self
 -- @param classmanager#clazz clazz
--- @param #xwsecpprivates privates
+-- @param #privates privates
 -- @return #number
 function(self, clazz, privates)
     return privates.id
@@ -144,10 +144,10 @@ end) -- function id
 
 .func("setApi",
 -----------------------
--- @function [parent=#xwsecpintern] setApi
+-- @function [parent=#intern] setApi
 -- @param #xwos.modules.security.profile self
 -- @param classmanager#clazz clazz
--- @param #xwsecpprivates privates
+-- @param #privates privates
 -- @param #string api
 -- @param #string method
 -- @param #string level
@@ -172,10 +172,10 @@ end) -- function setApi
 
 .func("checkApi",
 -----------------------
--- @function [parent=#xwsecpintern] checkApi
+-- @function [parent=#intern] checkApi
 -- @param #xwos.modules.security.profile self
 -- @param classmanager#clazz clazz
--- @param #xwsecpprivates privates
+-- @param #privates privates
 -- @param #string api
 -- @param #string method
 -- @return #boolean
@@ -194,10 +194,10 @@ end) -- function checkApi
 
 .func("checkApiLevel",
 -----------------------
--- @function [parent=#xwsecpintern] checkApiLevel
+-- @function [parent=#intern] checkApiLevel
 -- @param #xwos.modules.security.profile self
 -- @param classmanager#clazz clazz
--- @param #xwsecpprivates privates
+-- @param #privates privates
 -- @param #string api
 -- @param #string method
 -- @param #string level
@@ -219,10 +219,10 @@ end) -- function checkApiLevel
 
 .func("setAccess",
 -----------------------
--- @function [parent=#xwsecpintern] setAccess
+-- @function [parent=#intern] setAccess
 -- @param #xwos.modules.security.profile self
 -- @param classmanager#clazz clazz
--- @param #xwsecpprivates privates
+-- @param #privates privates
 -- @param #string aclKey
 -- @param #string level
 function(self, clazz, privates, aclKey, level)
@@ -241,10 +241,10 @@ end) -- function setAccess
 
 .func("checkAccess",
 -----------------------
--- @function [parent=#xwsecpintern] checkAccess
+-- @function [parent=#intern] checkAccess
 -- @param #xwos.modules.security.profile self
 -- @param classmanager#clazz clazz
--- @param #xwsecpprivates privates
+-- @param #privates privates
 -- @param #string aclKey
 -- @return #boolean
 function(self, clazz, privates, aclKey)
@@ -261,10 +261,10 @@ end) -- function checkAccess
 
 .func("checkAccessLevel",
 -----------------------
--- @function [parent=#xwsecpintern] checkAccessLevel
+-- @function [parent=#intern] checkAccessLevel
 -- @param #xwos.modules.security.profile self
 -- @param classmanager#clazz clazz
--- @param #xwsecpprivates privates
+-- @param #privates privates
 -- @param #string aclKey
 -- @param #string level
 -- @return #boolean
@@ -279,10 +279,10 @@ end) -- function checkAccessLevel
 
 .func("save",
 ---------------------------------
--- @function [parent=#xwsecpintern] save
+-- @function [parent=#intern] save
 -- @param #xwos.modules.security.profile self
 -- @param classmanager#clazz clazz
--- @param #xwsecpprivates privates
+-- @param #privates privates
 function(self, clazz, privates)
     local data = {
         acl = privates.acl

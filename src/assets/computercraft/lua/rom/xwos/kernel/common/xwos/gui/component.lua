@@ -22,20 +22,20 @@ _CMR.class("xwos.gui.component").abstract()
 
 ------------------------
 -- the object privates
--- @type xwcprivates
+-- @type privates
 
 ------------------------
 -- the internal class
--- @type xwcintern
+-- @type intern
 -- @extends #xwos.gui.component
 
 ------------------------
 -- owning container
--- @field [parent=#xwcprivates] xwos.gui.container#xwos.gui.container _container
+-- @field [parent=#privates] xwos.gui.container#xwos.gui.container _container
 
 ------------------------
 -- component local stylesheet; only contains the styles overridden on this component
--- @field [parent=#xwcprivates] #table _style
+-- @field [parent=#privates] #table _style
 
 -- default stylesheet
 .pstat('style', {
@@ -44,10 +44,10 @@ _CMR.class("xwos.gui.component").abstract()
 
 .ctor(
 ------------------------
--- @function [parent=#xwcintern] width
+-- @function [parent=#intern] width
 -- @param #xwos.gui.component self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @param #table styles
 function(self, clazz, privates, styles)
   privates._style = styles or {}
@@ -120,10 +120,10 @@ end) -- ctor
 
 .func("getStyle",
 ------------------------
--- @function [parent=#xwcintern] getStyle
+-- @function [parent=#intern] getStyle
 -- @param #xwos.gui.component self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @param #string key
 -- @return #any
 function(self, clazz, privates, key)
@@ -148,10 +148,10 @@ end) -- function getStyle
 
 .func("getStyles",
 ------------------------
--- @function [parent=#xwcintern] getStyles
+-- @function [parent=#intern] getStyles
 -- @param #xwos.gui.component self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @param ...
 -- @return ...
 function(self, clazz, privates, ...)
@@ -171,10 +171,10 @@ end) -- function getStyles
 
 .func("setStyle",
 ------------------------
--- @function [parent=#xwcintern] setStyle
+-- @function [parent=#intern] setStyle
 -- @param #xwos.gui.component self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @param #string key
 -- @param #any value
 function(self, clazz, privates, key, value)
@@ -190,10 +190,10 @@ end) -- function getStyle
 
 .func("setStyles",
 ------------------------
--- @function [parent=#xwcintern] setStyles
+-- @function [parent=#intern] setStyles
 -- @param #xwos.gui.component self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @param #table values
 function(self, clazz, privates, values)
     for k,v in pairs(values) do
@@ -210,10 +210,10 @@ end) -- function setStyles
 
 .func("isVisible",
 ------------------------
--- @function [parent=#xwcintern] isVisible
+-- @function [parent=#intern] isVisible
 -- @param #xwos.gui.component self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @return #boolean
 function (self, clazz, privates)
     return self:getStyle("visible")
@@ -227,10 +227,10 @@ end) -- function isVisible
 
 .func("size",
 ------------------------
--- @function [parent=#xwcintern] size
+-- @function [parent=#intern] size
 -- @param #xwos.gui.component self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @return #number
 function (self, clazz, privates)
     return self:width(), self:height()
@@ -244,10 +244,10 @@ end) -- function size
 
 .func("pos",
 ------------------------
--- @function [parent=#xwcintern] pos
+-- @function [parent=#intern] pos
 -- @param #xwos.gui.component self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @return #number
 function (self, clazz, privates)
     return self:x(), self:y()
@@ -261,10 +261,10 @@ end) -- function pos
 
 .func("show",
 ------------------------
--- @function [parent=#xwcintern] show
+-- @function [parent=#intern] show
 -- @param #xwos.gui.component self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @return #xwos.gui.component self for chaining
 function (self, clazz, privates)
     self:setStyle("visible", true)
@@ -279,10 +279,10 @@ end) -- function show
 
 .func("hide",
 ------------------------
--- @function [parent=#xwcintern] hide
+-- @function [parent=#intern] hide
 -- @param #xwos.gui.component self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @return #xwos.gui.component self for chaining
 function (self, clazz, privates)
     self:setStyle("visible", false)
@@ -297,10 +297,10 @@ end) -- function hide
 
 .func("clearVisible",
 ------------------------
--- @function [parent=#xwcintern] clearVisible
+-- @function [parent=#intern] clearVisible
 -- @param #xwos.gui.component self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @return #xwos.gui.component self for chaining
 function (self, clazz, privates)
     self:setStyle("visible", nil)
@@ -315,10 +315,10 @@ end) -- function clearVisible
 
 .func("redraw",
 ------------------------
--- @function [parent=#xwcintern] redraw
+-- @function [parent=#intern] redraw
 -- @param #xwos.gui.component self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @return #xwos.gui.component self for chaining
 function (self, clazz, privates)
     if self:container() ~= nil and self:isVisible() then
@@ -334,10 +334,10 @@ end) -- function redraw
 
 .func("container",
 ------------------------
--- @function [parent=#xwcintern] container
+-- @function [parent=#intern] container
 -- @param #xwos.gui.component self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @return #xwos.gui.container container of nil if object is not contained in any container
 function (self, clazz, privates)
     return self._container

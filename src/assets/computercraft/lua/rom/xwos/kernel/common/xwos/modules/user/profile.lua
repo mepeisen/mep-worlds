@@ -25,50 +25,50 @@ _CMR.class("xwos.modules.user.profile")
 
 ------------------------
 -- the object privates
--- @type xwuserpprivates
+-- @type privates
 
 ------------------------
 -- the internal class
--- @type xwuserpintern
+-- @type intern
 -- @extends #xwos.modules.user.profile
 
 .ctor(
 ------------------------
 -- create new user profile
--- @function [parent=#xwuserpintern] __ctor
+-- @function [parent=#intern] __ctor
 -- @param #xwos.modules.user.profile self self
 -- @param classmanager#clazz clazz user profile class
--- @param #xwuserpprivates privates
+-- @param #privates privates
 -- @param #string name
--- @param #number id
 -- @param xwos.kernel#xwos.kernel kernel
+-- @param #number id
 function (self, clazz, privates, name, kernel, id)
     ---------------
     -- profile name
-    -- @field [parent=#xwuserpprivates] #string name
+    -- @field [parent=#privates] #string name
     privates.name = name
     
     ---------------
     -- the kernel reference
-    -- @field [parent=#xwuserpprivates] xwos.kernel#xwos.kernel kernel
+    -- @field [parent=#privates] xwos.kernel#xwos.kernel kernel
     privates.kernel = kernel
     
     ---------------
     -- the unique profile id
-    -- @field [parent=#xwuserpprivates] #number id
+    -- @field [parent=#privates] #number id
     privates.id = id
     
     ---------------
     -- user password
-    -- @field [parent=#xwuserpprivates] #string pass
+    -- @field [parent=#privates] #string pass
     
     ---------------
     -- active flag
-    -- @field [parent=#xwuserpprivates] #boolean active
+    -- @field [parent=#privates] #boolean active
     
     ---------------
     -- the security profiles
-    -- @field [parent=#xwuserpprivates] #table secp
+    -- @field [parent=#privates] #table secp
     privates.secp = {}
     local d = privates.kernel:readSecureData("core/user/"..privates.id..".dat")
     if d then
@@ -87,10 +87,10 @@ end) -- ctor
 
 .func("addAcl",
 ---------------------------------
--- @function [parent=#xwuserpintern] addAcl
+-- @function [parent=#intern] addAcl
 -- @param #xwos.modules.user.profile self
 -- @param classmanager#clazz clazz
--- @param #xwuserpprivates privates
+-- @param #privates privates
 -- @param #string profile
 function(self, clazz, privates, profile)
     privates.secp[profile] = true
@@ -105,10 +105,10 @@ end) -- function addAcl
 
 .func("removeAcl",
 ---------------------------------
--- @function [parent=#xwuserpintern] removeAcl
+-- @function [parent=#intern] removeAcl
 -- @param #xwos.modules.user.profile self
 -- @param classmanager#clazz clazz
--- @param #xwuserpprivates privates
+-- @param #privates privates
 -- @param #string profile
 function(self, clazz, privates, profile)
     privates.secp[profile] = nil
@@ -123,10 +123,10 @@ end) -- function addAcl
 
 .func("name",
 ---------------------------------
--- @function [parent=#xwuserpintern] name
+-- @function [parent=#intern] name
 -- @param #xwos.modules.user.profile self
 -- @param classmanager#clazz clazz
--- @param #xwuserpprivates privates
+-- @param #privates privates
 -- @return #string
 function(self, clazz, privates)
     return privates.name
@@ -140,10 +140,10 @@ end) -- function name
 
 .func("id",
 ---------------------------------
--- @function [parent=#xwuserpintern] id
+-- @function [parent=#intern] id
 -- @param #xwos.modules.user.profile self
 -- @param classmanager#clazz clazz
--- @param #xwuserpprivates privates
+-- @param #privates privates
 -- @return #number
 function(self, clazz, privates)
     return privates.id
@@ -159,10 +159,10 @@ end) -- function id
 
 .func("checkApi",
 -----------------------
--- @function [parent=#xwuserpintern] checkApi
+-- @function [parent=#intern] checkApi
 -- @param #xwos.modules.user.profile self
 -- @param classmanager#clazz clazz
--- @param #xwuserpprivates privates
+-- @param #privates privates
 -- @param #string api
 -- @param #string method
 -- @return #boolean
@@ -187,10 +187,10 @@ end) -- function checkApi
 
 .func("checkApiLevel",
 -----------------------
--- @function [parent=#xwuserpintern] checkApiLevel
+-- @function [parent=#intern] checkApiLevel
 -- @param #xwos.modules.user.profile self
 -- @param classmanager#clazz clazz
--- @param #xwuserpprivates privates
+-- @param #privates privates
 -- @param #string api
 -- @param #string method
 -- @param #string level
@@ -214,10 +214,10 @@ end) -- function checkApiLevel
 
 .func("checkAccess",
 -----------------------
--- @function [parent=#xwuserpintern] checkAccess
+-- @function [parent=#intern] checkAccess
 -- @param #xwos.modules.user.profile self
 -- @param classmanager#clazz clazz
--- @param #xwuserpprivates privates
+-- @param #privates privates
 -- @param #string aclKey
 -- @return #boolean
 function(self, clazz, privates, aclKey)
@@ -240,10 +240,10 @@ end) -- function checkAccess
 
 .func("checkAccessLevel",
 -----------------------
--- @function [parent=#xwuserpintern] checkAccessLevel
+-- @function [parent=#intern] checkAccessLevel
 -- @param #xwos.modules.user.profile self
 -- @param classmanager#clazz clazz
--- @param #xwuserpprivates privates
+-- @param #privates privates
 -- @param #string aclKey
 -- @param #string level
 -- @return #boolean
@@ -264,10 +264,10 @@ end) -- function checkAccessLevel
 
 .func("save",
 ---------------------------------
--- @function [parent=#xwuserpintern] save
+-- @function [parent=#intern] save
 -- @param #xwos.modules.user.profile self
 -- @param classmanager#clazz clazz
--- @param #xwuserpprivates privates
+-- @param #privates privates
 function(self, clazz, privates)
     local data = {
         secp = privates.secp,
@@ -285,10 +285,10 @@ end) -- function save
 
 .func("setActive",
 ---------------------------------
--- @function [parent=#xwuserpintern] setActive
+-- @function [parent=#intern] setActive
 -- @param #xwos.modules.user.profile self
 -- @param classmanager#clazz clazz
--- @param #xwuserpprivates privates
+-- @param #privates privates
 -- @param #boolean flag
 function(self, clazz, privates, flag)
     privates.active = flag
@@ -303,10 +303,10 @@ end) -- function setActive
 
 .func("isActive",
 ---------------------------------
--- @function [parent=#xwuserpintern] isActive
+-- @function [parent=#intern] isActive
 -- @param #xwos.modules.user.profile self
 -- @param classmanager#clazz clazz
--- @param #xwuserpprivates privates
+-- @param #privates privates
 -- @return #boolean
 function(self, clazz, privates)
     return privates.active and privates.active or false
@@ -320,10 +320,10 @@ end) -- function isActive
 
 .func("setPassword",
 ---------------------------------
--- @function [parent=#xwuserpintern] setPassword
+-- @function [parent=#intern] setPassword
 -- @param #xwos.modules.user.profile self
 -- @param classmanager#clazz clazz
--- @param #xwuserpprivates privates
+-- @param #privates privates
 -- @param #string newPass
 function(self, clazz, privates, newPass)
     -- TODO password encryption
@@ -340,10 +340,10 @@ end) -- function setPassword
 
 .func("checkPassword",
 ---------------------------------
--- @function [parent=#xwuserpintern] checkPassword
+-- @function [parent=#intern] checkPassword
 -- @param #xwos.modules.user.profile self
 -- @param classmanager#clazz clazz
--- @param #xwuserpprivates privates
+-- @param #privates privates
 -- @param #string pass
 -- @return #boolean true if password matches
 function(self, clazz, privates, pass)

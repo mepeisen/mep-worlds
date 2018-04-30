@@ -29,25 +29,25 @@ _CMR.class("xwos.modules.sandbox.evqueue")
 
 ------------------------
 -- the object privates
--- @type xwevqprivates
+-- @type privates
 
 ------------------------
 -- the internal class
--- @type xwevqintern
+-- @type intern
 -- @extends #xwos.modules.sandbox.evqueue
 
 .ctor(
 ------------------------
 -- create new event queue helper
--- @function [parent=#xwevqintern] __ctor
+-- @function [parent=#intern] __ctor
 -- @param #xwos.modules.sandbox.evqueue self self
 -- @param classmanager#clazz clazz event queue class
--- @param #xwevqprivates privates
+-- @param #privates privates
 -- @param xwos.kernel#xwos.kernel kernel
 function (self, clazz, privates, kernel)
     ---------------
     -- kernel reference
-    -- @field [parent=#xwevqprivates] xwos.kernel#xwos.kernel kernel
+    -- @field [parent=#privates] xwos.kernel#xwos.kernel kernel
     privates.kernel = kernel
 end) -- ctor
 
@@ -62,10 +62,10 @@ end) -- ctor
 
 .func("processEvt",
 -----------------------
--- @function [parent=#xwevqintern] processEvt
+-- @function [parent=#intern] processEvt
 -- @param #xwos.modules.sandbox.evqueue self
 -- @param classmanager#clazz clazz
--- @param #xwevqprivates privates
+-- @param #privates privates
 -- @param #number lpid
 -- @param xwos.kernel.process#xwos.kernel.process proc
 -- @param #table event

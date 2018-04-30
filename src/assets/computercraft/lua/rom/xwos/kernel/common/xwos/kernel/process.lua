@@ -45,21 +45,21 @@ _CMR.class("xwos.kernel.process")
 
 ------------------------
 -- the object privates
--- @type procprivates
+-- @type privates
 
 ------------------------
 -- the internal class
--- @type procintern
+-- @type intern
 -- @extends #xwos.kernel.process
 
 .ctor(
 ------------------------
 -- create new process
--- @function [parent=#procintern] __ctor
+-- @function [parent=#intern] __ctor
 -- @param #xwos.kernel.process self self
 -- @param classmanager#clazz clazz proc class
--- @param #procprivates privates
--- @param xwos.kernel.processes#xwprocsprivates pprivates
+-- @param #privates privates
+-- @param xwos.kernel.processes#privates pprivates
 -- @param #xwos.kernel.process p the parent process
 -- @param xwos.kernel#xwos.kernel k the kernel table
 -- @param #number newPid the new pid to be used by this process
@@ -68,58 +68,58 @@ _CMR.class("xwos.kernel.process")
 function(self, clazz, privates, pprivates, p, k, newPid, env, factories)
     --------------------------------
     -- the debug string for prefixing debug messages
-    -- @field [parent=#procprivates] #string dstr
+    -- @field [parent=#privates] #string dstr
     privates.dstr = "[PID"..newPid.."]"
     
     --------------------------------
     -- the process id
-    -- @field [parent=#procprivates] #number pid
+    -- @field [parent=#privates] #number pid
     privates.pid = newPid
     
     --------------------------------
     -- the process table
-    -- @field [parent=#procprivates] xwos.kernel.processes#xwprocsprivates processes
+    -- @field [parent=#privates] xwos.kernel.processes#privates processes
     privates.processes = pprivates
     
     --------------------------------------
     -- the process local event queue
-    -- @field [parent=#procprivates] #table evqueue
+    -- @field [parent=#privates] #table evqueue
     privates.evqueue = {}
     
     ------------------------------------------
     -- number of processes having called method join
-    -- @field [parent=#procprivates] #number joined 
+    -- @field [parent=#privates] #number joined 
     privates.joined = 0
     
     --------------------------------
     -- the parent process
-    -- @field [parent=#procprivates] #xwos.kernel.process parent
+    -- @field [parent=#privates] #xwos.kernel.process parent
     privates.parent = p
     
     --------------------------------
     -- the kernel reference
-    -- @field [parent=#procprivates] xwos.kernel#xwos.kernel kernel
+    -- @field [parent=#privates] xwos.kernel#xwos.kernel kernel
     privates.kernel = k
     
     --------------------------------
     -- the original process environment given to create function
-    -- @field [parent=#procprivates] global#global origenv
+    -- @field [parent=#privates] global#global origenv
     privates.origenv = env
     
     --------------------------------
     -- functions with signature (proc, env) to initialize the new process or environment
-    -- @field [parent=#procprivates] #table factories
+    -- @field [parent=#privates] #table factories
     privates.factories = factories
     
     --------------------------------
     -- the process state; "initializing", "running" or "terminated"
-    -- @field [parent=#procprivates] #string procstate 
+    -- @field [parent=#privates] #string procstate 
     privates.procstate = "initializing"
     self:debug("pocstate =", privates.procstate)
     
     --------------------------------
     -- the process environment used globally in this process
-    -- @field [parent=#procprivates] global#global env
+    -- @field [parent=#privates] global#global env
     privates.env = { pid = privates.pid }
     self:debug("env =", privates.env)
     
@@ -148,10 +148,10 @@ end) -- ctor
 
 .func("isFinished",
 -------------------------------
--- @function [parent=#procintern] isFinished
+-- @function [parent=#intern] isFinished
 -- @param #xwos.kernel.process self
 -- @param classmanager#clazz clazz
--- @param #procprivates privates
+-- @param #privates privates
 -- @return #boolean
 function(self, clazz, privates)
     return privates.procstate == "finished"
@@ -165,10 +165,10 @@ end) -- function isFinished
 
 .func("hasJoined",
 -------------------------------
--- @function [parent=#procintern] hasJoined
+-- @function [parent=#intern] hasJoined
 -- @param #xwos.kernel.process self
 -- @param classmanager#clazz clazz
--- @param #procprivates privates
+-- @param #privates privates
 -- @return #boolean
 function(self, clazz, privates)
     return privates.joined > 0
@@ -182,10 +182,10 @@ end) -- function hasJoined
 
 .func("popev",
 -------------------------------
--- @function [parent=#procintern] popev
+-- @function [parent=#intern] popev
 -- @param #xwos.kernel.process self
 -- @param classmanager#clazz clazz
--- @param #procprivates privates
+-- @param #privates privates
 -- @return #table
 function(self, clazz, privates)
     return tpop(privates.evqueue, 1)
@@ -199,10 +199,10 @@ end) -- function popev
 
 .func("pushev",
 -------------------------------
--- @function [parent=#procintern] pushev
+-- @function [parent=#intern] pushev
 -- @param #xwos.kernel.process self
 -- @param classmanager#clazz clazz
--- @param #procprivates privates
+-- @param #privates privates
 -- @param #table
 function(self, clazz, privates, event)
     originsert(privates.evqueue, event)
@@ -216,10 +216,10 @@ end) -- function pushev
 
 .func("pid",
 -------------------------------
--- @function [parent=#procintern] pid
+-- @function [parent=#intern] pid
 -- @param #xwos.kernel.process self
 -- @param classmanager#clazz clazz
--- @param #procprivates privates
+-- @param #privates privates
 -- @return #number
 function(self, clazz, privates)
     return privates.pid
@@ -233,10 +233,10 @@ end) -- function pid
 
 .func("debug",
 -------------------------------
--- @function [parent=#procintern] debug
+-- @function [parent=#intern] debug
 -- @param #xwos.kernel.process self
 -- @param classmanager#clazz clazz
--- @param #procprivates privates
+-- @param #privates privates
 -- @param ...
 function(self, clazz, privates, ...)
     privates.kernel:debug(privates.dstr, ...)
@@ -249,10 +249,10 @@ end) -- function debug
 
 .func("acquireInput",
 --------------------------------------
--- @function [parent=#procintern] acquireInput
+-- @function [parent=#intern] acquireInput
 -- @param #xwos.kernel.process self
 -- @param classmanager#clazz clazz
--- @param #procprivates privates
+-- @param #privates privates
 function(self, clazz, privates)
     -- TODO is a stack always good?
     -- switching between processes (alt+tab in windows) is not meant to build a stack of input
@@ -269,10 +269,10 @@ end) -- function acquireInput
 
 .func("join",
 ------------------------------------------
--- @function [parent=#procintern] join
+-- @function [parent=#intern] join
 -- @param #xwos.kernel.process self
 -- @param classmanager#clazz clazz
--- @param #procprivates privates
+-- @param #privates privates
 -- @param #xwos.kernel.process cproc
 function(self, clazz, privates, cproc)
     local cpid = "*"
@@ -313,10 +313,10 @@ end) -- function join
 
 .func("releaseInput",
 --------------------------------------
--- @function [parent=#procintern] releaseInput
+-- @function [parent=#intern] releaseInput
 -- @param #xwos.kernel.process self
 -- @param classmanager#clazz clazz
--- @param #procprivates privates
+-- @param #privates privates
 function(self, clazz, privates)
     privates.kernel.modules.instances.sandbox.procinput:release(self)
 end) -- function acquireInput
@@ -328,10 +328,10 @@ end) -- function acquireInput
 
 .func("wakeup",
 --------------------------------------
--- @function [parent=#procintern] wakeup
+-- @function [parent=#intern] wakeup
 -- @param #xwos.kernel.process self
 -- @param classmanager#clazz clazz
--- @param #procprivates privates
+-- @param #privates privates
 function(self, clazz, privates)
     if privates.co ~= nil and privates.procstate ~= "finished" then
         self:debug("wakeup requested")
@@ -346,10 +346,10 @@ end) -- function wakeup
 
 .func("terminate",
 --------------------------------------
--- @function [parent=#procintern] terminate
+-- @function [parent=#intern] terminate
 -- @param #xwos.kernel.process self
 -- @param classmanager#clazz clazz
--- @param #procprivates privates
+-- @param #privates privates
 function(self, clazz, privates)
     origqueue("xwos_terminate", privates.pid)
 end) -- function wakeup
@@ -361,10 +361,10 @@ end) -- function wakeup
 
 .func("remove",
 --------------------------------
--- @function [parent=#procintern] remove
+-- @function [parent=#intern] remove
 -- @param #xwos.kernel.process self
 -- @param classmanager#clazz clazz
--- @param #procprivates privates
+-- @param #privates privates
 function(self, clazz, privates)
     self:debug("removing from process table")
     privates.processes.procs[privates.pid] = nil
@@ -380,10 +380,10 @@ end) -- function remove
 
 .func("spawnClass",
 --------------------------------
--- @function [parent=#procintern] spawnClass
+-- @function [parent=#intern] spawnClass
 -- @param #xwos.kernel.process self
 -- @param classmanager#clazz clazz
--- @param #procprivates privates
+-- @param #privates privates
 -- @param #string class the class to invoke
 -- @param ... the arguments for given function
 function(self, clazz, privates, class, ...)
@@ -402,10 +402,10 @@ end) -- function spawnClass
 
 .func("spawn",
 --------------------------------
--- @function [parent=#procintern] spawn
+-- @function [parent=#intern] spawn
 -- @param #xwos.kernel.process self
 -- @param classmanager#clazz clazz
--- @param #procprivates privates
+-- @param #privates privates
 -- @param #function func the function to invoke
 -- @param ... the arguments for given function
 function(self, clazz, privates, func, ...)
@@ -598,7 +598,7 @@ function(self, clazz, privates, func, ...)
     setfenv(privates.env.setfenv, env0)
     --------------------------------
     -- co the coroutine
-    -- @field [parent=#procprivates] coroutine#coroutine
+    -- @field [parent=#privates] coroutine#coroutine
     privates.co = cocreate(spawn0)
     local res = {coresume(privates.co, ...)}
     if not res[1] then

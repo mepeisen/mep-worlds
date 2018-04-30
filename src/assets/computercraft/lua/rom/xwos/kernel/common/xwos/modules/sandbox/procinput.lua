@@ -21,7 +21,7 @@ _CMR.class("xwos.modules.sandbox.procinput")
 
 ------------------------
 -- the object privates
--- @type xwpiprivates
+-- @type privates
 -- 
 ------------------------
 -- item in process input
@@ -34,26 +34,26 @@ _CMR.class("xwos.modules.sandbox.procinput")
 
 ------------------------
 -- the internal class
--- @type xwpiintern
+-- @type intern
 -- @extends #xwos.modules.sandbox.procinput
 
 .ctor(
 ------------------------
 -- create new process input helper
--- @function [parent=#xwpiintern] __ctor
+-- @function [parent=#intern] __ctor
 -- @param #xwos.modules.sandbox.procinput self self
 -- @param classmanager#clazz clazz process input class
--- @param #xwpiprivates privates
+-- @param #privates privates
 -- @param xwos.kernel#xwos.kernel kernel
 function (self, clazz, privates, kernel)
     ---------------
     -- kernel reference
-    -- @field [parent=#xwpiprivates] xwos.kernel#xwos.kernel kernel
+    -- @field [parent=#privates] xwos.kernel#xwos.kernel kernel
     privates.kernel = kernel
     
     ---------------
     -- list of process inputs
-    -- @field [parent=#xwpiprivates] xwos.xwlist#xwos.xwlist
+    -- @field [parent=#privates] xwos.xwlist#xwos.xwlist
     privates.list = _CMR.new("xwos.xwlist")
 end) -- ctor
 
@@ -65,10 +65,10 @@ end) -- ctor
 
 .func("current",
 -----------------------
--- @function [parent=#xwpiintern] current
+-- @function [parent=#intern] current
 -- @param #xwos.modules.sandbox.procinput self
 -- @param classmanager#clazz clazz
--- @param #xwpiprivates privates
+-- @param #privates privates
 -- @return xwos.kernel.process#xwos.kernel.process
 function(self, clazz, privates)
     local res = privates.list:last() -- #xwpiitem
@@ -86,10 +86,10 @@ end) -- function current
 
 .func("acquire",
 -----------------------
--- @function [parent=#xwpiintern] acquire
+-- @function [parent=#intern] acquire
 -- @param #xwos.modules.sandbox.procinput self
 -- @param classmanager#clazz clazz
--- @param #xwpiprivates privates
+-- @param #privates privates
 -- @param xwos.kernel.process#xwos.kernel.process process
 function(self, clazz, privates, process)
     process:debug("fetching user input (front process)")
@@ -104,10 +104,10 @@ end) -- function acquire
 
 .func("release",
 -----------------------
--- @function [parent=#xwpiintern] release
+-- @function [parent=#intern] release
 -- @param #xwos.modules.sandbox.procinput self
 -- @param classmanager#clazz clazz
--- @param #xwpiprivates privates
+-- @param #privates privates
 -- @param xwos.kernel.process#xwos.kernel.process process
 function(self, clazz, privates, process)
     local res = privates.list:last() -- #xwpiitem

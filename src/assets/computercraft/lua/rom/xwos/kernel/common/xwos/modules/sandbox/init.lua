@@ -30,25 +30,25 @@ _CMR.class("xwos.modules.sandbox")
 
 ------------------------
 -- the object privates
--- @type xwsbprivates
+-- @type privates
 
 ------------------------
 -- the internal class
--- @type xwsbintern
+-- @type intern
 -- @extends #xwos.modules.sandbox 
 
 .ctor(
 ------------------------
 -- create new module sandbox
--- @function [parent=#xwsbintern] __ctor
+-- @function [parent=#intern] __ctor
 -- @param #xwos.modules.sandbox self self
 -- @param classmanager#clazz clazz sandbox class
--- @param #xwsbprivates privates
+-- @param #privates privates
 -- @param xwos.kernel#xwos.kernel kernel
 function (self, clazz, privates, kernel)
     ---------------
     -- kernel reference
-    -- @field [parent=#xwsbprivates] xwos.kernel#xwos.kernel kernel
+    -- @field [parent=#privates] xwos.kernel#xwos.kernel kernel
     privates.kernel = kernel
 end) -- ctor
 
@@ -59,10 +59,10 @@ end) -- ctor
 
 .func("preboot",
 ---------------------------------
--- @function [parent=#xwsbintern] preboot
+-- @function [parent=#intern] preboot
 -- @param #xwos.modules.sandbox self self
 -- @param classmanager#clazz clazz sandbox class
--- @param #xwsbprivates privates
+-- @param #privates privates
 function(self, clazz, privates)
     privates.kernel:debug("preboot sandbox")
     
@@ -89,10 +89,10 @@ end) -- function preboot
 
 .func("boot",
 ---------------------------------
--- @function [parent=#xwsbintern] boot
+-- @function [parent=#intern] boot
 -- @param #xwos.modules.sandbox self self
 -- @param classmanager#clazz clazz sandbox class
--- @param #xwsbprivates privates
+-- @param #privates privates
 function(self, clazz, privates)
     privates.kernel:debug("boot sandbox")
     privates.kernel.envFactories.sandbox = function(proc, env) privates:envFactory(proc, env) end
@@ -101,10 +101,10 @@ end)
 .pfunc("envFactory",
 ---------------------------------
 -- environment factory to create a sandbox
--- @function [parent=#xwsbintern] envFactory
+-- @function [parent=#intern] envFactory
 -- @param #xwos.modules.sandbox self self
 -- @param classmanager#clazz clazz sandbox class
--- @param #xwsbprivates privates
+-- @param #privates privates
 -- @param xwos.kernel.process#xwos.kernel.process proc
 -- @param global#global env
 function(self, clazz, privates, proc, env)

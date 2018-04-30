@@ -21,30 +21,30 @@ _CMR.class("xwos.modules.sandbox.timers")
 
 ------------------------
 -- the object privates
--- @type xwtprivates
+-- @type privates
 
 ------------------------
 -- the internal class
--- @type xwtintern
+-- @type intern
 -- @extends #xwos.modules.sandbox.timers
 
 .ctor(
 ------------------------
 -- create new timer helper
--- @function [parent=#xwtintern] __ctor
+-- @function [parent=#intern] __ctor
 -- @param #xwos.modules.sandbox.timers self self
 -- @param classmanager#clazz clazz event queue class
--- @param #xwtprivates privates
+-- @param #privates privates
 -- @param xwos.kernel#xwos.kernel kernel
 function (self, clazz, privates, kernel)
     ---------------
     -- kernel reference
-    -- @field [parent=#xwtprivates] xwos.kernel#xwos.kernel kernel
+    -- @field [parent=#privates] xwos.kernel#xwos.kernel kernel
     privates.kernel = kernel
     
     ---------------
     -- known timers
-    -- @field [parent=#xwtprivates] #map<#number,xwos.kernel.process#xwos.kernel.process> list
+    -- @field [parent=#privates] #map<#number,xwos.kernel.process#xwos.kernel.process> list
     privates.list = {}
 end) -- ctor
 
@@ -57,10 +57,10 @@ end) -- ctor
 
 .func("create",
 -------------------------------
--- @function [parent=#xwtintern] create
+-- @function [parent=#intern] create
 -- @param #xwos.modules.sandbox.timers self self
 -- @param classmanager#clazz clazz event queue class
--- @param #xwtprivates privates
+-- @param #privates privates
 -- @param #number id
 -- @param xwos.kernel.process#xwos.kernel.process proc
 function(self, clazz, privates, id, proc)
@@ -76,10 +76,10 @@ end) -- function create
 
 .func("get",
 -------------------------------
--- @function [parent=#xwtintern] get
+-- @function [parent=#intern] get
 -- @param #xwos.modules.sandbox.timers self self
 -- @param classmanager#clazz clazz event queue class
--- @param #xwtprivates privates
+-- @param #privates privates
 -- @param #number id
 -- @return xwos.kernel.process#xwos.kernel.process
 function(self, clazz, privates, id)

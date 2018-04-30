@@ -26,35 +26,35 @@ local tins = table.insert
 
 ------------------------
 -- the object privates
--- @type xwuserprivates
+-- @type privates
 
 ------------------------
 -- the internal class
--- @type xwuserintern
+-- @type intern
 -- @extends #xwos.modules.user 
 
 .ctor(
 ------------------------
 -- create new module user
--- @function [parent=#xwuserintern] __ctor
+-- @function [parent=#intern] __ctor
 -- @param #xwos.modules.user self self
 -- @param classmanager#clazz clazz user class
--- @param #xwuserprivates privates
+-- @param #privates privates
 -- @param xwos.kernel#xwos.kernel kernel
 function (self, clazz, privates, kernel)
     ---------------
     -- kernel reference
-    -- @field [parent=#xwuserprivates] xwos.kernel#xwos.kernel kernel
+    -- @field [parent=#privates] xwos.kernel#xwos.kernel kernel
     privates.kernel = kernel
     
     ------------------
     -- the known users by name
-    -- @field [parent=#xwuserprivates] #map<#string,xwos.modules.user.profile#xwos.modules.user.profile> profiles
+    -- @field [parent=#privates] #map<#string,xwos.modules.user.profile#xwos.modules.user.profile> profiles
     privates.profiles = {}
     
     ------------------
     -- next id being available for users
-    -- @field [parent=#xwuserprivates] #number nextId
+    -- @field [parent=#privates] #number nextId
     privates.nextId = 1
     
     local d = kernel:readSecureData("core/user.dat")
@@ -71,7 +71,7 @@ end) -- ctor
 
 ------------------------
 -- create new profile with given name
--- @function [parent=#xwuserprivates] createProfile
+-- @function [parent=#privates] createProfile
 -- @param #xwos.modules.user self self
 -- @param #string name
 -- @return xwos.modules.user.profile#xwos.modules.user.profile
@@ -82,7 +82,7 @@ end) -- ctor
 -- @function [parent=#xwsecpintern] createProfile
 -- @param #xwos.modules.user self self
 -- @param classmanager#clazz clazz user class
--- @param #xwuserprivates privates
+-- @param #privates privates
 -- @param #string name
 -- @return xwos.modules.user.profile#xwos.modules.user.profile
 function (self, clazz, privates, name)
@@ -101,10 +101,10 @@ end) -- createProfile
 
 .func("save",
 ---------------------------------
--- @function [parent=#xwuserintern] save
+-- @function [parent=#intern] save
 -- @param #xwos.modules.user self
 -- @param classmanager#clazz clazz
--- @param #xwuserprivates privates
+-- @param #privates privates
 function(self, clazz, privates)
     local d = { nextId = privates.nextId, profiles = {} }
     for k, v in pairs(privates.profiles) do
@@ -114,31 +114,31 @@ function(self, clazz, privates)
 end) -- function save
 
 ---------------------------------
--- Pre-Boot sandbox module
+-- Pre-Boot user module
 -- @function [parent=#xwos.modules.user] preboot
 -- @param #xwos.modules.user self self
 
 .func("preboot",
 ---------------------------------
--- @function [parent=#xwuserintern] preboot
+-- @function [parent=#intern] preboot
 -- @param #xwos.modules.user self self
 -- @param classmanager#clazz clazz user class
--- @param #xwuserprivates privates
+-- @param #privates privates
 function(self, clazz, privates)
     privates.kernel:debug("preboot user")
 end) -- function preboot
 
 ---------------------------------
--- Boot sandbox module
+-- Boot user module
 -- @function [parent=#xwos.modules.user] boot
 -- @param #xwos.modules.user self self
 
 .func("boot",
 ---------------------------------
--- @function [parent=#xwuserintern] boot
+-- @function [parent=#intern] boot
 -- @param #xwos.modules.user self self
 -- @param classmanager#clazz clazz user class
--- @param #xwuserprivates privates
+-- @param #privates privates
 function(self, clazz, privates)
     privates.kernel:debug("boot user")
 end) -- function boot
@@ -152,10 +152,10 @@ end) -- function boot
 
 .func("profile",
 ---------------------------------
--- @function [parent=#xwuserintern] profile
+-- @function [parent=#intern] profile
 -- @param #xwos.modules.user self self
 -- @param classmanager#clazz clazz user class
--- @param #xwuserprivates privates
+-- @param #privates privates
 -- @param #string name
 -- @return xwos.modules.user.profile#xwos.modules.user.profile
 function(self, clazz, privates, name)
@@ -171,10 +171,10 @@ end) -- function profile
 
 .func("createProfile",
 ---------------------------------
--- @function [parent=#xwuserintern] createProfile
+-- @function [parent=#intern] createProfile
 -- @param #xwos.modules.user self self
 -- @param classmanager#clazz clazz user class
--- @param #xwuserprivates privates
+-- @param #privates privates
 -- @param #string name
 -- @return xwos.modules.user.profile#xwos.modules.user.profile
 function(self, clazz, privates, name)

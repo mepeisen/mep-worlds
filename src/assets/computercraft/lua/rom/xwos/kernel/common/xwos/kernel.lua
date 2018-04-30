@@ -42,11 +42,11 @@ _CMR.class("xwos.kernel").singleton()
 
 ------------------------
 -- the object privates
--- @type xwkernelprivates
+-- @type privates
 
 ------------------------
 -- the internal class
--- @type xwkernelintern
+-- @type intern
 -- @extends #xwos.kernel 
 
 --------------------------------
@@ -62,10 +62,10 @@ _CMR.class("xwos.kernel").singleton()
 
 .func("boot",
 --------------------------------
--- @function [parent=#xwkernelintern] boot
+-- @function [parent=#intern] boot
 -- @param #xwos.kernel self
 -- @param classmanager#clazz clazz
--- @param #xwkernelprivates privates
+-- @param #privates privates
 -- @param #string ver
 -- @param #table kernelpaths
 -- @param #string kernelRoot
@@ -475,10 +475,10 @@ end) -- function boot
 
 .func("startup",
 --------------------------------
--- @function [parent=#xwkernelintern] startup
+-- @function [parent=#intern] startup
 -- @param #xwos.kernel self
 -- @param classmanager#clazz clazz
--- @param #xwkernelprivates privates
+-- @param #privates privates
 function(self, clazz, privates)
     local nenv = {}
     self:debug("preparing new environment for root process", nenv)
@@ -538,10 +538,10 @@ end) -- function startup
 
 .func("debug",
 -------------------------------
--- @function [parent=#xwkernelintern] debug
+-- @function [parent=#intern] debug
 -- @param #xwos.kernel self
 -- @param classmanager#clazz clazz
--- @param #xwkernelprivates privates
+-- @param #privates privates
 -- @param ...
 function(self, clazz, privates, ...)
     if self.kernelDebug then
@@ -557,10 +557,10 @@ end) -- function debug
 
 .func("print",
 -------------------------------
--- @function [parent=#xwkernelintern] print
+-- @function [parent=#intern] print
 -- @param #xwos.kernel self
 -- @param classmanager#clazz clazz
--- @param #xwkernelprivates privates
+-- @param #privates privates
 -- @param ...
 function(self, clazz, privates, ...)
     self.oldGlob.print(...) -- TODO wrap to kernel display
@@ -585,10 +585,10 @@ end) -- function print
 
 .func("readSecureData",
 -------------------------------
--- @function [parent=#xwkernelintern] readSecureData
+-- @function [parent=#intern] readSecureData
 -- @param #xwos.kernel self
 -- @param classmanager#clazz clazz
--- @param #xwkernelprivates privates
+-- @param #privates privates
 -- @param #string path
 -- @param #string def
 -- @return #string
@@ -612,10 +612,10 @@ end) -- function readSecureData
 
 .func("writeSecureData",
 -------------------------------
--- @function [parent=#xwkernelintern] writeSecureData
+-- @function [parent=#intern] writeSecureData
 -- @param #xwos.kernel self
 -- @param classmanager#clazz clazz
--- @param #xwkernelprivates privates
+-- @param #privates privates
 -- @param #string path
 -- @param #string data
 function(self, clazz, privates, path, data)
@@ -677,10 +677,10 @@ end -- function readSecureData
 
 .func("trace",
 -------------------------------
--- @function [parent=#xwkernelintern] trace
+-- @function [parent=#intern] trace
 -- @param #xwos.kernel self
 -- @param classmanager#clazz clazz
--- @param #xwkernelprivates privates
+-- @param #privates privates
 -- @return #list<#traceitem>
 function(self, clazz, privates)
     return self.oldGlob.boot.trace(false)

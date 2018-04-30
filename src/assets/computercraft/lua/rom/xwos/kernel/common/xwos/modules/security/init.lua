@@ -26,35 +26,35 @@ _CMR.class("xwos.modules.security")
 
 ------------------------
 -- the object privates
--- @type xwsecprivates
+-- @type privates
 
 ------------------------
 -- the internal class
--- @type xwsecintern
+-- @type intern
 -- @extends #xwos.modules.security 
 
 .ctor(
 ------------------------
 -- create new module security
--- @function [parent=#xwsecintern] __ctor
+-- @function [parent=#intern] __ctor
 -- @param #xwos.modules.security self self
 -- @param classmanager#clazz clazz security class
--- @param #xwsecprivates privates
+-- @param #privates privates
 -- @param xwos.kernel#xwos.kernel kernel
 function (self, clazz, privates, kernel)
     ---------------
     -- kernel reference
-    -- @field [parent=#xwsecprivates] xwos.kernel#xwos.kernel kernel
+    -- @field [parent=#privates] xwos.kernel#xwos.kernel kernel
     privates.kernel = kernel
     
     ------------------
     -- the known profiles by name
-    -- @field [parent=#xwsecprivates] #map<#string,xwos.modules.security.profile#xwos.modules.security.profile> profiles
+    -- @field [parent=#privates] #map<#string,xwos.modules.security.profile#xwos.modules.security.profile> profiles
     privates.profiles = {}
     
     ------------------
     -- next id being available for profiles
-    -- @field [parent=#xwsecprivates] #number nextId
+    -- @field [parent=#privates] #number nextId
     privates.nextId = 1
     
     local d = kernel:readSecureData("core/security.dat")
@@ -83,7 +83,7 @@ end) -- ctor
 
 ------------------------
 -- create new profile with given name
--- @function [parent=#xwsecprivates] createProfile
+-- @function [parent=#privates] createProfile
 -- @param #xwos.modules.security self self
 -- @param #string name
 -- @return xwos.modules.security.profile#xwos.modules.security.profile
@@ -94,7 +94,7 @@ end) -- ctor
 -- @function [parent=#xwsecpintern] createProfile
 -- @param #xwos.modules.security self self
 -- @param classmanager#clazz clazz security class
--- @param #xwsecprivates privates
+-- @param #privates privates
 -- @param #string name
 -- @return xwos.modules.security.profile#xwos.modules.security.profile
 function (self, clazz, privates, name)
@@ -113,10 +113,10 @@ end) -- createProfile
 
 .func("save",
 ---------------------------------
--- @function [parent=#xwsecintern] save
+-- @function [parent=#intern] save
 -- @param #xwos.modules.security self
 -- @param classmanager#clazz clazz
--- @param #xwsecprivates privates
+-- @param #privates privates
 function(self, clazz, privates)
     local d = { nextId = privates.nextId, profiles = {} }
     for k, v in pairs(privates.profiles) do
@@ -132,10 +132,10 @@ end) -- function save
 
 .func("preboot",
 ---------------------------------
--- @function [parent=#xwsecintern] preboot
+-- @function [parent=#intern] preboot
 -- @param #xwos.modules.security self self
 -- @param classmanager#clazz clazz security class
--- @param #xwsecprivates privates
+-- @param #privates privates
 function(self, clazz, privates)
     privates.kernel:debug("preboot security")
 end) -- function preboot
@@ -147,10 +147,10 @@ end) -- function preboot
 
 .func("boot",
 ---------------------------------
--- @function [parent=#xwsecintern] boot
+-- @function [parent=#intern] boot
 -- @param #xwos.modules.security self self
 -- @param classmanager#clazz clazz security class
--- @param #xwsecprivates privates
+-- @param #privates privates
 function(self, clazz, privates)
     privates.kernel:debug("boot security")
 end) -- function boot
@@ -164,10 +164,10 @@ end) -- function boot
 
 .func("profile",
 ---------------------------------
--- @function [parent=#xwsecintern] profile
+-- @function [parent=#intern] profile
 -- @param #xwos.modules.security self self
 -- @param classmanager#clazz clazz security class
--- @param #xwsecprivates privates
+-- @param #privates privates
 -- @param #string name
 -- @return xwos.modules.security.profile#xwos.modules.security.profile
 function(self, clazz, privates, name)
@@ -183,10 +183,10 @@ end) -- function profile
 
 .func("createProfile",
 ---------------------------------
--- @function [parent=#xwsecintern] createProfile
+-- @function [parent=#intern] createProfile
 -- @param #xwos.modules.security self self
 -- @param classmanager#clazz clazz security class
--- @param #xwsecprivates privates
+-- @param #privates privates
 -- @param #string name
 -- @return xwos.modules.security.profile#xwos.modules.security.profile
 function(self, clazz, privates, name)

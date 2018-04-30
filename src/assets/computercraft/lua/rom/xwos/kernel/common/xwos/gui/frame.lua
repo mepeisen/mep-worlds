@@ -25,12 +25,12 @@ _CMR.class("xwos.gui.frame").extends("xwos.gui.component")
 
 ------------------------
 -- the object privates
--- @type xwcprivates
--- @extends xwos.gui.component#xwcprivates
+-- @type privates
+-- @extends xwos.gui.component#privates
 
 ------------------------
 -- the internal class
--- @type xwcintern
+-- @type intern
 -- @extends #xwos.gui.frame
 
 -- default stylesheet
@@ -55,23 +55,23 @@ _CMR.class("xwos.gui.frame").extends("xwos.gui.component")
 
 ------------------------
 -- the text for top frame line
--- @field [parent=#xwcprivates] #string _top
+-- @field [parent=#privates] #string _top
 
 ------------------------
 -- the text for bottom frame line
--- @field [parent=#xwcprivates] #string _bottom
+-- @field [parent=#privates] #string _bottom
 
 ------------------------
 -- the text for mid frame line
--- @field [parent=#xwcprivates] #string _mid
+-- @field [parent=#privates] #string _mid
 
 ------------------------
 -- the window object to draw the frame
--- @field [parent=#xwcprivates] window#windowObject _frame
+-- @field [parent=#privates] window#windowObject _frame
 
 ------------------------
 -- the window object to draw the content
--- @field [parent=#xwcprivates] xwos.gui.stage#xwos.gui.stage _content
+-- @field [parent=#privates] xwos.gui.stage#xwos.gui.stage _content
 
 -- TODO layout for maximum sized frames (use whole terminal), some layout constraints
 
@@ -104,10 +104,10 @@ _CMR.class("xwos.gui.frame").extends("xwos.gui.component")
 
 .ctor(
 ------------------------
--- @function [parent=#xwcintern] ctor
+-- @function [parent=#intern] ctor
 -- @param #xwos.gui.frame self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @param #table styles
 -- @param ... initial objects
 function(self, clazz, privates, styles, ...)
@@ -152,10 +152,10 @@ end) -- function create
 
 .func("width",
 ------------------------
--- @function [parent=#xwcintern] width
+-- @function [parent=#intern] width
 -- @param #xwos.gui.frame self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @return #number
 function (self, clazz, privates)
     return self:getStyle("width")
@@ -169,10 +169,10 @@ end) -- function width
 
 .func("height",
 ------------------------
--- @function [parent=#xwcintern] height
+-- @function [parent=#intern] height
 -- @param #xwos.gui.frame self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @return #number
 function (self, clazz, privates)
     return self:getStyle("height")
@@ -188,10 +188,10 @@ end) -- function height
 
 .func("setSize",
 ------------------------
--- @function [parent=#xwcintern] setSize
+-- @function [parent=#intern] setSize
 -- @param #xwos.gui.frame self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @param #number width
 -- @param #number height
 -- @return #xwos.gui.frame
@@ -209,10 +209,10 @@ end) -- function setSize
 
 .func("x",
 ------------------------
--- @function [parent=#xwcintern] x
+-- @function [parent=#intern] x
 -- @param #xwos.gui.frame self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @return #number
 function (self, clazz, privates)
     return self:getStyle("x")
@@ -226,10 +226,10 @@ end) -- function x
 
 .func("y",
 ------------------------
--- @function [parent=#xwcintern] y
+-- @function [parent=#intern] y
 -- @param #xwos.gui.frame self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @return #number
 function (self, clazz, privates)
     return self:getStyle("y")
@@ -245,10 +245,10 @@ end) -- function y
 
 .func("setPos",
 ------------------------
--- @function [parent=#xwcintern] setPos
+-- @function [parent=#intern] setPos
 -- @param #xwos.gui.frame self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @param #number x
 -- @param #number y
 -- @return #xwos.gui.frame
@@ -266,10 +266,10 @@ end) -- function setPos
 
 .func("paint",
 ------------------------
--- @function [parent=#xwcintern] paint
+-- @function [parent=#intern] paint
 -- @param #xwos.gui.frame self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @return #xwos.gui.frame
 function (self, clazz, privates)
     if self:container() ~= nil and self:isVisible() then
@@ -345,10 +345,10 @@ end) -- function paint
 
 .func("str",
 ------------------------
--- @function [parent=#xwcintern] str
+-- @function [parent=#intern] str
 -- @param #xwos.gui.container self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @param #number x
 -- @param #number y
 -- @param #string str
@@ -374,10 +374,10 @@ end) -- function str
 
 .func("crwin",
 ------------------------
--- @function [parent=#xwcintern] crwin
+-- @function [parent=#intern] crwin
 -- @param #xwos.gui.frame self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @param #number x
 -- @param #number y
 -- @param #number width
@@ -401,10 +401,10 @@ end) -- function crwin
 
 .func("movewin",
 ------------------------
--- @function [parent=#xwcintern] movewin
+-- @function [parent=#intern] movewin
 -- @param #xwos.gui.frame self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @param #number x
 -- @param #number y
 -- @param #number width

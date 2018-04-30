@@ -25,11 +25,11 @@ _CMR.class("xwos.kernel.modulesmgr")
 
 ------------------------
 -- the object privates
--- @type xwmodsprivates
+-- @type privates
 
 ------------------------
 -- the internal class
--- @type xwmodsintern
+-- @type intern
 -- @extends #xwos.kernel.modulesmgr 
 
 .ctor(
@@ -38,17 +38,17 @@ _CMR.class("xwos.kernel.modulesmgr")
 -- @function [parent=#xwprocsintern] __ctor
 -- @param #xwos.kernel.modulesmgr self self
 -- @param classmanager#clazz clazz proc class
--- @param #xwmodsprivates privates
+-- @param #privates privates
 -- @param xwos.kernel#xwos.kernel kernel
 function(self, clazz, privates, kernel)
     --------------------------------
     -- the kernel reference
-    -- @field [parent=#xwmodsprivates] xwos.kernel#xwos.kernel kernel
+    -- @field [parent=#privates] xwos.kernel#xwos.kernel kernel
     privates.kernel = kernel
     
     --------------------------------
     -- the ordering for loading kernel modules
-    -- @field [parent=#xwmodsprivates] #list<#string> moduleOrder
+    -- @field [parent=#privates] #list<#string> moduleOrder
     privates.moduleOrder = _CMR.require("moduleOrder")
     
     -------------------------------
@@ -68,6 +68,14 @@ function(self, clazz, privates, kernel)
     -------------------------------
     -- user kernel module
     -- @field [parent=#mminstances] xwos.modules.user#xwos.modules.user user
+    
+    -------------------------------
+    -- session kernel module
+    -- @field [parent=#mminstances] xwos.modules.session#xwos.modules.session session
+    
+    -------------------------------
+    -- appmanager kernel module
+    -- @field [parent=#mminstances] xwos.modules.appman#xwos.modules.appman appman
 end) -- ctor
 
 --------------------------------
@@ -77,10 +85,10 @@ end) -- ctor
 
 .func("preboot",
 --------------------------------
--- @function [parent=#xwmodsintern] preboot
+-- @function [parent=#intern] preboot
 -- @param #xwos.kernel.modulesmgr self
 -- @param classmanager#clazz clazz
--- @param #xwmodsprivates privates
+-- @param #privates privates
 function(self, clazz, privates)
     for k,v in pairs(_CMR.findPackages("xwos.modules")) do
         privates.kernel:debug("load kernel module", v, "/ class", k)
@@ -108,10 +116,10 @@ end) -- function preboot
 
 .func("boot",
 --------------------------------
--- @function [parent=#xwmodsintern] boot
+-- @function [parent=#intern] boot
 -- @param #xwos.kernel.modulesmgr self
 -- @param classmanager#clazz clazz
--- @param #xwmodsprivates privates
+-- @param #privates privates
 function(self, clazz, privates)
     for i, v in pairs(privates.moduleOrder) do
         if self.instances[v] ~= nil then

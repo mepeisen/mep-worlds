@@ -42,34 +42,34 @@ _CMR.class("xwos.kernel.processes")
 
 ------------------------
 -- the object privates
--- @type xwprocsprivates
+-- @type privates
 
 ------------------------
 -- the internal class
--- @type xwprocsintern
+-- @type intern
 -- @extends #xwos.kernel.processes 
 
 .ctor(
 ------------------------
 -- create new process manager
--- @function [parent=#xwprocsintern] __ctor
+-- @function [parent=#intern] __ctor
 -- @param #xwos.kernel.processes self self
 -- @param classmanager#clazz clazz proc class
--- @param #xwprocsprivates privates
+-- @param #privates privates
 function(self, clazz, privates)
     --------------------------------
     -- next pid to use for new processes
-    -- @field [parent=#xwprocsprivates] #number nextPid
+    -- @field [parent=#privates] #number nextPid
     privates.nextPid = 0
 
     --------------------------------
     -- the known processes
-    -- @field [parent=#xwprocsprivates] xwos.xwlist#xwos.xwlist list
+    -- @field [parent=#privates] xwos.xwlist#xwos.xwlist list
     privates.list = _CMR.new("xwos.xwlist")
 
     --------------------------------
     -- thw processes by id
-    -- @field [parent=#xwprocsprivates] #map<#number,xwos.kernel.process#xwos.kernel.process> procs
+    -- @field [parent=#privates] #map<#number,xwos.kernel.process#xwos.kernel.process> procs
     privates.procs = {}
 end) -- ctor
 
@@ -85,10 +85,10 @@ end) -- ctor
 
 .func("create",
 --------------------------------
--- @function [parent=#xwprocsintern] create
+-- @function [parent=#intern] create
 -- @param #xwos.kernel.processes self
 -- @param classmanager#clazz clazz
--- @param #xwprocsprivates privates
+-- @param #privates privates
 -- @param xwos.kernel.process#xwos.kernel.process p
 -- @param xwos.kernel#xwos.kernel k
 -- @param global#global env
@@ -97,7 +97,7 @@ end) -- ctor
 function(self, clazz, privates, p, k, env, factories)
     --------------------------------
     -- kernel reference
-    -- @field [parent=#xwprocsprivates] xwos.kernel#xwos.kernel kernel
+    -- @field [parent=#privates] xwos.kernel#xwos.kernel kernel
     privates.kernel = k
     
     local newPid = privates.nextPid
@@ -117,10 +117,10 @@ end) -- function new
 
 .func("iterate",
 --------------------------------
--- @function [parent=#xwprocsintern] iterate
+-- @function [parent=#intern] iterate
 -- @param #xwos.kernel.processes self
 -- @param classmanager#clazz clazz
--- @param #xwprocsprivates privates
+-- @param #privates privates
 -- @return #function
 function(self, clazz, privates)
     return privates.list:iterate()

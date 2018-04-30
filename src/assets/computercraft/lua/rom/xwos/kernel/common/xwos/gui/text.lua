@@ -23,12 +23,12 @@ _CMR.class("xwos.gui.text").extends("xwos.gui.component")
 
 ------------------------
 -- the object privates
--- @type xwcprivates
--- @extends xwos.gui.component#xwcprivates
+-- @type privates
+-- @extends xwos.gui.component#privates
 
 ------------------------
 -- the internal class
--- @type xwcintern
+-- @type intern
 -- @extends #xwos.gui.text
 
 -- default stylesheet
@@ -41,14 +41,14 @@ _CMR.class("xwos.gui.text").extends("xwos.gui.component")
 
 ------------------------
 -- the text content; do not manipulate directly without care
--- @field [parent=#xwcprivates] #string _content 
+-- @field [parent=#privates] #string _content 
 
 .ctor(
 ------------------------
--- @function [parent=#xwcintern] ctor
+-- @function [parent=#intern] ctor
 -- @param #xwos.gui.text self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @param #string text
 -- @param #table styles
 function(self, clazz, privates, text, styles)
@@ -79,10 +79,10 @@ end) -- function create
 
 .func("width",
 ------------------------
--- @function [parent=#xwcintern] width
+-- @function [parent=#intern] width
 -- @param #xwos.gui.text self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @return #number
 function (self, clazz, privates)
     -- TODO styles
@@ -97,10 +97,10 @@ end) -- function width
 
 .func("height",
 ------------------------
--- @function [parent=#xwcintern] height
+-- @function [parent=#intern] height
 -- @param #xwos.gui.text self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @return #number
 function (self, clazz, privates)
     -- TODO styles
@@ -117,10 +117,10 @@ end) -- function height
 
 .func("setSize",
 ------------------------
--- @function [parent=#xwcintern] setSize
+-- @function [parent=#intern] setSize
 -- @param #xwos.gui.text self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @param #number width
 -- @param #number height
 -- @return #xwos.gui.text
@@ -137,10 +137,10 @@ end) -- function setSize
 
 .func("x",
 ------------------------
--- @function [parent=#xwcintern] x
+-- @function [parent=#intern] x
 -- @param #xwos.gui.text self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @return #number
 function (self, clazz, privates)
     return self:getStyle("x")
@@ -154,10 +154,10 @@ end) -- function x
 
 .func("y",
 ------------------------
--- @function [parent=#xwcintern] y
+-- @function [parent=#intern] y
 -- @param #xwos.gui.text self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @return #number
 function (self, clazz, privates)
     return self:getStyle("y")
@@ -173,10 +173,10 @@ end) -- function y
 
 .func("setPos",
 ------------------------
--- @function [parent=#xwcintern] setPos
+-- @function [parent=#intern] setPos
 -- @param #xwos.gui.text self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @param #number x
 -- @param #number y
 -- @return #xwos.gui.text
@@ -193,10 +193,10 @@ end) -- function setPos
 
 .func("paint",
 ------------------------
--- @function [parent=#xwcintern] paint
+-- @function [parent=#intern] paint
 -- @param #xwos.gui.text self
 -- @param classmanager#clazz clazz
--- @param #xwcprivates privates
+-- @param #privates privates
 -- @return #xwos.gui.text
 function (self, clazz, privates)
     if self:container() ~= nil and self:isVisible() then
