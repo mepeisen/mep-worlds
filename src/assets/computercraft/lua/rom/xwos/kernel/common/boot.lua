@@ -26,9 +26,7 @@ local pairs = pairs
 local fsexists = fs.exists
 local tinsert = table.insert
 local slines = function(str)
-  local _lines = {}
-  for l in str:gmatch('[^\n\r]+') do tinsert(_lines,l) end
-  return _lines
+  return str:gmatch('[^\n\r]+')
 end -- slines
 local ssub = string.sub
 local startsWith = function(str, starts)
@@ -183,6 +181,13 @@ function M.trace(asString)
                 tinsert(res, { hr=v, type="F" })
             end -- if trace
         end -- for lines
+        if asString then
+            local str = ""
+            for _,v in pairs(res) do
+                str = str .. "["..v.type.."] "..v.hr .. "\n"
+            end
+            return str
+        end
         return res
     end -- cclite
     
