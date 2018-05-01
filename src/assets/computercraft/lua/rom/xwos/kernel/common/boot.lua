@@ -25,7 +25,11 @@ local pcall = pcall
 local pairs = pairs
 local fsexists = fs.exists
 local tinsert = table.insert
-local slines = string.lines
+local slines = function(str)
+  local _lines = {}
+  for l in str:gmatch('[^\n\r]+') do tinsert(_lines,l) end
+  return _lines
+end -- slines
 local ssub = string.sub
 local startsWith = function(str, starts)
     return (str:find('^'..starts)) and true or false
