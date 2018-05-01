@@ -21,6 +21,7 @@ return function(boot)
     
     boot.krequire('tests/classmanager')
     boot.krequire('tests/xwos_xwlist')
+    boot.krequire('tests/xwos_kernel_fschroot')
     boot.krequire('tests/xwos_kernel_modulesmgr')
     boot.krequire('tests/xwos_kernel_process')
     boot.krequire('tests/xwos_modules_security_profile')
