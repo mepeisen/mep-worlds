@@ -82,7 +82,7 @@ end) -- ctor
 -- @return fs#fs wrapped 
 .func("wrap",
 --------------------------------
--- @function [parent=#intern] list
+-- @function [parent=#intern] wrap
 -- @param #xwos.kernel.fschroot self
 -- @param classmanager#clazz clazz
 -- @param #privates privates
