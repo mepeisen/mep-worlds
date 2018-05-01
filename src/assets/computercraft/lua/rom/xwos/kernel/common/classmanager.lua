@@ -23,9 +23,12 @@ local fsexists = fs.exists
 local fsisdir = fs.isDir
 local fslist = fs.list
 local loadfile = loadfile
+local load = load
 local setfenv = setfenv
 local setmetatable = setmetatable
 local split = string.gmatch
+local sub = string.sub
+local fscombine = fs.combine
 
 return function(env)
     ---------------
@@ -50,17 +53,19 @@ return function(env)
     -- @param #string path the path to file
     -- @return #any the file result
     function classmanager.require(path)
-        local file = gsub(path, "%.", "/")
         for k,v in pairs(classpath) do
-            local path = v.."/"..file..".lua"
-            if fsexists(path) and not fsisdir(path) then
-                local res, err = loadfile(path, env)
-                if res then
-                    return res()
-                else -- if res
-                    error(err)
-                end -- if not res
-            end -- if isfile
+            if sub(path, 0, #v.prefix) == v.prefix then
+                local file = gsub(sub(path, #v.prefix + 1), "%.", "/")
+                local path2 = file..".lua"
+                if v.exists(path2) and not v.isdir(path2) then
+                    local res, err = v.loadfile(path2, env)
+                    if res then
+                        return res()
+                    else -- if res
+                        error(err)
+                    end -- if not res
+                end -- if isfile
+            end -- if prefix
         end -- for cp
         error("file "..path.." not found")
     end -- function path
@@ -73,10 +78,68 @@ return function(env)
     -- @return #classmanager self for chaining
     function classmanager.addcp(...)
         for k,v in pairs({...}) do
-            tinsert(classpath, v)
+            local cpe = {
+                path = v,
+                prefix = '',
+                exists = function(path)
+                    return fsexists(fscombine(v, path))
+                end,
+                isdir = function(path)
+                    return fsisdir(fscombine(v, path))
+                end,
+                loadfile = function(path, env2)
+                    return loadfile(fscombine(v, path), env2 or env)
+                end,
+                list = function(path)
+                    return fslist(fscombine(v, path))
+                end
+            }
+            setfenv(cpe.exists, env)
+            setfenv(cpe.isdir, env)
+            setfenv(cpe.loadfile, env)
+            setfenv(cpe.list, env)
+            tinsert(classpath, cpe)
         end -- for ...
         return classmanager
     end -- function addcp
+    
+    ---------------
+    -- adds a namespace to be read from given file system
+    -- TODO security: do not allow invocation from child threads
+    -- @function [parent=#classmanager] addns
+    -- @param fs#fs fs the filesystem to read the files
+    -- @param #string prefix the namespace prefix
+    -- @return #classmanager self for chaining
+    function classmanager.addns(fs, prefix)
+        local cpe = {
+            fs = fs,
+            prefix = prefix,
+            exists = function(path)
+                return fs.exists(path)
+            end,
+            isdir = function(path)
+                return fs.isDir(path)
+            end,
+            loadfile = function(path, env2)
+                local file = fs.open( path, "r" )
+                if file then
+                    local func, err = load( file.readAll(), fs.getName( path ), "t", env2 or env )
+                    file.close()
+                    return func, err
+                end
+                return nil, "File not found"
+            end,
+            list = function(path)
+                return fs.list(path)
+            end
+        }
+        setfenv(cpe.exists, env)
+        setfenv(cpe.isdir, env)
+        setfenv(cpe.loadfile, env)
+        setfenv(cpe.list, env)
+        tinsert(classpath, cpe)
+        return classmanager
+    end -- function addns
     
     ---------------
     -- removes a path from classpath
@@ -87,14 +150,30 @@ return function(env)
     function classmanager.removecp(...)
         for k,v in pairs({...}) do
             for i, v2 in pairs(classpath) do
-                if v2 == v then
+                if v2.path == v then
                     classpath[i] = nil
                 end
             end
         end -- for ...
         return classmanager
     end -- function removecp
-    
+
+    ---------------
+    -- removes a namespace
+    -- TODO security: do not allow invocation from child threads
+    -- @function [parent=#classmanager] removens
+    -- @param fs#fs fs the filesystem to read the files
+    -- @param #string prefix the namespace prefix
+    -- @return #classmanager self for chaining
+    function classmanager.removens(fs, prefix)
+        for i, v2 in pairs(classpath) do
+            if v2.fs == fs and v2.prefix == prefix then
+                classpath[i] = nil
+            end
+        end
+        return classmanager
+    end -- function removens
+
     local function errClass(name, err)
         local errfunc = function()
             error(err)
@@ -102,8 +181,8 @@ return function(env)
         classmanager.class(name).ctor(errfunc)
     end -- error class
     
-    local function loadClassFile(name, file, path)
-        local res, err = loadfile(path)
+    local function loadClassFile(name, cpe, file, path)
+        local res, err = cpe.loadfile(path)
         if res then
             setfenv(res, env)
             res()
@@ -120,17 +199,19 @@ return function(env)
     end -- function loadClassFile
     
     local function loadClass(name)
-        local file = gsub(name, "%.", "/")
         for k,v in pairs(classpath) do
-            local path1 = v.."/"..file..".lua"
-            local path2 = v.."/"..file.."/init.lua"
-            if fsexists(path1) and not fsisdir(path1) then
-                loadClassFile(name, file, path1)
-                return
-            elseif fsexists(path2) and not fsisdir(path2) then
-                loadClassFile(name, file, path2)
-                return
-            end -- if isfile
+            if sub(name, 0, #v.prefix) == v.prefix then
+                local file = gsub(sub(name, #v.prefix + 1), "%.", "/")
+                local path1 = file..".lua"
+                local path2 = file.."/init.lua"
+                if v.exists(path1) and not v.isdir(path1) then
+                    loadClassFile(name, v, file, path1)
+                    return
+                elseif v.exists(path2) and not v.isdir(path2) then
+                    loadClassFile(name, v, file, path2)
+                    return
+                end -- if isfile
+            end -- if prefix
         end -- for cp
         local err = "class "..name.." not found"
         errClass(name, err)
@@ -362,16 +443,17 @@ return function(env)
     -- @return #table the found packages (package names in keys)
     function classmanager.findPackages(prefix)
         local res = {}
-        local file = gsub(prefix, "%.", "/")
         for k,v in pairs(classpath) do
-            local path = v.."/"..file
-            if (fsisdir(path)) then
-                for _, f in pairs(fslist(path)) do
-                    if fsisdir(path.."/"..f) then
-                        res[prefix.."."..f] = f
-                    end -- if fs.isdir
-                end -- for fs.list
-            end -- if isdir
+            if sub(prefix, 0, #v.prefix) == v.prefix then
+                local file = gsub(sub(prefix, #v.prefix + 1), "%.", "/")
+                if (v.isdir(file)) then
+                    for _, f in pairs(v.list(file)) do
+                        if v.isdir(file.."/"..f) then
+                            res[prefix.."."..f] = f
+                        end -- if fs.isdir
+                    end -- for fs.list
+                end -- if isdir
+             end -- if prefix
         end -- for co
         return res
     end -- function findPackages
@@ -385,14 +467,16 @@ return function(env)
         local res = {}
         local file = gsub(package, "%.", "/")
         for k,v in pairs(classpath) do
-            local path = v.."/"..file
-            if fsisdir(path) then
-                for _, f in pairs(fslist(path)) do
-                    if f:sub(-4)==".lua" and not fsisdir(path.."/"..f) then
-                        res[package.."."..f:sub(0, -5)] = true
-                    end -- if not fs.isdir
-                end -- for fs.list
-            end -- if fs.isdir
+            if sub(package, 0, #v.prefix) == v.prefix then
+                local file = gsub(sub(package, #v.prefix + 1), "%.", "/")
+                if v.isdir(file) then
+                    for _, f in pairs(v.list(file)) do
+                        if f:sub(-4)==".lua" and not v.isdir(file.."/"..f) then
+                            res[package.."."..f:sub(0, -5)] = true
+                        end -- if not fs.isdir
+                    end -- for fs.list
+                end -- if fs.isdir
+            end -- if prefix
         end -- for co
         return res
     end -- function findClasses

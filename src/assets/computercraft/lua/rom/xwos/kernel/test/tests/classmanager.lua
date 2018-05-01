@@ -447,3 +447,60 @@ function TestClassmanager:testAnnot()
     lu.assertErrorMsgContains("nil value", function() bar:getBar(foo) end)
 end -- testAnnot
 
+-- tests namespacing
+function TestClassmanager:testEmptyNs()
+    local cmr = cmf(boot.newglob()) -- classmanager#classmanager
+    _CMR = cmr
+    local kp = boot.kernelRoot()..'/kernel/test/tests/classmanager/'
+    cmr.addns({
+            exists = function(path) return fs.exists(kp..path) end,
+            isDir = function(path) return fs.isDir(kp..path) end,
+            open = function(path, mode) return fs.open(kp..path, mode) end,
+            getName = function(path) return fs.getName(kp..path) end,
+            list = function(path) return fs.list(kp..path) end
+        },
+        ''
+    )
+    cmr.require('SimpleClass')
+    lu.assertNotNil(cmr.new('SimpleClass')) -- only works if SimpleClassInvalid was really loaded
+    _CMR = nil
+end -- testEmptyNs
+
+-- tests namespacing
+function TestClassmanager:testNs1()
+    local cmr = cmf(boot.newglob()) -- classmanager#classmanager
+    _CMR = cmr
+    local kp = boot.kernelRoot()..'/kernel/test/tests/classmanager2/'
+    cmr.addns({
+            exists = function(path) return fs.exists(kp..path) end,
+            isDir = function(path) return fs.isDir(kp..path) end,
+            open = function(path, mode) return fs.open(kp..path, mode) end,
+            getName = function(path) return fs.getName(kp..path) end,
+            list = function(path) return fs.list(kp..path) end
+        },
+        'some'
+    )
+    cmr.require('some.ns1.SimpleClass1')
+    lu.assertNotNil(cmr.new('some.ns1.SimpleClass1')) -- only works if SimpleClassInvalid was really loaded
+    _CMR = nil
+end -- testNs1
+
+-- tests namespacing
+function TestClassmanager:testNs2()
+    local cmr = cmf(boot.newglob()) -- classmanager#classmanager
+    _CMR = cmr
+    local kp = boot.kernelRoot()..'/kernel/test/tests/classmanager2/'
+    cmr.addns({
+            exists = function(path) return fs.exists(kp..path) end,
+            isDir = function(path) return fs.isDir(kp..path) end,
+            open = function(path, mode) return fs.open(kp..path, mode) end,
+            getName = function(path) return fs.getName(kp..path) end,
+            list = function(path) return fs.list(kp..path) end
+        },
+        'some.deep'
+    )
+    cmr.require('some.deep.ns1.ns2.SimpleClass2')
+    lu.assertNotNil(cmr.new('some.deep.ns1.ns2.SimpleClass2')) -- only works if SimpleClassInvalid was really loaded
+    _CMR = nil
+end -- testNs2
+

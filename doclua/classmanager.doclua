@@ -32,9 +32,23 @@
 -- @return #classmanager self for chaining
 
 ---------------
+-- adds a namespace to be read from given file system
+-- @function [parent=#classmanager] addns
+-- @param fs#fs fs the filesystem to read the files
+-- @param #string prefix the namespace prefix
+-- @return #classmanager self for chaining
+
+---------------
 -- removes a path from classpath
 -- @function [parent=#classmanager] removecp
 -- @param ... classpath elements to be removed
+-- @return #classmanager self for chaining
+
+---------------
+-- removes a namespace
+-- @function [parent=#classmanager] removens
+-- @param fs#fs fs the filesystem to read the files
+-- @param #string prefix the namespace prefix
 -- @return #classmanager self for chaining
 
 ---------------
