@@ -55,7 +55,7 @@ end) -- ctor
 
 .func("load",
 ---------------------------------
--- @function [parent=#intern] save
+-- @function [parent=#intern] load
 -- @param #xwos.modules.appman self
 -- @param classmanager#clazz clazz
 -- @param #privates privates
@@ -74,7 +74,7 @@ function(self, clazz, privates)
         -- @field [parent=#privates] xwos.kernel.fschroot#xwos.kernel.fschroot fs
         privates.fs = _CMR.new('xwos.kernel.fschroot', path)
     end -- if secure data
-end) -- function save
+end) -- function load
 
 ---------------------------------
 -- Save storage to secure kernel storage
