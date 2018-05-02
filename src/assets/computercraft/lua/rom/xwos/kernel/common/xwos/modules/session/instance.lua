@@ -63,6 +63,7 @@ function (self, clazz, privates, kernel, id)
     ---------------
     -- the persistent flag
     -- @field [parent=#privates] #boolean persistent
+    privates.persistent = false
 end) -- ctor
 
 ---------------------------------
@@ -156,7 +157,7 @@ end) -- function isPersistent
 -- @param #boolean flag
 function(self, clazz, privates, flag)
     privates.persistent = flag
-    privates.kernel.modules.instances.session:save()
+    privates.kernel.modules.instances.session:save() -- will call self on this object
 end) -- function setPersistent
 
 ---------------------------------
