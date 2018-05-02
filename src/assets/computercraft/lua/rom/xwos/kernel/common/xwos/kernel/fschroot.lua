@@ -460,7 +460,7 @@ end) -- function getDir
 -- @return #table matches 
 .func("complete",
 --------------------------------
--- @function [parent=#intern] list
+-- @function [parent=#intern] complete
 -- @param #xwos.kernel.fschroot self
 -- @param classmanager#clazz clazz
 -- @param #privates privates
