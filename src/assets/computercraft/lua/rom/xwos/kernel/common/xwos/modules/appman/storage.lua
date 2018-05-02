@@ -56,7 +56,7 @@ end) -- ctor
 ---------------------------------
 -- Returns instance id
 -- @function [parent=#xwos.modules.appman.storage] id
--- @param #xwos.modules.appman.instance self self
+-- @param #xwos.modules.appman.storage self self
 -- @return #number storage id
 
 .func("id",

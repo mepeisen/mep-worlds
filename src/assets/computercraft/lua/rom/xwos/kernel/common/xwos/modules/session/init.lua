@@ -49,7 +49,7 @@ function (self, clazz, privates, kernel)
     
     ------------------
     -- the known sessions by id
-    -- @field [parent=#privates] #map<#integer,xwos.modules.session.instance#xwos.modules.session.instance> instances
+    -- @field [parent=#privates] #map<#number,xwos.modules.session.instance#xwos.modules.session.instance> instances
     privates.instances = {}
     
     ------------------

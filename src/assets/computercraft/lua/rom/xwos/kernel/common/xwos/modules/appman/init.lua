@@ -49,7 +49,7 @@ function (self, clazz, privates, kernel)
     
     ------------------
     -- the application storages
-    -- @field [parent=#privates] #list<#integer,xwos.modules.appman.storage#xwos.modules.appman.storage> storages
+    -- @field [parent=#privates] #map<#number,xwos.modules.appman.storage#xwos.modules.appman.storage> storages
     privates.storages = {}
     
     ------------------

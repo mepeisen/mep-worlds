@@ -37,7 +37,7 @@ _CMR.class("xwos.modules.appman.fsstorage")
 ------------------------
 -- create new app storage instance
 -- @function [parent=#intern] __ctor
--- @param #xwos.modules.appman.storage self self
+-- @param #xwos.modules.appman.fsstorage self self
 -- @param classmanager#clazz clazz session instance class
 -- @param #privates privates
 -- @param #number id the storage id
@@ -51,12 +51,12 @@ end) -- ctor
 ---------------------------------
 -- Load storage from secure kernel storage
 -- @function [parent=#xwos.modules.appman] load
--- @param #xwos.modules.appman self self
+-- @param #xwos.modules.appman.fsstorage self self
 
 .func("load",
 ---------------------------------
 -- @function [parent=#intern] load
--- @param #xwos.modules.appman self
+-- @param #xwos.modules.appman.fsstorage self
 -- @param classmanager#clazz clazz
 -- @param #privates privates
 function(self, clazz, privates)

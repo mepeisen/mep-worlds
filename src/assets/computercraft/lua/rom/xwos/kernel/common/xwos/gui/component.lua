@@ -330,7 +330,7 @@ end) -- function redraw
 -- Returns the gui container
 -- @function [parent=#xwos.gui.component] container
 -- @param #xwos.gui.component self self
--- @return #xwos.gui.container container of nil if object is not contained in any container
+-- @return xwos.gui.container#xwos.gui.container container of nil if object is not contained in any container
 
 .func("container",
 ------------------------
@@ -338,7 +338,7 @@ end) -- function redraw
 -- @param #xwos.gui.component self
 -- @param classmanager#clazz clazz
 -- @param #privates privates
--- @return #xwos.gui.container container of nil if object is not contained in any container
+-- @return xwos.gui.container#xwos.gui.container container of nil if object is not contained in any container
 function (self, clazz, privates)
     return self._container
 end) -- function container
