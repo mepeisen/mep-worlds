@@ -20,8 +20,8 @@ local unser = textutils.unserialize
 
 -----------------------
 -- @module xwos.modules.appman.fsstorage
--- @extends xwos.modules.appman.storage
-_CMR.class("xwos.modules.appman.fsstorage")
+-- @extends xwos.modules.appman.storage#xwos.modules.appman.storage
+_CMR.class("xwos.modules.appman.fsstorage").extends("xwos.modules.appman.storage")
 
 ------------------------
 -- the object privates
@@ -50,7 +50,7 @@ end) -- ctor
 
 ---------------------------------
 -- Load storage from secure kernel storage
--- @function [parent=#xwos.modules.appman] load
+-- @function [parent=#xwos.modules.appman.fsstorage] load
 -- @param #xwos.modules.appman.fsstorage self self
 
 .func("load",
@@ -78,13 +78,13 @@ end) -- function load
 
 ---------------------------------
 -- Save storage to secure kernel storage
--- @function [parent=#xwos.modules.appman] save
--- @param #xwos.modules.appman self self
+-- @function [parent=#xwos.modules.appman.fsstorage] save
+-- @param #xwos.modules.appman.fsstorage self self
 
 .func("save",
 ---------------------------------
 -- @function [parent=#intern] save
--- @param #xwos.modules.appman self
+-- @param #xwos.modules.appman.fsstorage self
 -- @param classmanager#clazz clazz
 -- @param #privates privates
 function(self, clazz, privates)
@@ -94,20 +94,20 @@ end) -- function save
 
 ---------------------------------
 -- Sets the path to be used
--- @function [parent=#xwos.modules.appman] setPath
--- @param #xwos.modules.appman self self
+-- @function [parent=#xwos.modules.appman.fsstorage] setPath
+-- @param #xwos.modules.appman.fsstorage self self
 -- @param #string path
 
 .func("setPath",
 ---------------------------------
 -- @function [parent=#intern] setPath
--- @param #xwos.modules.appman self
+-- @param #xwos.modules.appman.fsstorage self
 -- @param classmanager#clazz clazz
 -- @param #privates privates
 -- @param #string path
 function(self, clazz, privates, path)
-    privates.path = d.path
-    privates.fs = _CMR.new('xwos.kernel.fschroot', path)
+    privates.path = path
+    privates.fs = _CMR.new('xwos.kernel.fschroot', privates.kernel, privates.kernel.oldGlob.fs, path)
     self:save()
 end) -- function setPath
 

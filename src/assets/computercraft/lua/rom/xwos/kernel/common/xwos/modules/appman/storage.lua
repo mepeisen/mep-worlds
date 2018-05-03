@@ -71,59 +71,6 @@ function(self, clazz, privates)
 end) -- function id
 
 -------------------------------------------------------------------------------
--- Returns a wrapper object that can be used as fs-api
--- @function [parent=#xwos.modules.appman.storage] wrap
--- @param #xwos.modules.appman.storage self self
--- @param #table env the environment to be used for functions
--- @return fs#fs wrapped 
-.func("wrap",
---------------------------------
--- @function [parent=#intern] list
--- @param #xwos.modules.appman.storage self
--- @param classmanager#clazz clazz
--- @param #privates privates
--- @param #table env the environment to be used for functions
--- @return fs#fs wrapped 
-function(self, clazz, privates, env)
-    local res = {}
-    res.list = function(...) return self:list(...) end
-    res.exists = function(...) return self:exists(...) end
-    res.isDir = function(...) return self:isDir(...) end
-    res.isReadOnly = function(...) return self:isReadOnly(...) end
-    res.getName = function(...) return self:getName(...) end
-    res.getDrive = function(...) return self:getDrive(...) end
-    res.getSize = function(...) return self:getSize(...) end
-    res.getFreeSpace = function(...) return self:getFreeSpace(...) end
-    res.makeDir = function(...) return self:makeDir(...) end
-    res.move = function(...) return self:move(...) end
-    res.copy = function(...) return self:copy(...) end
-    res.delete = function(...) return self:delete(...) end
-    res.combine = function(...) return self:combine(...) end
-    res.open = function(...) return self:open(...) end
-    res.find = function(...) return self:find(...) end
-    res.getDir = function(...) return self:getDir(...) end
-    res.complete = function(...) return self:complete(...) end
-    setfenv(res.list, env)
-    setfenv(res.exists, env)
-    setfenv(res.isDir, env)
-    setfenv(res.isReadOnly, env)
-    setfenv(res.getName, env)
-    setfenv(res.getDrive, env)
-    setfenv(res.getSize, env)
-    setfenv(res.getFreeSpace, env)
-    setfenv(res.makeDir, env)
-    setfenv(res.move, env)
-    setfenv(res.copy, env)
-    setfenv(res.delete, env)
-    setfenv(res.combine, env)
-    setfenv(res.open, env)
-    setfenv(res.find, env)
-    setfenv(res.getDir, env)
-    setfenv(res.complete, env)
-    return res
-end) -- function list
-
--------------------------------------------------------------------------------
 -- Returns a list of all the files (including subdirectories but not their contents) contained in a directory, as a numerically indexed table. 
 -- @function [parent=#xwos.modules.appman.storage] list
 -- @param #xwos.modules.appman.storage self self
@@ -245,13 +192,21 @@ end) -- function list
 -- @param #boolean includeSlashes (optional)
 -- @return #table matches 
 
+-- abstract functions from fs api
+.aFunc("list", "exists", "isDir", "isReadOnly", "getName", "getDrive", "getSize", "getFreeSpace", "makeDir", "move", "copy", "delete", "combine", "open", "find", "getDir", "complete")
+
 ---------------------------------
 -- Save storage to secure kernel storage
 -- @function [parent=#xwos.modules.appman.storage] save
 -- @param #xwos.modules.appman.storage self self
+.aFunc("save")
 
--- abstract functions from fs api
-.aFunc("save", "list", "exists", "isDir", "isReadOnly", "getName", "getDrive", "getSize", "getFreeSpace", "makeDir", "move", "copy", "delete", "combine", "open", "find", "getDir", "complete")
+---------------------------------
+-- Return filesystem instance
+-- @function [parent=#xwos.modules.appman.storage] fs
+-- @param #xwos.modules.appman.storage self self
+-- @return xwos.kernel.fschroot#xwos.kernel.fschroot filesystem instance to access the storage
+.aFunc("fs")
 
 ---------------------------------
 -- List applications from underlying filesystem
@@ -268,15 +223,23 @@ end) -- function list
 -- @return #table
 function(self, clazz, privates)
     local res = {}
-    for _, g in pairs(self:list("")) do
-        for _, a in pairs(self:list(g)) do
-            for _, v in pairs(self:list(g.."/"..a)) do
-                if self:exists(g.."/"..a.."/"..v.."/manifest.txt") then
-                    tins(res, g.."/"..a.."/"..v)
-                end -- if manifest
-            end -- for versions
-        end -- for artifacts
-    end -- for groups
+    if self:exists("") then
+        for _, g in pairs(self:list("")) do
+            if self:isDir(g) then
+                for _, a in pairs(self:list(g)) do
+                    if self:isDir(g.."/"..a) then
+                        for _, v in pairs(self:list(g.."/"..a)) do
+                            if self:isDir(g.."/"..a.."/"..v) then
+                                if self:exists(g.."/"..a.."/"..v.."/manifest.txt") then
+                                    tins(res, g.."/"..a.."/"..v)
+                                end -- if manifest
+                            end -- if isDir(g.."/"..a.."/"..v)
+                        end -- for versions
+                    end -- if isDir(g.."/"..a)
+                end -- for artifacts
+            end -- if isDir(g)
+        end -- for groups
+    end -- if exists
     return res
 end) -- function listApps
 

@@ -85,7 +85,8 @@ function TestClassmanager:testList2()
     lu.assertItemsEquals(res, {
         "tests.classmanager",
         "tests.classmanager2",
-        "tests.modulesmgr"
+        "tests.modulesmgr",
+        "tests.fsstorage"
         })
     _CMR = nil
 end -- testList
