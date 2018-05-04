@@ -114,6 +114,7 @@ function(self, clazz, privates, ver, kernelpaths, kernelRoot, cpfactory, oldGlob
     -- Require for kernel scripts
     -- @function [parent=#xwos.kernel] cpfactory
     -- @param #table env the environment to use
+    -- @return classmanager#classmanager
     self.cpfactory = cpfactory
     
     print("installing extension moses...")

@@ -111,4 +111,21 @@ function(self, clazz, privates, path)
     self:save()
 end) -- function setPath
 
+---------------------------------
+-- Return filesystem instance
+-- @function [parent=#xwos.modules.appman.storage] fs
+-- @param #xwos.modules.appman.storage self self
+-- @return xwos.kernel.fschroot#xwos.kernel.fschroot filesystem instance to access the storage
+
+.func("fs",
+---------------------------------
+-- @function [parent=#intern] fs
+-- @param #xwos.modules.appman.fsstorage self
+-- @param classmanager#clazz clazz
+-- @param #privates privates
+-- @return xwos.kernel.fschroot#xwos.kernel.fschroot
+function(self, clazz, privates)
+    return privates.fs
+end) -- function fs
+
 return nil

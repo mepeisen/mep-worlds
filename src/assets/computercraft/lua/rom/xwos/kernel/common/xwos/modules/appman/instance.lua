@@ -189,4 +189,22 @@ function(self, clazz, privates)
     return _CMR.new('xwos.kernel.fsro', privates.kernel, privates.storage:wrap({}), privates.path)
 end) -- function data
 
+---------------------------------
+-- Returns a class manager for loading application classes
+-- @function [parent=#xwos.modules.appman.instance] cmr
+-- @param #xwos.modules.appman.instance self self
+-- @return classmanager#classmanager classmanager instance
+
+.func("cmr",
+---------------------------------
+-- @function [parent=#intern] cmr
+-- @param #xwos.modules.appman.instance self
+-- @param classmanager#clazz clazz
+-- @param #privates privates
+-- @return classmanager#classmanager
+function(self, clazz, privates, env)
+    local fsr = _CMR.new('xwos.kernel.fsro', privates.kernel, privates.storage:fs():wrap(), privates.path)
+    return privates.kernel.cpfactory(env).addns(fsr, privates.manifest.namespace)
+end) -- function data
+
 return nil
