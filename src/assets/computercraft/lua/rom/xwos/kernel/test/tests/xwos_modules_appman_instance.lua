@@ -17,9 +17,9 @@
 
 local cmf = boot.krequire('classmanager')
 
-TestXwosModulesAppmanFsstorage = {}
+TestXwosModulesAppmanInstance = {}
 
-function TestXwosModulesAppmanFsstorage:setUp()
+function TestXwosModulesAppmanInstance:setUp()
     local cmr = cmf(boot.newglob()) -- classmanager#classmanager
     _CMR = cmr
     -- add kernel common path
@@ -28,7 +28,9 @@ function TestXwosModulesAppmanFsstorage:setUp()
     local allen = cmr.require('xwos.extensions.allen.allen')
     string.startsWith = allen.startsWith
     
+    cmr.load("xwos.modules.appman.instance")
     cmr.load("xwos.kernel.fschroot")
+    cmr.load("xwos.kernel.fsro")
     cmr.load("xwos.modules.appman.storage")
     cmr.load("xwos.modules.appman.fsstorage")
     -- kernelmock
@@ -49,44 +51,57 @@ function TestXwosModulesAppmanFsstorage:setUp()
         end)
 end -- setUp
 
-function TestXwosModulesAppmanFsstorage:tearDown()
+function TestXwosModulesAppmanInstance:tearDown()
     _CMR = nil
 end -- tearDown
 
--- testing profile creation
-function TestXwosModulesAppmanFsstorage:testNew()
-    local kernel = _CMR.new('kernelmock')
-    local fss = _CMR.new('xwos.modules.appman.fsstorage', 4711, kernel) -- xwos.modules.appman.fsstorage#xwos.modules.appman.fsstorage
-    lu.assertEquals(fss:id(), 4711)
-end -- testNew
-
-
-
--- testing set path
-function TestXwosModulesAppmanFsstorage:testSetPath()
-    local kernel = _CMR.new('kernelmock')
+-- testing app instance with non existent manifest file
+function TestXwosModulesAppmanInstance:testNotFound()
+    local kernel = _CMR.new('kernelmock') -- xwos.kernel#xwos.kernel
     local fss = _CMR.new('xwos.modules.appman.fsstorage', 4711, kernel) -- xwos.modules.appman.fsstorage#xwos.modules.appman.fsstorage
     fss:setPath(boot.kernelRoot().."/kernel/test/tests/fsstorage")
     
-    local f = {}
-    f["core/appman/fsstorage-4711.dat"] = "{\n  path = \""..boot.kernelRoot().."/kernel/test/tests/fsstorage\",\n}"
-    lu.assertEquals(kernel.secdata, f)
-end -- testSetPath
+    local obj = _CMR.new('xwos.modules.appman.instance', fss, "notfound", kernel) -- xwos.modules.appman.instance#xwos.modules.appman.instance
+    
+    lu.assertEquals(obj:manifest(), {})
+    lu.assertErrorMsgContains("Not a directory", function() obj:data():list("") end)
+    -- TODO check cmr building
+end -- testNotFound
 
-
-
--- testing app listings
-function TestXwosModulesAppmanFsstorage:testListEmpty()
-    local kernel = _CMR.new('kernelmock')
+-- testing app instance with invalid manifest file
+function TestXwosModulesAppmanInstance:testInvalid()
+    local kernel = _CMR.new('kernelmock') -- xwos.kernel#xwos.kernel
     local fss = _CMR.new('xwos.modules.appman.fsstorage', 4711, kernel) -- xwos.modules.appman.fsstorage#xwos.modules.appman.fsstorage
-    fss:setPath(boot.kernelRoot().."/kernel/test/tests/fsstorage/unknown")
-    lu.assertEquals(fss:listApps(), {})
-end -- testListEmpty
+    fss:setPath(boot.kernelRoot().."/kernel/test/tests/fsstorage")
+    
+    local obj = _CMR.new('xwos.modules.appman.instance', fss, "inv1", kernel) -- xwos.modules.appman.instance#xwos.modules.appman.instance
+    
+    lu.assertItemsEquals(obj:manifest(), {})
+    lu.assertErrorMsgContains("Not a directory", function() obj:data():list("") end)
+    -- TODO check cmr building
+end -- testInvalid
 
--- testing app listings
-function TestXwosModulesAppmanFsstorage:testList1()
-    local kernel = _CMR.new('kernelmock')
+-- testing app instance with valid manifest file
+function TestXwosModulesAppmanInstance:testValid()
+    local kernel = _CMR.new('kernelmock') -- xwos.kernel#xwos.kernel
     local fss = _CMR.new('xwos.modules.appman.fsstorage', 4711, kernel) -- xwos.modules.appman.fsstorage#xwos.modules.appman.fsstorage
-    fss:setPath(boot.kernelRoot().."/kernel/test/tests/fsstorage/inv1")
-    lu.assertItemsEquals(fss:listApps(), {"group3/app31/version1", "group3/app31/version2", "group3/app33/version1"})
-end -- testList1
+    fss:setPath(boot.kernelRoot().."/kernel/test/tests/fsstorage")
+    
+    local obj = _CMR.new('xwos.modules.appman.instance', fss, "app1", kernel) -- xwos.modules.appman.instance#xwos.modules.appman.instance
+    
+    lu.assertItemsEquals(obj:manifest(), {
+        artifact="myapp",
+        author="Your name",
+        dependencies="XWOS@[0.0.4",
+        email="Your mail address",
+        group="eu_xworlds_sample",
+        hardware="ANY",
+        main="eu.xworlds.samples.myapp.main",
+        name="My sample application",
+        namespace="eu.xworlds.samples.myapp",
+        url="http://your-domain/your-app.html",
+        version="0.0.1-SNAPSHOT"
+    })
+    lu.assertEquals(obj:data():list(""), {"foo.txt"})
+    -- TODO check cmr building
+end -- testValid

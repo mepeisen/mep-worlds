@@ -20,7 +20,7 @@ local error = error
 --------------------------------
 -- Read-only wrapper around filesystem api
 -- @module xwos.kernel.fsro
--- @extends xwos.kernel.fschroot
+-- @extends xwos.kernel.fschroot#xwos.kernel.fschroot
 _CMR.class("xwos.kernel.fsro").extends("xwos.kernel.fschroot")
 
 ------------------------

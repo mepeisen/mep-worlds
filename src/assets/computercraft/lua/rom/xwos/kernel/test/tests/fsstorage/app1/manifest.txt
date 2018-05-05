@@ -1,0 +1,17 @@
+# human readable app name
+name = My sample application
+# technical info
+group = eu_xworlds_sample
+artifact = myapp
+version = 0.0.1-SNAPSHOT
+# author information
+author = Your name
+email = Your mail address
+url = http://your-domain/your-app.html
+# dependencies
+dependencies = XWOS@[0.0.4
+# hardware information
+hardware = ANY
+# classes and runtime information
+namespace = eu.xworlds.samples.myapp
+main = eu.xworlds.samples.myapp.main

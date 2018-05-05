@@ -49,17 +49,11 @@ _CMR.class("xwos.modules.appman.instance")
 -- @param xwos.modules.appman.storage#xwos.modules.appman.storage storage the owning storage
 -- @param #string path the installation path of given app
 -- @param xwos.kernel#xwos.kernel kernel
--- @param #number id the unique application id
-function (self, clazz, privates, storage, path, kernel, id)
+function (self, clazz, privates, storage, path, kernel)
     ---------------
     -- the kernel reference
     -- @field [parent=#privates] xwos.kernel#xwos.kernel kernel
     privates.kernel = kernel
-    
-    ---------------
-    -- the unique app id
-    -- @field [parent=#privates] #number id
-    privates.id = id
     
     ---------------
     -- the installation path
@@ -132,11 +126,37 @@ function (self, clazz, privates, storage, path, kernel, id)
             local s2 = trim(s)
             if #s2 > 0 and not strstarts(s2, "#") then
                 s2 = strgmatch(s2, "[^=]+")
-                privates.manifest[trim(s2())] = trim(s2())
+                local k = s2()
+                local v = s2()
+                if k ~= nil and v ~= nil then
+                    privates.manifest[trim(k)] = trim(v)
+                else
+                    -- TODO should we throw errors for invalid manifests?
+                end -- if k, v
             end -- if not comment
         end -- for lines
     end -- if manifest
 end) -- ctor
+
+---------------------------------
+-- Sets instance id
+-- @function [parent=#xwos.modules.appman.instance] setId
+-- @param #xwos.modules.appman.instance self self
+-- @param #number id
+
+.func("setId",
+---------------------------------
+-- @function [parent=#intern] setId
+-- @param #xwos.modules.appman.instance self
+-- @param classmanager#clazz clazz
+-- @param #privates privates
+-- @param #number id
+function(self, clazz, privates, id)
+    ---------------
+    -- the unique app id
+    -- @field [parent=#privates] #number id
+    privates.id = id
+end) -- function setId
 
 ---------------------------------
 -- Returns instance id
@@ -186,7 +206,7 @@ end) -- function manifest
 -- @param #privates privates
 -- @return xwos.kernel.fsro#xwos.kernel.fsro
 function(self, clazz, privates)
-    return _CMR.new('xwos.kernel.fsro', privates.kernel, privates.storage:wrap({}), privates.path)
+    return _CMR.new('xwos.kernel.fsro', privates.kernel, privates.storage:fs():wrap({}), privates.path.."/data")
 end) -- function data
 
 ---------------------------------
