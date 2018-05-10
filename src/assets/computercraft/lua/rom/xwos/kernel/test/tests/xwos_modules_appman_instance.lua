@@ -55,6 +55,18 @@ function TestXwosModulesAppmanInstance:tearDown()
     _CMR = nil
 end -- tearDown
 
+-- testing app instance id
+function TestXwosModulesAppmanInstance:testId()
+    local kernel = _CMR.new('kernelmock') -- xwos.kernel#xwos.kernel
+    local fss = _CMR.new('xwos.modules.appman.fsstorage', 4711, kernel) -- xwos.modules.appman.fsstorage#xwos.modules.appman.fsstorage
+    fss:setPath(boot.kernelRoot().."/kernel/test/tests/fsstorage")
+    
+    local obj = _CMR.new('xwos.modules.appman.instance', fss, "notfound", kernel) -- xwos.modules.appman.instance#xwos.modules.appman.instance
+    obj:setId(4711)
+    
+    lu.assertEquals(obj:id(), 4711)
+end -- testNotFound
+
 -- testing app instance with non existent manifest file
 function TestXwosModulesAppmanInstance:testNotFound()
     local kernel = _CMR.new('kernelmock') -- xwos.kernel#xwos.kernel
