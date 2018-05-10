@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>XWOS | Latest snapshot</title>
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+  <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
+  <link rel="stylesheet" href="../dist/css/AdminLTE.min.css">
+  <link rel="stylesheet" href="../dist/css/skins/skin-blue.min.css">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="../plugins/highlite/styles/default.css">
+  <!--[if lt IE 9]>
+  <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+  <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+  <![endif]-->
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+<div class="wrapper">
+
+  <header class="main-header">
+
+    <a href="index.html" class="logo">
+      <span class="logo-mini"><b>XW</b>OS</span>
+      <span class="logo-lg"><b>XW</b>OS</span>
+    </a>
+
+    <nav class="navbar navbar-static-top" role="navigation">
+      <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+        <span class="sr-only">Toggle navigation</span>
+      </a>
+      
+      <div id="navbar-custom-menu" class="navbar-custom-menu">
+      </div>
+    </nav>
+  </header>
+  
+  <aside class="main-sidebar">
+
+    <section id="sidebar" class="sidebar">
+    </section>
+  </aside>
+
+  <div class="content-wrapper">
+    <section class="content-header">
+      <h1>
+        XWOS
+      <small>Latest snapshot</small>
+      </h1>
+      <ol class="breadcrumb">
+        <li><a href="../index.html"><i class="fa fa-home"></i> Home</a></li>
+        <li><a href="index.html"><i class="fa fa-home"></i> Latest snapshot</a></li>
+        <li><a href="manual_kerneldev.html"><i class="fa fa-cogs"></i> Kernel developer</a></li>
+        <li class="active"><i class="fa fa-cogs"></i> extensions vs. modules vs. apis</li>
+      </ol>
+    </section>
+
+    <section class="content">
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="toc">
+    				<h2 class="page-header"><a href="#toc">TOC</a></h2>
+    				<ul>
+    					<li><a href="#overview">Overview</a></li>
+    					<li><a href="#extensions">About extensions</a></li>
+    					<li><a href="#modules">About kernel modules</a></li>
+    					<li><a href="#apis">About APIs</a></li>
+    				</ul>
+    			</section>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="overview">
+    				<h2 class="page-header"><a href="#overview">extensions vs. modules vs. apis</a></h2>
+    				<p class="lead">
+    					When developing for the <b>XWOS</b> kernel you will find three ways to add a feature. In following chapters
+    					I will give you a short summary about each feature and how to use it.
+    				</p>
+    			</section>
+    		</div>
+    	</div>
+    	<div class="row">
+    		<div class="col-md-12">
+    			<div class="callout callout-warning lead">
+	    			<h4>Warning!</h4>
+	    			<p>
+	    				 Developing kernel features always requires to understand the <b>XWOS</b> sandboxing feature. Ensure to read
+	    				 and understand the <a href="manual_kerneldev_module_sandbox.html">article about sandbox kernel module</a> too.
+	    			</p>
+	  			</div>
+	  		</div>
+	  	</div>
+	  	<div class="row">
+    		<div class="col-md-12">
+    			<p class="lead">
+    				<a href="#toc">Back to top</a>
+    			</p>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="extensions">
+    				<h2 class="page-header"><a href="#extensions">About extensions</a></h2>
+    				<p class="lead">
+    					Extensions are located inside folder <code>xwos/extensions</code>. They are loaded explicit
+    					within kernel boot process; see class <code>xwos_kernel</code> with method <code>boot</code>
+    					for details.
+    				</p>
+    				<p>
+    					Extensions are guaranteed to be loaded before any kernel module loads. They may be used inside
+    					kernel modules or applications started by <b>XWOS</b>. If you plan to add a new extension you
+    					must manipulate the <code>boot</code> method to load the extension before module manager.
+    				</p>
+    				<p>
+    					For the moment we assume that extensions are only small libraries being required by the kernel
+    					or the core modules itself. At the moment we have two extensions: allen (extending the string api)
+    					and moses (extending the table api).
+    				</p>
+    				<p class="lead">
+    					<a href="#toc">Back to top</a>
+    				</p>
+    			</section>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="modules">
+    				<h2 class="page-header"><a href="#modules">About modules</a></h2>
+    				<p class="lead">
+    					Modules are located inside folder <code>xwos/modules</code>. All modules found in this folder are
+    					loaded automatically without additional setup.
+    				</p>
+    				<p>
+    					Modules are guaranteed to be loaded before the first process (<code>login</code>) starts.
+    					They may depend on other kernel modules or on extensions and computercraft apis. If you plan
+    					to add a new api you only need to create your own folder inside <code>xwos/modules</code> and
+    					add a corresponding <code>init.lua</code> declaring a class <code>xwos_modules_YOURNAME</code>.
+    				</p>
+    				<p>
+    					There are some core modules that are loaded in a specific order. This order can be found in file
+    					<code>moduleOrder.lua</code>. Any additional module not found in this predefined order will be
+    					loaded after those core modules.
+    				</p>
+    			</section>
+    		</div>
+    	</div>
+    	<div class="row">
+    		<div class="col-md-12">
+    			<div class="callout callout-info lead">
+	    			<h4>Information!</h4>
+	    			<p>
+	    				 Modules are the most flexible way to add new kernel features. They can be created without modifying any code line of the
+	    				 <b>XWOS</b> kernel itself. In future versions of <b>XWOS</b> you will be able to download and install additional kernel
+	    				 modules as an administrator user.
+	    			</p>
+	  			</div>
+	  		</div>
+	  	</div>
+	  	<div class="row">
+    		<div class="col-md-12">
+    			<p class="lead">
+    				<a href="#toc">Back to top</a>
+    			</p>
+    		</div>
+    	</div>
+    
+    	<div class="row">
+    		<div class="col-md-12">
+    			<section id="apis">
+    				<h2 class="page-header"><a href="#apis">About APIs</a></h2>
+    				<p class="lead">
+    					Modules are located inside folder <code>xwos/modules</code>. All modules found in this folder are
+    					loaded automatically without additional setup.
+    				</p>
+    				<p>
+    					Modules are guaranteed to be loaded before the first process (<code>login</code>) starts.
+    					They may depend on other kernel modules or on extensions and computercraft apis. If you plan
+    					to add a new api you only need to create your own folder inside <code>xwos/modules</code> and
+    					add a corresponding <code>init.lua</code> declaring a class <code>xwos_modules_YOURNAME</code>.
+    				</p>
+    				<p>
+    					There are some core modules that are loaded in a specific order. This order can be found in file
+    					<code>moduleOrder.lua</code>. Any additional module not found in this predefined order will be
+    					loaded after those core modules.
+    				</p>
+    			</section>
+    		</div>
+    	</div>
+    	<div class="row">
+    		<div class="col-md-12">
+    			<div class="callout callout-info lead">
+	    			<h4>Information!</h4>
+	    			<p>
+	    				 Modules are the most flexible way to add new kernel features. They can be created without modifying any code line of the
+	    				 <b>XWOS</b> kernel itself. In future versions of <b>XWOS</b> you will be able to download and install additional kernel
+	    				 modules as an administrator user.
+	    			</p>
+	  			</div>
+	  		</div>
+	  	</div>
+	  	<div class="row">
+    		<div class="col-md-12">
+    			<p class="lead">
+    				<a href="#toc">Back to top</a>
+    			</p>
+    		</div>
+    	</div>
+    </section>
+  </div>
+
+  <footer class="main-footer">
+    <div class="pull-right hidden-xs">
+      Design by adminLTE
+    </div>
+    <strong>Copyright &copy; 2018 xworlds.eu.</strong> All rights reserved.
+  </footer>
+</div>
+
+<script src="../plugins/jQuery/jquery-2.2.3.min.js"></script>
+<script src="../bootstrap/js/bootstrap.min.js"></script>
+<script src="../dist/js/app.min.js"></script>
+<script src="../plugins/highlite/highlight.pack.js"></script>
+
+<script type="text/javascript">
+$(function(){
+	$("#sidebar").load("parts_menu.html")
+	$("#navbar-custom-menu").load("../parts_nav.html")
+});
+hljs.initHighlightingOnLoad();
+</script>
+</body>
+</html>

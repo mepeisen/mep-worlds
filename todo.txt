@@ -1,0 +1,8 @@
+predefined app storages
+	--> Pre-installed [all-users] (%kernel-root%/apps/<group>/<artifact>/<version>)
+	--> Custom installed [all-users] (%secure-data%/apps/all/<group>/<artifact>/<version>)
+	--> Custom-installed [profile] (%secure-data%/apps/p-%profile-id%/<group>/<artifact>/<version>)
+	--> Custom-installed [user] (%secure-data%/apps/u-%user-id%/<group>/<artifact>/<version>)
+
+-->	custom additional storages for all users, profiles or users
+

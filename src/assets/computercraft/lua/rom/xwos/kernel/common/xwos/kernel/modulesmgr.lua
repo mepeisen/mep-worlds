@@ -18,6 +18,8 @@
 local pairs = pairs
 local tcontains = table.contains
 
+-- TODO support custom modules, installed by administrator users
+
 --------------------------------
 -- local process environments
 -- @module xwos.kernel.modulesmgr
